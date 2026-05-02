@@ -1,29 +1,51 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import {
     LayoutDashboard, Users, Calendar,
     FileText, LogOut, Stethoscope,
-    Menu, X, Bell, User, ChevronDown,
-    ClipboardList, Activity, Loader2
+    Menu, X, BellRing, User, ChevronDown,
+    Activity, Loader2, Moon, Sun,
+    CheckCheck, CalendarClock, UserPlus, AlertCircle, Shield, UserCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// ─── Dummy notifikasi dokter ────────────────────────────────────────────────
+const INITIAL_NOTIFICATIONS = [
+    { id: 1, icon: <CalendarClock size={14} />, color: 'text-teal-600 bg-teal-50', title: 'Pasien Baru', desc: 'Ahmad Fauzi telah diantrikan', time: '5 mnt lalu', read: false },
+    { id: 2, icon: <UserPlus size={14} />, color: 'text-emerald-600 bg-emerald-50', title: 'Jadwal Hari Ini', desc: '5 pasien tersisa — 13:00–17:00', time: '30 mnt lalu', read: false },
+    { id: 3, icon: <AlertCircle size={14} />, color: 'text-amber-600 bg-amber-50', title: 'Rekam Medis', desc: 'Data pasien Siti belum dilengkapi', time: '1 jam lalu', read: false },
+    { id: 4, icon: <CheckCheck size={14} />, color: 'text-slate-500 bg-slate-100', title: 'Laporan Selesai', desc: 'Laporan harian berhasil disimpan', time: '2 jam lalu', read: true },
+];
 
 export default function DoctorLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState(false);
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [doctorName, setDoctorName] = useState('Dokter');
 
+    // ── Profile dropdown
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const profileRef = useRef<HTMLDivElement>(null);
+
+    // ── Notifikasi dropdown
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
+    const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+    const notifRef = useRef<HTMLDivElement>(null);
+    const unreadCount = notifications.filter(n => !n.read).length;
+
+    // ── Dark mode
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
+    // 1. AUTH CHECK
     useEffect(() => {
         const token = localStorage.getItem('token') || Cookies.get('token');
         const role = localStorage.getItem('user_role') || Cookies.get('role');
         const name = localStorage.getItem('user_name') || 'Dokter';
-
         if (!token || role?.toLowerCase() !== 'doctor') {
             router.push('/login');
         } else {
@@ -32,57 +54,73 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
         }
     }, [router]);
 
+    // 2. CLOSE DROPDOWNS ON OUTSIDE CLICK
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (profileRef.current && !profileRef.current.contains(e.target as Node)) setIsProfileOpen(false);
+            if (notifRef.current && !notifRef.current.contains(e.target as Node)) setIsNotifOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    // 3. DARK MODE
+    useEffect(() => {
+        document.documentElement.classList.toggle('dark', isDarkMode);
+    }, [isDarkMode]);
+
+    // 4. LOGOUT
     const handleLogout = () => {
         Cookies.remove('token');
         Cookies.remove('role');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('user_role');
-        localStorage.removeItem('user_name');
+        localStorage.clear();
         router.push('/login');
     };
 
+    const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    const markRead = (id: number) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+
     const menuItems = [
-        { icon: LayoutDashboard, label: 'Dashboard',     href: '/doctor',                 color: 'text-indigo-500', bg: 'bg-indigo-50' },
-        { icon: Calendar,        label: 'Jadwal Praktek', href: '/doctor/schedule',        color: 'text-teal-500',   bg: 'bg-teal-50' },
-        { icon: Users,           label: 'Antrian Pasien', href: '/doctor/queue',           color: 'text-amber-500',  bg: 'bg-amber-50' },
-        { icon: FileText,        label: 'Rekam Medis',    href: '/doctor/medical-records', color: 'text-rose-500',   bg: 'bg-rose-50' },
-        { icon: Activity,        label: 'Laporan Medis',  href: '/doctor/dashboard',       color: 'text-violet-500', bg: 'bg-violet-50' },
+        { icon: LayoutDashboard, label: 'Dashboard', href: '/doctor' },
+        { icon: Calendar, label: 'Jadwal Praktek', href: '/doctor/schedule' },
+        { icon: Users, label: 'Antrian Pasien', href: '/doctor/queue' },
+        { icon: FileText, label: 'Rekam Medis', href: '/doctor/medical-records' },
+        { icon: Activity, label: 'Laporan Medis', href: '/doctor/dashboard' },
     ];
 
-    if (!isAuthorized) {
-        return (
-            <div className="h-screen w-screen bg-white flex flex-col items-center justify-center gap-4">
-                <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center">
-                    <Stethoscope className="text-indigo-500 animate-pulse" size={28} />
-                </div>
-                <Loader2 className="animate-spin text-indigo-400" size={24} />
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Memverifikasi Akses Dokter...</p>
+    if (!isAuthorized) return (
+        <div className="h-screen w-screen bg-white flex flex-col items-center justify-center gap-4">
+            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center">
+                <Stethoscope className="text-emerald-600 animate-pulse" size={28} />
             </div>
-        );
-    }
+            <Loader2 className="animate-spin text-emerald-400" size={24} />
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Memverifikasi Akses Dokter...</p>
+        </div>
+    );
 
     return (
-        <div className="min-h-screen bg-[#F5F7FF] flex font-sans">
+        <div className="min-h-screen bg-[#F0F9F7] flex font-sans">
 
-            {/* ── SIDEBAR ───────────────────────────────────────────────────── */}
-            <aside className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-slate-100 transition-all duration-300 shadow-xl shadow-slate-200/40 flex flex-col ${isSidebarOpen ? 'w-[240px]' : 'w-[72px]'}`}>
+            {/* ═══════════════════ SIDEBAR ═══════════════════════════════════ */}
+            <aside className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-emerald-50/50 shadow-sm flex flex-col transition-all duration-300 ${isSidebarOpen ? 'w-[240px]' : 'w-[72px]'}`}>
 
                 {/* Logo */}
-                <div className={`flex items-center gap-3 px-5 py-6 border-b border-slate-50 shrink-0`}>
-                    <div className="w-9 h-9 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200 shrink-0">
-                        <Stethoscope size={20} />
+                <div className="flex items-center gap-3 px-4 py-5 border-b border-emerald-50/50 shrink-0">
+                    <div className="w-8 h-8 bg-emerald-700 rounded-lg flex items-center justify-center text-white shadow-lg shadow-emerald-200 shrink-0">
+                        <Stethoscope size={16} />
                     </div>
                     <AnimatePresence>
                         {isSidebarOpen && (
                             <motion.div
-                                initial={{ opacity: 0, x: -10 }}
+                                initial={{ opacity: 0, x: -8 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -10 }}
+                                exit={{ opacity: 0, x: -8 }}
                                 transition={{ duration: 0.15 }}
                             >
-                                <p className="text-base font-black tracking-tighter text-slate-800 leading-none">Klinik.<span className="text-indigo-600">AI</span></p>
-                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Doc System</p>
+                                <p className="text-base font-black tracking-tighter text-slate-800 leading-none">
+                                    Klinik.<span className="text-emerald-700">AI</span>
+                                </p>
+                                <p className="text-[9px] text-emerald-600 font-bold uppercase tracking-widest mt-0.5">Doc System</p>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -95,37 +133,45 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="mx-3 mt-4 mb-2 p-3 bg-indigo-50/50 rounded-xl border border-indigo-100/50 overflow-hidden"
+                            className="mx-3 mt-4 mb-2 p-3 bg-emerald-50/40 rounded-xl border border-emerald-100/50 overflow-hidden"
                         >
-                            <p className="text-[10px] font-black text-indigo-900 uppercase leading-none">Nauli Dental Care</p>
-                            <p className="text-[9px] text-indigo-500 font-bold mt-1 italic opacity-70">{doctorName}</p>
+                            <p className="text-[10px] font-black text-emerald-900 uppercase leading-none">Nauli Dental Care</p>
+                            <p className="text-[9px] text-emerald-600 font-bold truncate mt-1 italic opacity-70">{doctorName}</p>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
                 {/* Navigation */}
                 <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto py-2">
-                    {!isSidebarOpen && <div className="h-2" />}
+                    {isSidebarOpen && (
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] px-3 mb-2 opacity-60">Doc Menu</p>
+                    )}
                     {menuItems.map((item) => {
                         const isActive = pathname === item.href;
                         return (
                             <Link key={item.href} href={item.href} title={!isSidebarOpen ? item.label : undefined}>
-                                <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all relative group ${
-                                    isActive
-                                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100'
-                                        : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
-                                }`}>
+                                <div className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all relative group ${isActive
+                                        ? 'bg-emerald-700 text-white shadow-md shadow-emerald-200'
+                                        : 'text-slate-600 hover:bg-emerald-50/50 hover:text-emerald-700'
+                                    }`}>
+                                    {/* Active indicator */}
                                     {isActive && (
                                         <motion.div
-                                            layoutId="doc-sidebar-active"
-                                            className="absolute inset-0 bg-indigo-600 rounded-xl -z-10"
+                                            layoutId="doc-sidebar-line"
+                                            className="absolute -left-1 w-1 h-4 bg-emerald-700 rounded-full"
                                         />
                                     )}
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
-                                        isActive ? 'bg-white/20' : item.bg
-                                    }`}>
-                                        <item.icon size={16} className={isActive ? 'text-white' : item.color} />
+
+                                    {/* Ikon */}
+                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all ${isActive ? 'bg-white/20' : 'bg-transparent'
+                                        }`}>
+                                        <item.icon
+                                            size={16}
+                                            className={isActive ? 'text-white' : 'text-emerald-600'}
+                                        />
                                     </div>
+
+                                    {/* Label */}
                                     <AnimatePresence>
                                         {isSidebarOpen && (
                                             <motion.span
@@ -138,9 +184,10 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
                                             </motion.span>
                                         )}
                                     </AnimatePresence>
+
                                     {/* Tooltip saat sidebar kecil */}
                                     {!isSidebarOpen && (
-                                        <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity z-50">
+                                        <div className="absolute left-full ml-3 px-3 py-1.5 bg-emerald-900 text-white text-[11px] font-bold rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity z-50 shadow-lg">
                                             {item.label}
                                         </div>
                                     )}
@@ -151,65 +198,194 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
                 </nav>
 
                 {/* Logout */}
-                <div className="p-3 border-t border-slate-100 shrink-0">
+                <div className="p-3 border-t border-emerald-50/50 shrink-0">
                     <button
                         onClick={handleLogout}
                         title={!isSidebarOpen ? 'Logout' : undefined}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 text-[12px] font-bold transition-all group rounded-xl"
+                        className="w-full flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-red-600 hover:bg-red-50 text-[12px] font-bold transition-all group rounded-xl"
                     >
-                        <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center shrink-0">
-                            <LogOut size={15} className="text-red-400 group-hover:translate-x-0.5 transition-transform" />
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0">
+                            <LogOut size={15} className="group-hover:translate-x-0.5 transition-transform" />
                         </div>
                         {isSidebarOpen && <span>Logout</span>}
                     </button>
                 </div>
             </aside>
 
-            {/* ── MAIN ──────────────────────────────────────────────────────── */}
+            {/* ═══════════════════ MAIN ══════════════════════════════════════ */}
             <main className={`flex-1 flex flex-col min-w-0 h-screen overflow-y-auto transition-all duration-300 ${isSidebarOpen ? 'ml-[240px]' : 'ml-[72px]'}`}>
 
-                {/* Header */}
-                <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 flex items-center justify-between sticky top-0 z-40 shrink-0">
+                {/* ────────────────── HEADER ────────────────────────────────── */}
+                <header className="h-14 bg-white/80 backdrop-blur-md border-b border-emerald-50/50 px-6 flex items-center justify-between sticky top-0 z-40 shrink-0">
+
+                    {/* Kiri: toggle sidebar + judul halaman */}
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                            className="p-2 text-slate-400 hover:bg-slate-100 rounded-xl transition-all hover:text-indigo-600"
+                            onClick={() => setIsSidebarOpen(v => !v)}
+                            className="hidden lg:flex p-2 text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-all"
                         >
-                            {isSidebarOpen ? <X size={18} /> : <Menu size={18} />}
+                            <Menu size={18} />
                         </button>
-                        <div className="h-5 w-px bg-slate-100" />
-                        <h2 className="text-[12px] font-black text-slate-800 tracking-widest uppercase italic border-l-2 border-indigo-600 pl-3">
+                        <h2 className="text-[12px] font-black text-slate-800 tracking-widest leading-none uppercase italic border-l-2 border-emerald-600 pl-3">
                             {menuItems.find(i => i.href === pathname)?.label || 'Dashboard'}
                         </h2>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        {/* Bell */}
-                        <div className="relative">
-                            <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
-                                <Bell size={18} />
-                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
+                    {/* Kanan: ikon + profile */}
+                    <div className="flex items-center gap-2">
+
+                        {/* ════ IKON 1 — NOTIFIKASI ════════════════════════ */}
+                        <div className="relative" ref={notifRef}>
+                            <button
+                                onClick={() => { setIsNotifOpen(v => !v); setIsProfileOpen(false); }}
+                                title="Notifikasi"
+                                className={`relative p-2 rounded-lg transition-all duration-200 ${isNotifOpen
+                                        ? 'bg-emerald-800 text-white shadow-md shadow-emerald-900/20'
+                                        : 'text-slate-400 hover:text-white hover:bg-emerald-800 hover:shadow-md hover:shadow-emerald-900/10'
+                                    }`}
+                            >
+                                <BellRing size={16} />
+                                <AnimatePresence>
+                                    {unreadCount > 0 && (
+                                        <motion.span
+                                            key="badge"
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            exit={{ scale: 0 }}
+                                            className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white leading-none"
+                                        >
+                                            {unreadCount}
+                                        </motion.span>
+                                    )}
+                                </AnimatePresence>
                             </button>
+
+                            {/* Dropdown Notifikasi */}
+                            <AnimatePresence>
+                                {isNotifOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                        transition={{ duration: 0.15 }}
+                                        className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-emerald-100/30 overflow-hidden z-50"
+                                    >
+                                        <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-4 py-3 flex items-center justify-between">
+                                            <div>
+                                                <p className="text-[12px] font-black text-white uppercase tracking-wide">Notifikasi</p>
+                                                <p className="text-[9px] text-emerald-200 font-bold mt-0.5">{unreadCount} belum dibaca</p>
+                                            </div>
+                                            {unreadCount > 0 && (
+                                                <button
+                                                    onClick={markAllRead}
+                                                    className="flex items-center gap-1 px-2 py-1 bg-white/15 hover:bg-white/25 text-white text-[9px] font-black rounded-lg transition-all uppercase tracking-wide"
+                                                >
+                                                    <CheckCheck size={11} /> Tandai semua
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="divide-y divide-slate-50 max-h-72 overflow-y-auto">
+                                            {notifications.map(notif => (
+                                                <button
+                                                    key={notif.id}
+                                                    onClick={() => markRead(notif.id)}
+                                                    className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-all hover:bg-emerald-50/60 ${!notif.read ? 'bg-emerald-50/30' : ''}`}
+                                                >
+                                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${notif.color}`}>
+                                                        {notif.icon}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <p className={`text-[11px] font-black truncate ${!notif.read ? 'text-slate-800' : 'text-slate-500'}`}>{notif.title}</p>
+                                                            {!notif.read && <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0" />}
+                                                        </div>
+                                                        <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">{notif.desc}</p>
+                                                        <p className="text-[9px] text-slate-400 mt-1 font-bold">{notif.time}</p>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/50">
+                                            <button
+                                                onClick={() => setIsNotifOpen(false)}
+                                                className="w-full text-[10px] font-black text-emerald-700 hover:text-emerald-900 uppercase tracking-widest transition-colors"
+                                            >
+                                                Lihat semua notifikasi →
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
 
-                        <div className="h-5 w-px bg-slate-100" />
+                        {/* ════ IKON 2 — DARK MODE ═════════════════════════ */}
+                        <button
+                            onClick={() => setIsDarkMode(v => !v)}
+                            title={isDarkMode ? 'Matikan Dark Mode' : 'Aktifkan Dark Mode'}
+                            className={`relative p-2 rounded-lg transition-all duration-200 overflow-hidden ${isDarkMode
+                                    ? 'bg-emerald-800 text-white shadow-md shadow-emerald-900/20'
+                                    : 'text-slate-400 hover:text-white hover:bg-emerald-800 hover:shadow-md hover:shadow-emerald-900/10'
+                                }`}
+                        >
+                            <AnimatePresence mode="wait">
+                                {isDarkMode ? (
+                                    <motion.span key="sun"
+                                        initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+                                        animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                                        exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="flex"
+                                    >
+                                        <Sun size={16} />
+                                    </motion.span>
+                                ) : (
+                                    <motion.span key="moon"
+                                        initial={{ rotate: 90, opacity: 0, scale: 0.5 }}
+                                        animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                                        exit={{ rotate: -90, opacity: 0, scale: 0.5 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="flex"
+                                    >
+                                        <Moon size={16} />
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </button>
 
-                        {/* Profile */}
-                        <div className="relative">
+                        <div className="h-5 w-[1px] bg-emerald-100 mx-1" />
+
+                        {/* ════ PROFILE BUTTON ════════════════════════════ */}
+                        <div className="relative" ref={profileRef}>
                             <button
-                                onClick={() => setIsProfileOpen(v => !v)}
-                                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all ${isProfileOpen ? 'bg-indigo-700' : 'hover:bg-indigo-700'} group`}
+                                onClick={() => { setIsProfileOpen(v => !v); setIsNotifOpen(false); }}
+                                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-200 group ${isProfileOpen
+                                        ? 'bg-emerald-800 shadow-lg shadow-emerald-900/20'
+                                        : 'hover:bg-emerald-800 hover:shadow-md hover:shadow-emerald-900/10'
+                                    }`}
                             >
-                                <div className="w-8 h-8 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center shrink-0">
-                                    <User size={16} className="text-indigo-600" />
+                                {/* Avatar ikon dokter */}
+                                <div className="relative shrink-0 transition-transform active:scale-90 group-hover:scale-105">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-700 border-2 border-white/20 shadow-sm flex items-center justify-center">
+                                        <Stethoscope size={15} className="text-white" />
+                                    </div>
+                                    <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 border-2 border-white rounded-full animate-pulse" />
                                 </div>
-                                <div className="text-left hidden sm:block">
-                                    <p className={`text-[11px] font-black uppercase transition-colors ${isProfileOpen ? 'text-white' : 'text-slate-700 group-hover:text-white'}`}>{doctorName}</p>
-                                    <p className={`text-[9px] font-bold tracking-widest uppercase transition-colors ${isProfileOpen ? 'text-indigo-200' : 'text-indigo-500 group-hover:text-indigo-300'}`}>Dokter Spesialis</p>
+
+                                {/* Teks */}
+                                <div className="text-left hidden sm:block leading-none">
+                                    <p className={`text-[11px] font-black uppercase transition-colors truncate max-w-[90px] ${isProfileOpen ? 'text-white' : 'text-slate-800 group-hover:text-white'}`}>
+                                        {doctorName}
+                                    </p>
+                                    <p className={`text-[9px] font-bold tracking-widest mt-0.5 uppercase transition-colors ${isProfileOpen ? 'text-emerald-200' : 'text-emerald-600 group-hover:text-emerald-300'}`}>
+                                        Dokter
+                                    </p>
                                 </div>
-                                <ChevronDown size={13} className={`transition-all ${isProfileOpen ? 'rotate-180 text-indigo-200' : 'text-slate-400 group-hover:text-indigo-200'}`} />
+
+                                {/* Chevron */}
+                                <ChevronDown size={13} className={`transition-all duration-200 ${isProfileOpen ? 'rotate-180 text-emerald-200' : 'text-slate-400 group-hover:text-emerald-200'}`} />
                             </button>
 
+                            {/* Dropdown Profile */}
                             <AnimatePresence>
                                 {isProfileOpen && (
                                     <motion.div
@@ -217,22 +393,40 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
                                         transition={{ duration: 0.15 }}
-                                        className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50"
+                                        className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-emerald-100/30 overflow-hidden z-50"
                                     >
-                                        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-4">
+                                        {/* Header gradient */}
+                                        <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 p-4 text-white">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                                                    <User size={20} className="text-white" />
+                                                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center border-2 border-white/30">
+                                                    <Stethoscope size={20} className="text-white" />
                                                 </div>
-                                                <div>
-                                                    <p className="text-[13px] font-black text-white uppercase">{doctorName}</p>
-                                                    <p className="text-[9px] text-indigo-200 font-bold uppercase tracking-widest">Dokter Spesialis</p>
+                                                <div className="flex-1">
+                                                    <p className="text-[13px] font-black uppercase">{doctorName}</p>
+                                                    <p className="text-[10px] font-bold opacity-80 tracking-wide">DOKTER SPESIALIS</p>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="p-2">
-                                            <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-xl text-[12px] font-bold transition-all">
-                                                <LogOut size={14} /> Keluar
+
+                                        {/* Email/info */}
+                                        <div className="px-4 py-3 border-b border-slate-100/50">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Signed in as</p>
+                                            <p className="text-[12px] font-bold text-slate-700">dokter@klinik.ai</p>
+                                        </div>
+
+                                        {/* Menu items */}
+                                        <div className="py-2 px-2">
+                                            <button
+                                                onClick={() => { setIsProfileOpen(false); router.push('/doctor/profile'); }}
+                                                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-[12px] font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all"
+                                            >
+                                                <UserCircle size={16} className="text-emerald-600" /> View Profile
+                                            </button>
+                                            <button
+                                                onClick={handleLogout}
+                                                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-[12px] font-bold text-red-600 hover:bg-red-50 transition-all"
+                                            >
+                                                <LogOut size={16} /> Keluar
                                             </button>
                                         </div>
                                     </motion.div>
@@ -242,7 +436,7 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
                     </div>
                 </header>
 
-                {/* Content */}
+                {/* ────────────────── CONTENT ───────────────────────────────── */}
                 <div className="flex-1 p-6 lg:p-10">
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -258,14 +452,6 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
                     </AnimatePresence>
                 </div>
             </main>
-
-            {/* Mobile overlay */}
-            {!isSidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-40 lg:hidden"
-                    onClick={() => setIsSidebarOpen(true)}
-                />
-            )}
         </div>
     );
 }

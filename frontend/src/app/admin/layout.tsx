@@ -55,24 +55,27 @@ const INITIAL_NOTIFICATIONS = [
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-    const [isSyncing, setIsSyncing]               = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isAuthorized, setIsAuthorized]         = useState(false);
-    const [isProfileOpen, setIsProfileOpen]       = useState(false);
-    const [isNotifOpen, setIsNotifOpen]           = useState(false);
-    const [notifications, setNotifications]       = useState(INITIAL_NOTIFICATIONS);
+    const [isAuthorized, setIsAuthorized] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
+    const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+
+    // ── sidebar collapse (desktop)
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     const profileRef = useRef<HTMLDivElement>(null);
-    const notifRef   = useRef<HTMLDivElement>(null);
+    const notifRef = useRef<HTMLDivElement>(null);
     const unreadCount = notifications.filter(n => !n.read).length;
 
     const pathname = usePathname();
-    const router   = useRouter();
+    const router = useRouter();
 
     // 1. PROTEKSI RUTE
     useEffect(() => {
         const token = localStorage.getItem('token') || Cookies.get('token');
-        const role  = localStorage.getItem('user_role') || Cookies.get('role');
+        const role = localStorage.getItem('user_role') || Cookies.get('role');
         if (!token) {
             router.push('/login');
         } else if (role?.toLowerCase() !== 'admin') {
@@ -81,7 +84,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         } else {
             setIsAuthorized(true);
         }
-    }, [router]); // ← hapus 'pathname' agar auth hanya dicek sekali saat mount
+    }, [router]);
 
     // 2. CLOSE DROPDOWNS WHEN CLICKING OUTSIDE
     useEffect(() => {
@@ -118,29 +121,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
     };
 
-    // 5. Tandai semua notifikasi sudah dibaca
     const markAllRead = () =>
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
 
-    // 6. Tandai satu notifikasi sudah dibaca
     const markRead = (id: number) =>
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
 
     const navItems = [
-        { name: 'Dashboard',        href: '/admin',              icon: <LayoutDashboard size={16} />, color: 'text-emerald-600' },
-        { name: 'Reservations',     href: '/admin/appointments', icon: <CalendarCheck2 size={16} />,  color: 'text-teal-600'    },
-        { name: 'Daftar Pasien',    href: '/admin/patients',     icon: <Users2 size={16} />,          color: 'text-green-600'   },
-        { name: 'Manajemen Dokter', href: '/admin/doctors',      icon: <UserRoundCog size={16} />,    color: 'text-cyan-600'    },
-        { name: 'AI Data',          href: '/admin/schedules',    icon: <MessageSquare size={16} />,   color: 'text-green-600' },
-        { name: 'AI Knowledge',     href: '/admin/knowledge',    icon: <BrainCircuit size={16} />,    color: 'text-teal-600'    },
-        { name: 'Layanan Klinik',   href: '/admin/services',     icon: <Stethoscope size={16} />,     color: 'text-green-600'   },
-        { name: 'Pengaturan',       href: '/admin/settings',     icon: <Settings2 size={16} />,       color: 'text-slate-600'   },
+        { name: 'Dashboard', href: '/admin', icon: <LayoutDashboard size={16} />, color: 'text-emerald-600' },
+        { name: 'Reservations', href: '/admin/appointments', icon: <CalendarCheck2 size={16} />, color: 'text-teal-600' },
+        { name: 'Daftar Pasien', href: '/admin/patients', icon: <Users2 size={16} />, color: 'text-green-600' },
+        { name: 'Manajemen Dokter', href: '/admin/doctors', icon: <UserRoundCog size={16} />, color: 'text-cyan-600' },
+        { name: 'AI Data', href: '/admin/schedules', icon: <MessageSquare size={16} />, color: 'text-green-600' },
+        { name: 'AI Knowledge', href: '/admin/knowledge', icon: <BrainCircuit size={16} />, color: 'text-teal-600' },
+        { name: 'Layanan Klinik', href: '/admin/services', icon: <Stethoscope size={16} />, color: 'text-green-600' },
+        { name: 'Pengaturan', href: '/admin/settings', icon: <Settings2 size={16} />, color: 'text-slate-600' },
     ];
 
     const profileMenuItems = [
-        { name: 'View Profile',   icon: <UserCircle size={16} />, action: () => { setIsProfileOpen(false); router.push('/admin/profile'); } },
-        { name: 'Change Account', icon: <Shield size={16} />,     action: () => { setIsProfileOpen(false); router.push('/admin/change-account'); } },
-        { name: 'Sign Out',       icon: <LogOut size={16} />,     action: handleLogout, color: 'text-red-600' },
+        { name: 'View Profile', icon: <UserCircle size={16} />, action: () => { setIsProfileOpen(false); router.push('/admin/profile'); } },
+        { name: 'Change Account', icon: <Shield size={16} />, action: () => { setIsProfileOpen(false); router.push('/admin/change-account'); } },
+        { name: 'Sign Out', icon: <LogOut size={16} />, action: handleLogout, color: 'text-red-600' },
     ];
 
     if (!isAuthorized) {
@@ -156,33 +157,113 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex min-h-screen bg-[#F0F9F7] text-[#1E293B] font-sans">
 
             {/* ═══ SIDEBAR ═══════════════════════════════════════════════════ */}
-            <aside className={`fixed lg:sticky lg:top-0 z-50 w-60 h-screen bg-white border-r border-emerald-50/50 shadow-sm transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+            {/* Mobile: slide in/out | Desktop: collapse to icon-only */}
+            <aside className={`
+                fixed lg:sticky lg:top-0 z-50 h-screen
+                bg-white border-r border-emerald-50/50 shadow-sm
+                flex flex-col
+                transition-all duration-300
+                ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                ${isSidebarOpen ? 'w-60' : 'w-[72px]'}
+            `}>
                 <div className="flex flex-col h-full">
+
                     {/* Logo */}
-                    <div className="p-5 flex items-center gap-2.5">
-                        <div className="w-7 h-7 bg-emerald-700 rounded-lg flex items-center justify-center text-white shadow-lg shadow-emerald-200 font-black italic text-xs">K</div>
-                        <h1 className="text-base font-black tracking-tighter text-slate-800">Klinik.<span className="text-emerald-700">AI</span></h1>
+                    <div className="p-4 flex items-center gap-2.5 border-b border-emerald-50/50 shrink-0">
+                        <div className="w-8 h-8 bg-emerald-700 rounded-lg flex items-center justify-center text-white shadow-lg shadow-emerald-200 font-black italic text-xs shrink-0">
+                            K
+                        </div>
+                        <AnimatePresence>
+                            {isSidebarOpen && (
+                                <motion.h1
+                                    initial={{ opacity: 0, x: -8 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -8 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="text-base font-black tracking-tighter text-slate-800 whitespace-nowrap"
+                                >
+                                    Klinik.<span className="text-emerald-700">AI</span>
+                                </motion.h1>
+                            )}
+                        </AnimatePresence>
                     </div>
 
-                    {/* Clinic Info */}
-                    <div className="mx-3 mb-4 p-3 bg-emerald-50/40 rounded-xl border border-emerald-100/50">
-                        <p className="text-[10px] font-black text-emerald-900 uppercase leading-none">Nauli Dental Care</p>
-                        <p className="text-[9px] text-emerald-600 font-bold truncate mt-1 italic opacity-70">Jl. Balige No. 12, Toba</p>
-                    </div>
+                    {/* Clinic Info — hanya tampil saat sidebar terbuka */}
+                    <AnimatePresence>
+                        {isSidebarOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mx-3 mt-4 mb-2 p-3 bg-emerald-50/40 rounded-xl border border-emerald-100/50 overflow-hidden"
+                            >
+                                <p className="text-[10px] font-black text-emerald-900 uppercase leading-none">Nauli Dental Care</p>
+                                <p className="text-[9px] text-emerald-600 font-bold truncate mt-1 italic opacity-70">Jl. Balige No. 12, Toba</p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* Nav */}
-                    <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] px-3 mb-2 opacity-60">Admin System</p>
+                    <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto py-2">
+                        {isSidebarOpen && (
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] px-3 mb-2 opacity-60">
+                                Admin System
+                            </p>
+                        )}
+
                         {navItems.map((item) => {
                             const isActive = pathname === item.href;
                             return (
-                                <Link key={item.href} href={item.href} className="block group">
-                                    <div className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all relative ${isActive ? 'bg-emerald-700 text-white shadow-md shadow-emerald-200' : 'text-slate-600 hover:bg-emerald-50/50 hover:text-emerald-700'}`}>
-                                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${isActive ? 'bg-white/20' : 'bg-transparent'}`}>
-                                            <span className={isActive ? 'text-white' : item.color}>{item.icon}</span>
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    title={!isSidebarOpen ? item.name : undefined}
+                                    className="block group"
+                                >
+                                    <div className={`
+                                        flex items-center gap-2.5 px-3 py-2 rounded-xl
+                                        transition-all relative
+                                        ${isActive
+                                            ? 'bg-emerald-700 text-white shadow-md shadow-emerald-200'
+                                            : 'text-slate-600 hover:bg-emerald-50/50 hover:text-emerald-700'
+                                        }
+                                    `}>
+                                        {/* Active line indicator */}
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="nav-line"
+                                                className="absolute -left-1 w-1 h-4 bg-emerald-700 rounded-full"
+                                            />
+                                        )}
+
+                                        {/* Ikon */}
+                                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all ${isActive ? 'bg-white/20' : 'bg-transparent'}`}>
+                                            <span className={isActive ? 'text-white' : item.color}>
+                                                {item.icon}
+                                            </span>
                                         </div>
-                                        <span className={`text-[12px] font-bold tracking-tight ${isActive ? 'text-white' : ''}`}>{item.name}</span>
-                                        {isActive && <motion.div layoutId="nav-line" className="absolute -left-1 w-1 h-4 bg-emerald-700 rounded-full" />}
+
+                                        {/* Label — muncul hanya saat sidebar terbuka */}
+                                        <AnimatePresence>
+                                            {isSidebarOpen && (
+                                                <motion.span
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0 }}
+                                                    transition={{ duration: 0.12 }}
+                                                    className={`text-[12px] font-bold tracking-tight truncate ${isActive ? 'text-white' : ''}`}
+                                                >
+                                                    {item.name}
+                                                </motion.span>
+                                            )}
+                                        </AnimatePresence>
+
+                                        {/* Tooltip saat ikon saja */}
+                                        {!isSidebarOpen && (
+                                            <div className="absolute left-full ml-3 px-3 py-1.5 bg-emerald-900 text-white text-[11px] font-bold rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity z-50 shadow-lg">
+                                                {item.name}
+                                            </div>
+                                        )}
                                     </div>
                                 </Link>
                             );
@@ -190,27 +271,52 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </nav>
 
                     {/* Logout */}
-                    <div className="p-3 border-t border-slate-100">
+                    <div className="p-3 border-t border-slate-100 shrink-0">
                         <button
                             onClick={handleLogout}
+                            title={!isSidebarOpen ? 'Logout' : undefined}
                             className="w-full flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-red-600 text-[12px] font-bold transition-all group rounded-xl hover:bg-red-50"
                         >
-                            <LogOut size={16} className="group-hover:translate-x-1 transition-transform" />
-                            <span>Logout</span>
+                            <LogOut size={16} className="group-hover:translate-x-1 transition-transform shrink-0" />
+                            <AnimatePresence>
+                                {isSidebarOpen && (
+                                    <motion.span
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.12 }}
+                                    >
+                                        Logout
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
                         </button>
                     </div>
                 </div>
             </aside>
 
             {/* ═══ MAIN CONTENT ══════════════════════════════════════════════ */}
-            <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+            <main className={`flex-1 flex flex-col min-w-0 h-screen overflow-y-auto transition-all duration-300`}>
 
                 {/* ── HEADER ─────────────────────────────────────────────── */}
                 <header className="h-14 bg-white/80 backdrop-blur-md border-b border-emerald-50/50 px-6 flex items-center justify-between sticky top-0 z-40 shrink-0">
                     <div className="flex items-center gap-3">
-                        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                        {/* Toggle sidebar — desktop */}
+                        <button
+                            onClick={() => setIsSidebarOpen(v => !v)}
+                            className="hidden lg:flex p-2 text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-all"
+                        >
                             <Menu size={18} />
                         </button>
+
+                        {/* Toggle sidebar — mobile */}
+                        <button
+                            onClick={() => setIsMobileMenuOpen(v => !v)}
+                            className="lg:hidden p-2 bg-emerald-50 rounded-lg text-emerald-600"
+                        >
+                            <Menu size={18} />
+                        </button>
+
                         <h2 className="text-[12px] font-black text-slate-800 tracking-widest leading-none uppercase italic border-l-2 border-emerald-600 pl-3">
                             {navItems.find(i => i.href === pathname)?.name || 'Dashboard'}
                         </h2>
