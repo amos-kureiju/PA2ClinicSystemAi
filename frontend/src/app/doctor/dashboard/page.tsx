@@ -4,185 +4,314 @@ import api from '@/services/api';
 import {
     Clock, CheckCircle2, UserRound, Sparkles,
     Timer, ClipboardList, Loader2, ArrowRight,
-    Stethoscope, CalendarDays, Activity, Users
+    Stethoscope, CalendarDays, Users, TrendingUp,
+    Activity, ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+
+// ── Live Clock Hook ──────────────────────────────────────────────────────────
+function useLiveClock() {
+    const [time, setTime] = useState(new Date());
+    useEffect(() => {
+        const t = setInterval(() => setTime(new Date()), 1000);
+        return () => clearInterval(t);
+    }, []);
+    return time;
+}
+
+// ── Stagger animation helper ─────────────────────────────────────────────────
+const fadeUp = (delay = 0) => ({
+    initial: { opacity: 0, y: 18 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.45, ease: 'easeOut', delay },
+});
 
 export default function DoctorDashboard() {
-    const [todayPatients, setTodayPatients] = useState([]);
+    const [todayPatients, setTodayPatients] = useState<any[]>([]);
     const [stats, setStats] = useState({ todayCount: 0, completedCount: 0 });
     const [isLoading, setIsLoading] = useState(true);
+    const now = useLiveClock();
 
     useEffect(() => {
-        const loadDashboardData = async () => {
+        const load = async () => {
             try {
                 const res = await api.get('/clinic/appointments');
                 const confirmed = res.data.filter((a: any) => a.status === 'confirmed');
                 const completed = res.data.filter((a: any) => a.status === 'completed');
                 setTodayPatients(confirmed);
                 setStats({ todayCount: confirmed.length, completedCount: completed.length });
-            } catch (err) {
-                console.error("Gagal memuat dashboard dokter");
-            } finally {
-                setIsLoading(false);
-            }
+            } catch { console.error('Gagal memuat dashboard dokter'); }
+            finally { setIsLoading(false); }
         };
-        loadDashboardData();
+        load();
     }, []);
 
+    const hh = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const ss = now.getSeconds().toString().padStart(2, '0');
+    const tanggal = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    const statCards = [
+        {
+            label: 'Pasien Antre',
+            value: stats.todayCount,
+            icon: <Clock size={22} />,
+            accent: 'from-emerald-500 to-emerald-600',
+            bg: 'bg-emerald-50',
+            text: 'text-emerald-700',
+            ring: 'ring-emerald-100',
+        },
+        {
+            label: 'Selesai Diperiksa',
+            value: stats.completedCount,
+            icon: <CheckCircle2 size={22} />,
+            accent: 'from-teal-500 to-teal-600',
+            bg: 'bg-teal-50',
+            text: 'text-teal-700',
+            ring: 'ring-teal-100',
+        },
+        {
+            label: 'Total Pasien',
+            value: stats.todayCount + stats.completedCount,
+            icon: <Users size={22} />,
+            accent: 'from-green-500 to-emerald-600',
+            bg: 'bg-green-50',
+            text: 'text-green-700',
+            ring: 'ring-green-100',
+        },
+        {
+            label: 'Progres Hari Ini',
+            value: stats.todayCount + stats.completedCount > 0
+                ? `${Math.round((stats.completedCount / (stats.todayCount + stats.completedCount)) * 100)}%`
+                : '0%',
+            icon: <TrendingUp size={22} />,
+            accent: 'from-emerald-600 to-green-700',
+            bg: 'bg-emerald-50',
+            text: 'text-emerald-800',
+            ring: 'ring-emerald-100',
+        },
+    ];
+
     return (
-        <div className="space-y-8 animate-in fade-in duration-700">
+        <div className="space-y-7">
 
-            {/* 1. WELCOME BANNER */}
-            <div className="bg-white rounded-[2rem] p-10 border border-[#D4EDE5] shadow-sm relative overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-2 bg-emerald-500 rounded-l-[2rem]" />
-                <div className="relative z-10 pl-4">
-                    <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-1.5 rounded-full mb-5">
-                        <Sparkles size={12} className="text-emerald-600" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700">
-                            Sesi Kerja Aktif
-                        </span>
-                    </div>
+            {/* ══════════════════════════════════════════════════════════════
+                1. WELCOME BANNER + CLOCK
+            ══════════════════════════════════════════════════════════════ */}
+            <motion.div {...fadeUp(0)} className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-                    <h1 className="text-3xl font-black italic uppercase tracking-tighter text-slate-900 leading-none">
-                        Halo, dr. Septian Adi
-                    </h1>
-                    <p className="text-slate-500 text-sm font-medium mt-3">
-                        Hari ini Anda memiliki{' '}
-                        <span className="font-black text-emerald-600">{stats.todayCount} pasien</span>{' '}
-                        yang menunggu di antrean.
-                    </p>
-                </div>
-                <Stethoscope
-                    size={200}
-                    className="absolute -right-10 -bottom-10 text-emerald-50 rotate-[-15deg] pointer-events-none"
-                />
-            </div>
+                {/* Welcome — 2/3 */}
+                <div className="lg:col-span-2 relative overflow-hidden bg-gradient-to-br from-emerald-700 via-emerald-800 to-green-900 rounded-2xl p-8 shadow-xl shadow-emerald-900/20">
+                    {/* Decorative circles */}
+                    <div className="absolute -top-10 -right-10 w-52 h-52 bg-white/5 rounded-full pointer-events-none" />
+                    <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-white/5 rounded-full pointer-events-none" />
+                    <Stethoscope size={160} className="absolute right-6 bottom-0 text-white/5 pointer-events-none" />
 
-            {/* 2. QUICK STATS */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm p-7 flex items-center justify-between hover:border-emerald-300 transition-all group">
-                    <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pasien Antre</p>
-                        <h3 className="text-4xl font-black text-slate-800 italic">{stats.todayCount}</h3>
-                    </div>
-                    <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Clock size={28} />
-                    </div>
-                </div>
+                    <div className="relative z-10">
+                        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full mb-5">
+                            <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-100">Sesi Kerja Aktif</span>
+                        </div>
 
-                <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm p-7 flex items-center justify-between hover:border-emerald-300 transition-all group">
-                    <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Selesai Diperiksa</p>
-                        <h3 className="text-4xl font-black text-slate-800 italic">{stats.completedCount}</h3>
-                    </div>
-                    <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <CheckCircle2 size={28} />
+                        <h1 className="text-3xl font-black italic uppercase tracking-tight text-white leading-tight">
+                            Selamat Datang,<br />
+                            <span className="text-emerald-300">dr. Septian Adi</span>
+                        </h1>
+                        <p className="text-emerald-200/80 text-sm font-medium mt-3 max-w-sm">
+                            Hari ini Anda memiliki{' '}
+                            <span className="font-black text-white">{stats.todayCount} pasien</span>{' '}
+                            yang menunggu di antrean pemeriksaan.
+                        </p>
+
+                        <div className="flex items-center gap-3 mt-6">
+                            <Link href="/doctor/queue">
+                                <button className="flex items-center gap-2 bg-white text-emerald-800 text-[11px] font-black uppercase tracking-widest px-5 py-2.5 rounded-xl hover:bg-emerald-50 transition-all shadow-lg shadow-black/10">
+                                    Mulai Periksa <ArrowRight size={13} />
+                                </button>
+                            </Link>
+                            <Link href="/doctor/schedule">
+                                <button className="flex items-center gap-2 bg-white/10 border border-white/20 text-white text-[11px] font-black uppercase tracking-widest px-5 py-2.5 rounded-xl hover:bg-white/20 transition-all">
+                                    Lihat Jadwal
+                                </button>
+                            </Link>
+                        </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm p-7 flex items-center justify-between hover:border-emerald-300 transition-all group">
-                    <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Pasien</p>
-                        <h3 className="text-4xl font-black text-slate-800 italic">
-                            {stats.todayCount + stats.completedCount}
-                        </h3>
+                {/* Live Clock — 1/3 */}
+                <div className="relative overflow-hidden bg-white border border-emerald-100 rounded-2xl p-7 shadow-sm flex flex-col justify-between">
+                    {/* subtle grid pattern */}
+                    <div
+                        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+                        style={{
+                            backgroundImage: 'repeating-linear-gradient(0deg,#059669 0,#059669 1px,transparent 1px,transparent 28px),repeating-linear-gradient(90deg,#059669 0,#059669 1px,transparent 1px,transparent 28px)',
+                        }}
+                    />
+
+                    <div className="relative z-10">
+                        <p className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.25em] mb-4 flex items-center gap-2">
+                            <Clock size={11} /> Waktu Sekarang
+                        </p>
+
+                        {/* Digital clock */}
+                        <div className="flex items-end gap-1 leading-none">
+                            <span className="text-5xl font-black text-slate-900 tabular-nums tracking-tighter">
+                                {hh}
+                            </span>
+                            <span className="text-xl font-black text-emerald-500 mb-1 tabular-nums">:{ss}</span>
+                            <span className="text-sm font-black text-slate-400 mb-1.5 ml-1">WIB</span>
+                        </div>
+
+                        {/* Progress bar — seconds */}
+                        <div className="mt-4 h-1 w-full bg-emerald-50 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-1000"
+                                style={{ width: `${(now.getSeconds() / 59) * 100}%` }}
+                            />
+                        </div>
                     </div>
-                    <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Users size={28} />
+
+                    <div className="relative z-10 mt-5">
+                        <p className="text-[11px] font-black text-slate-700 capitalize">{tanggal}</p>
+                        <div className="mt-3 pt-3 border-t border-emerald-50 grid grid-cols-2 gap-2">
+                            <div className="bg-emerald-50 rounded-xl p-3 text-center">
+                                <p className="text-[9px] font-black text-emerald-600 uppercase tracking-wider">Antre</p>
+                                <p className="text-2xl font-black text-emerald-800 mt-0.5">{stats.todayCount}</p>
+                            </div>
+                            <div className="bg-slate-50 rounded-xl p-3 text-center">
+                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-wider">Selesai</p>
+                                <p className="text-2xl font-black text-slate-800 mt-0.5">{stats.completedCount}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </motion.div>
 
-                <div className="bg-slate-900 rounded-[1.5rem] p-7 flex flex-col justify-center shadow-lg">
-                    <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Waktu Sekarang</p>
-                    <h3 className="text-2xl font-black italic text-white">
-                        {new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
-                    </h3>
-                    <p className="text-slate-400 text-[10px] font-bold uppercase mt-1">
-                        {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-                    </p>
-                </div>
-            </div>
+            {/* ══════════════════════════════════════════════════════════════
+                2. STAT CARDS
+            ══════════════════════════════════════════════════════════════ */}
+            <motion.div {...fadeUp(0.1)} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {statCards.map((card, i) => (
+                    <motion.div
+                        key={card.label}
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15 + i * 0.07, duration: 0.4, ease: 'easeOut' }}
+                        className={`bg-white rounded-2xl border shadow-sm p-5 ring-1 ${card.ring} hover:shadow-md hover:-translate-y-0.5 transition-all group`}
+                    >
+                        <div className="flex items-start justify-between mb-4">
+                            <div className={`w-10 h-10 ${card.bg} ${card.text} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                                {card.icon}
+                            </div>
+                            <span className={`text-[9px] font-black uppercase tracking-widest ${card.text} opacity-60`}>
+                                Hari ini
+                            </span>
+                        </div>
+                        <p className={`text-3xl font-black italic ${card.text} leading-none`}>{card.value}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1.5">{card.label}</p>
+                    </motion.div>
+                ))}
+            </motion.div>
 
-            {/* 3. DAFTAR PASIEN HARI INI */}
-            <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8">
-                <div className="flex justify-between items-center mb-8">
+            {/* ══════════════════════════════════════════════════════════════
+                3. PASIEN BERIKUTNYA
+            ══════════════════════════════════════════════════════════════ */}
+            <motion.div {...fadeUp(0.25)} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+
+                {/* Header */}
+                <div className="px-7 py-5 border-b border-emerald-50 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center border border-emerald-100">
-                            <CalendarDays size={22} />
+                        <div className="w-10 h-10 bg-emerald-700 text-white rounded-xl flex items-center justify-center shadow-md shadow-emerald-200">
+                            <CalendarDays size={18} />
                         </div>
                         <div>
-                            <h3 className="text-xl font-black uppercase italic tracking-tighter text-slate-900 leading-none">
-                                Pasien Berikutnya
+                            <h3 className="text-[13px] font-black uppercase italic tracking-tight text-slate-900 leading-none">
+                                Antrian Pasien
                             </h3>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                Daftar pemeriksaan yang diprioritaskan
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                                Daftar pemeriksaan hari ini
                             </p>
                         </div>
                     </div>
-
-                    <Link
-                        href="/doctor/schedule"
-                        className="text-[10px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-widest flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-xl hover:bg-emerald-100 transition-all"
-                    >
-                        Lihat Semua <ArrowRight size={12} />
+                    <Link href="/doctor/schedule">
+                        <button className="flex items-center gap-1.5 text-[10px] font-black text-emerald-700 uppercase tracking-widest bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-xl hover:bg-emerald-100 transition-all">
+                            Lihat Semua <ChevronRight size={12} />
+                        </button>
                     </Link>
                 </div>
 
-                <div className="space-y-3">
+                {/* List */}
+                <div className="divide-y divide-slate-50">
                     {isLoading ? (
-                        <div className="py-12 text-center">
-                            <Loader2 className="animate-spin mx-auto text-emerald-600" size={32} />
+                        <div className="py-16 text-center">
+                            <Loader2 className="animate-spin mx-auto text-emerald-600" size={28} />
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-3">Memuat data...</p>
                         </div>
                     ) : todayPatients.length > 0 ? (
                         todayPatients.slice(0, 5).map((app: any, i: number) => (
-                            <div
+                            <motion.div
                                 key={app.id}
-                                className="flex flex-col md:flex-row items-center justify-between p-5 bg-[#F5FAF7] rounded-[1.5rem] border border-transparent hover:border-emerald-200 hover:bg-emerald-50/40 transition-all group"
+                                initial={{ opacity: 0, x: -12 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 + i * 0.06, duration: 0.35 }}
+                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-7 py-5 hover:bg-emerald-50/40 transition-all group"
                             >
                                 <div className="flex items-center gap-5">
-                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center font-black text-lg text-emerald-600 shadow-sm border border-emerald-100">
+                                    {/* Nomor antrean */}
+                                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-base shrink-0 shadow-sm border ${i === 0
+                                            ? 'bg-emerald-700 text-white border-emerald-600 shadow-emerald-200'
+                                            : 'bg-white text-emerald-700 border-emerald-100'
+                                        }`}>
                                         {i + 1}
                                     </div>
+
                                     <div>
-                                        <h4 className="font-black text-slate-800 text-base uppercase italic tracking-tight">
-                                            {app.patient_name}
-                                        </h4>
+                                        <div className="flex items-center gap-2">
+                                            <h4 className="font-black text-slate-800 text-[13px] uppercase italic tracking-tight">
+                                                {app.patient_name}
+                                            </h4>
+                                            {i === 0 && (
+                                                <span className="text-[8px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full uppercase tracking-widest">
+                                                    Berikutnya
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="flex items-center gap-4 mt-1">
                                             <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1.5">
-                                                <Timer size={11} className="text-emerald-500" />
-                                                Estimasi:{' '}
-                                                {new Date(app.appointment_date).toLocaleTimeString('id-ID', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                })}
+                                                <Timer size={10} className="text-emerald-500" />
+                                                {new Date(app.appointment_date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
                                             </p>
                                             <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1.5">
-                                                <ClipboardList size={11} className="text-emerald-500" />
-                                                Keluhan: Umum
+                                                <ClipboardList size={10} className="text-emerald-500" />
+                                                Pemeriksaan Umum
                                             </p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <Link href="/doctor/schedule">
-                                    <button className="mt-4 md:mt-0 bg-emerald-600 text-white px-7 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-emerald-700 transition-all flex items-center gap-2 group/btn">
-                                        Mulai Periksa
-                                        <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                                <Link href="/doctor/schedule" className="mt-3 sm:mt-0">
+                                    <button className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${i === 0
+                                            ? 'bg-emerald-700 text-white shadow-md shadow-emerald-200 hover:bg-emerald-800'
+                                            : 'bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100'
+                                        }`}>
+                                        {i === 0 ? 'Mulai Periksa' : 'Lihat Detail'}
+                                        <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                                     </button>
                                 </Link>
-                            </div>
+                            </motion.div>
                         ))
                     ) : (
-                        <div className="py-20 text-center space-y-3 opacity-30">
-                            <UserRound size={44} className="mx-auto text-slate-400" />
-                            <p className="font-black text-slate-500 uppercase tracking-[0.3em] text-xs italic">
-                                Belum Ada Pasien Yang Dikonfirmasi Hari Ini
+                        <div className="py-20 text-center space-y-3">
+                            <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto border border-emerald-100">
+                                <UserRound size={28} className="text-emerald-300" />
+                            </div>
+                            <p className="font-black text-slate-400 uppercase tracking-[0.2em] text-[10px]">
+                                Belum ada pasien dikonfirmasi
                             </p>
                         </div>
                     )}
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }

@@ -15,9 +15,9 @@ import Link from 'next/link';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-    pending:   { label: 'Menunggu',    color: 'text-amber-600',   bg: 'bg-amber-50 border-amber-200',   dot: 'bg-amber-400' },
-    scheduled: { label: 'Dipanggil',   color: 'text-blue-600',    bg: 'bg-blue-50 border-blue-200',     dot: 'bg-blue-400'  },
-    completed: { label: 'Selesai',     color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200', dot: 'bg-emerald-400' },
+    pending: { label: 'Menunggu', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', dot: 'bg-amber-400' },
+    scheduled: { label: 'Dipanggil', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200', dot: 'bg-emerald-400' },
+    completed: { label: 'Selesai', color: 'text-teal-600', bg: 'bg-teal-50 border-teal-200', dot: 'bg-teal-400' },
 };
 
 function StatCard({ label, value, icon, gradient, sub }: {
@@ -30,8 +30,8 @@ function StatCard({ label, value, icon, gradient, sub }: {
             animate={{ opacity: 1, y: 0 }}
             className={`relative p-7 rounded-[1.75rem] overflow-hidden ${gradient || 'bg-white border border-slate-100'} shadow-sm`}
         >
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 ${gradient ? 'bg-white/20' : 'bg-indigo-50'}`}>
-                <span className={gradient ? 'text-white' : 'text-indigo-600'}>{icon}</span>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 ${gradient ? 'bg-white/20' : 'bg-emerald-50'}`}>
+                <span className={gradient ? 'text-white' : 'text-emerald-600'}>{icon}</span>
             </div>
             <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${gradient ? 'text-white/70' : 'text-slate-400'}`}>{label}</p>
             <h2 className={`text-4xl font-black italic ${gradient ? 'text-white' : 'text-slate-800'}`}>{value}</h2>
@@ -69,32 +69,32 @@ export default function DoctorDashboard() {
             .catch(console.error);
     }, []);
 
-    const pending   = appointments.filter((a: any) => a.status?.toLowerCase() === 'pending');
+    const pending = appointments.filter((a: any) => a.status?.toLowerCase() === 'pending');
     const scheduled = appointments.filter((a: any) => a.status?.toLowerCase() === 'scheduled');
     const completed = appointments.filter((a: any) => a.status?.toLowerCase() === 'completed');
-    const total     = appointments.length;
+    const total = appointments.length;
 
     const vitals = [
         { label: 'Tek. Darah Rata-rata', value: '120/80', unit: 'mmHg', icon: <Heart size={18} />, bar: 75, color: 'bg-rose-400', iconBg: 'bg-rose-50 text-rose-500' },
-        { label: 'Suhu Pasien',          value: '36.5',   unit: '°C',   icon: <Thermometer size={18} />, bar: 55, color: 'bg-amber-400', iconBg: 'bg-amber-50 text-amber-500' },
-        { label: 'Stok Obat',            value: 'Stabil', unit: '',     icon: <Pill size={18} />,        bar: 90, color: 'bg-blue-400', iconBg: 'bg-blue-50 text-blue-500' },
+        { label: 'Suhu Pasien', value: '36.5', unit: '°C', icon: <Thermometer size={18} />, bar: 55, color: 'bg-amber-400', iconBg: 'bg-amber-50 text-amber-500' },
+        { label: 'Stok Obat', value: 'Stabil', unit: '', icon: <Pill size={18} />, bar: 90, color: 'bg-emerald-400', iconBg: 'bg-emerald-50 text-emerald-500' },
     ];
 
     const quickMenus = [
-        { label: 'Rekam Medis', icon: <FileText size={22} />, href: '/doctor/medical-records', color: 'from-indigo-500 to-violet-600' },
-        { label: 'Jadwal',      icon: <Calendar size={22} />, href: '/doctor/schedule',         color: 'from-teal-500 to-emerald-600' },
-        { label: 'Antrian',     icon: <Users size={22} />,    href: '/doctor/queue',            color: 'from-amber-500 to-orange-500' },
-        { label: 'Laporan',     icon: <BarChart3 size={22} />,href: '/doctor',                  color: 'from-rose-500 to-pink-600' },
+        { label: 'Rekam Medis', icon: <FileText size={22} />, href: '/doctor/medical-records', color: 'from-emerald-500 to-teal-600' },
+        { label: 'Jadwal', icon: <Calendar size={22} />, href: '/doctor/schedule', color: 'from-teal-500 to-emerald-600' },
+        { label: 'Antrian', icon: <Users size={22} />, href: '/doctor/queue', color: 'from-amber-500 to-orange-500' },
+        { label: 'Laporan', icon: <BarChart3 size={22} />, href: '/doctor', color: 'from-sky-500 to-blue-600' },
     ];
 
     return (
         <div className="space-y-8 pb-32">
 
-            {/* ── HERO HEADER ───────────────────────────────────────────────── */}
+            {/* ── HERO HEADER (Hijau) ───────────────────────────────────────────── */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-700 rounded-[2rem] p-10 overflow-hidden shadow-xl shadow-indigo-200"
+                className="relative bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-700 rounded-[2rem] p-10 overflow-hidden shadow-xl shadow-emerald-100"
             >
                 {/* Decorative circles */}
                 <div className="absolute -top-16 -right-16 w-72 h-72 bg-white/5 rounded-full" />
@@ -109,7 +109,7 @@ export default function DoctorDashboard() {
                         </div>
                         <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter leading-none">
                             Selamat Datang,<br />
-                            <span className="text-indigo-200">dr. {doctorName}</span>
+                            <span className="text-emerald-200">dr. {doctorName}</span>
                         </h1>
                         <p className="text-white/60 font-medium mt-3 text-sm max-w-md">
                             Sistem Informasi Medis Klinik.AI — {total} pasien terdaftar hari ini.
@@ -134,13 +134,13 @@ export default function DoctorDashboard() {
                 </div>
             </motion.div>
 
-            {/* ── STATS GRID ────────────────────────────────────────────────── */}
+            {/* ── STATS GRID (Warna hijau) ─────────────────────────────────────── */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
                 <StatCard
                     label="Total Pasien"
                     value={stats?.total_all_patients ?? 0}
                     icon={<Users size={24} />}
-                    gradient="bg-gradient-to-br from-indigo-600 to-violet-700"
+                    gradient="bg-gradient-to-br from-emerald-600 to-teal-700"
                     sub="Semua pasien terdaftar"
                 />
                 <StatCard
@@ -170,19 +170,19 @@ export default function DoctorDashboard() {
                 <div className="lg:col-span-2 space-y-5">
                     <div className="flex items-center justify-between">
                         <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2.5">
-                            <div className="w-8 h-8 bg-indigo-50 rounded-xl flex items-center justify-center">
-                                <ClipboardList size={18} className="text-indigo-600" />
+                            <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center">
+                                <ClipboardList size={18} className="text-emerald-600" />
                             </div>
                             Antrian Pasien Aktif
                         </h3>
-                        <Link href="/doctor/queue" className="flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
+                        <Link href="/doctor/queue" className="flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-800 transition-colors">
                             Lihat Semua <ChevronRight size={14} />
                         </Link>
                     </div>
 
                     {isLoading ? (
                         <div className="flex justify-center py-20 bg-white rounded-[2rem] border border-slate-100">
-                            <Loader2 className="animate-spin text-indigo-600" size={36} />
+                            <Loader2 className="animate-spin text-emerald-600" size={36} />
                         </div>
                     ) : appointments.length === 0 ? (
                         <div className="bg-white p-16 rounded-[2rem] border border-dashed border-slate-200 text-center">
@@ -207,12 +207,12 @@ export default function DoctorDashboard() {
                                             onClick={() => setActiveQueue(isExpanded ? null : app.id)}
                                         >
                                             {/* Nomor Antrian */}
-                                            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0">
+                                            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0">
                                                 {idx + 1}
                                             </div>
 
                                             {/* Avatar & Name */}
-                                            <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-violet-100 rounded-2xl flex items-center justify-center font-black text-indigo-600 text-lg shrink-0">
+                                            <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center font-black text-emerald-600 text-lg shrink-0">
                                                 {app.patient_name?.charAt(0) || '?'}
                                             </div>
 
@@ -224,7 +224,7 @@ export default function DoctorDashboard() {
                                                         {new Date(app.appointment_date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                                                     </span>
                                                     {app.doctor_name && (
-                                                        <span className="text-[10px] text-indigo-500 font-bold">• {app.doctor_name}</span>
+                                                        <span className="text-[10px] text-emerald-500 font-bold">• {app.doctor_name}</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -255,7 +255,7 @@ export default function DoctorDashboard() {
                                                     <div className="flex gap-2 items-end">
                                                         <Link
                                                             href={`/doctor/medical-records`}
-                                                            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
+                                                            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100"
                                                         >
                                                             <FileText size={12} /> Buka Rekam Medis
                                                         </Link>
@@ -273,10 +273,10 @@ export default function DoctorDashboard() {
                 {/* Sidebar Panel — 1 col */}
                 <div className="space-y-6">
 
-                    {/* Health Vitals */}
+                    {/* Health Vitals (dengan aksen hijau) */}
                     <div className="bg-white p-7 rounded-[2rem] border border-slate-100 shadow-sm">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-9 h-9 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500">
+                            <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500">
                                 <Stethoscope size={18} />
                             </div>
                             <h4 className="font-black text-slate-800 text-sm uppercase tracking-wider">Health Insights</h4>
@@ -306,14 +306,14 @@ export default function DoctorDashboard() {
                         </div>
                     </div>
 
-                    {/* Progress Harian */}
+                    {/* Progress Harian (warna gelap dengan aksen emerald) */}
                     <div className="bg-slate-900 p-7 rounded-[2rem] shadow-xl shadow-slate-200 relative overflow-hidden">
-                        <div className="absolute -top-8 -right-8 w-32 h-32 bg-indigo-500/15 rounded-full" />
-                        <div className="absolute bottom-0 left-0 w-20 h-20 bg-violet-500/10 rounded-full" />
+                        <div className="absolute -top-8 -right-8 w-32 h-32 bg-emerald-500/15 rounded-full" />
+                        <div className="absolute bottom-0 left-0 w-20 h-20 bg-teal-500/10 rounded-full" />
                         <div className="relative z-10">
                             <div className="flex items-center justify-between mb-5">
                                 <h4 className="text-xs font-black text-white/60 uppercase tracking-widest">Progres Harian</h4>
-                                <TrendingUp size={16} className="text-indigo-400" />
+                                <TrendingUp size={16} className="text-emerald-400" />
                             </div>
 
                             {/* Donut-style progress */}
@@ -324,7 +324,7 @@ export default function DoctorDashboard() {
                                         <motion.circle
                                             cx="18" cy="18" r="15.5"
                                             fill="none"
-                                            stroke="#818cf8"
+                                            stroke="#10b981" // emerald-500
                                             strokeWidth="3"
                                             strokeLinecap="round"
                                             strokeDasharray={`${total > 0 ? (completed.length / total) * 97.4 : 0} 97.4`}
@@ -341,9 +341,9 @@ export default function DoctorDashboard() {
                                 </div>
                                 <div className="space-y-2">
                                     {[
-                                        { label: 'Selesai',    val: completed.length, color: 'bg-indigo-400' },
-                                        { label: 'Menunggu',   val: pending.length,   color: 'bg-amber-400' },
-                                        { label: 'Dipanggil',  val: scheduled.length, color: 'bg-blue-400' },
+                                        { label: 'Selesai', val: completed.length, color: 'bg-emerald-400' },
+                                        { label: 'Menunggu', val: pending.length, color: 'bg-amber-400' },
+                                        { label: 'Dipanggil', val: scheduled.length, color: 'bg-sky-400' },
                                     ].map(item => (
                                         <div key={item.label} className="flex items-center gap-2.5">
                                             <span className={`w-2 h-2 rounded-full ${item.color}`} />
@@ -356,7 +356,7 @@ export default function DoctorDashboard() {
                         </div>
                     </div>
 
-                    {/* Quick Access */}
+                    {/* Quick Access (dengan gradien hijau pada menu tertentu) */}
                     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                         <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Menu Cepat</h4>
                         <div className="grid grid-cols-2 gap-3">
@@ -381,8 +381,8 @@ export default function DoctorDashboard() {
             <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8">
                 <div className="flex items-center justify-between mb-7">
                     <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2.5">
-                        <div className="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center">
-                            <Calendar size={18} className="text-amber-500" />
+                        <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center">
+                            <Calendar size={18} className="text-emerald-500" />
                         </div>
                         Jadwal Pemeriksaan Hari Ini
                     </h3>
@@ -393,7 +393,7 @@ export default function DoctorDashboard() {
 
                 {isLoading ? (
                     <div className="flex justify-center py-10">
-                        <Loader2 className="animate-spin text-indigo-400" size={28} />
+                        <Loader2 className="animate-spin text-emerald-400" size={28} />
                     </div>
                 ) : (
                     <div className="relative">
@@ -415,7 +415,7 @@ export default function DoctorDashboard() {
                                         <div className={`absolute -left-12 w-4 h-4 rounded-full border-2 border-white shadow-md ${st.dot}`} />
 
                                         <div className={`flex-1 flex items-center gap-4 p-4 rounded-2xl border ${st.bg} group hover:shadow-sm transition-all`}>
-                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center font-black text-indigo-600 text-sm shadow-sm">
+                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center font-black text-emerald-600 text-sm shadow-sm">
                                                 {app.patient_name?.charAt(0) || '?'}
                                             </div>
                                             <div className="flex-1 min-w-0">
@@ -436,7 +436,7 @@ export default function DoctorDashboard() {
                             {appointments.length > 5 && (
                                 <div className="relative flex items-center gap-4">
                                     <div className="absolute -left-12 w-4 h-4 rounded-full border-2 border-slate-200 bg-slate-100" />
-                                    <Link href="/doctor/queue" className="flex-1 flex items-center justify-center gap-2 p-4 rounded-2xl border border-dashed border-slate-200 text-slate-400 hover:border-indigo-300 hover:text-indigo-600 transition-all group">
+                                    <Link href="/doctor/queue" className="flex-1 flex items-center justify-center gap-2 p-4 rounded-2xl border border-dashed border-slate-200 text-slate-400 hover:border-emerald-300 hover:text-emerald-600 transition-all group">
                                         <span className="text-[11px] font-black uppercase tracking-widest">+{appointments.length - 5} Pasien Lainnya</span>
                                         <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                                     </Link>
