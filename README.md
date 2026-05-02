@@ -1,99 +1,80 @@
-<!--- HEADER BANNER with animated gradient --->
+<!-- HEADER BANNER -->
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12&height=220&section=header&text=DentalAI%20Systems&fontSize=60&animation=fadeIn&fontAlignY=38" width="100%" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=200&section=header&text=DentalAI%20Systems&fontSize=50&animation=fadeIn" width="100%" />
 </p>
 
-<!--- TYPING EFFECT (already animated) --->
+<!-- TYPING EFFECT -->
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=30&duration=3000&pause=500&color=FF6D5A&center=true&vCenter=true&width=500&lines=DentAI;AI+Dental+Clinic;n8n+Automation;RAG+Chatbot" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=28&duration=3000&pause=500&color=FF6D5A&center=true&vCenter=true&width=435&lines=DentAI;AI+Dental+Clinic;n8n+Automation" alt="Typing SVG" />
 </p>
 
-<!--- ANIMATED 3D BOTS (rotating shadows) --->
-<div align="center">
-  <div style="display: inline-block; animation: float 3s ease-in-out infinite;">
-    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=tooth&backgroundColor=FF6D5A&radius=50&scale=90" width="120" />
-  </div>
+<br />
+<!-- AVATAR BOTS (Diberi jarak antar gambar) -->
+<p align="center">
+  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=tooth&backgroundColor=FF6D5A&radius=50&scale=90" width="120" />
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <div style="display: inline-block; animation: float 3s ease-in-out infinite 0.5s;">
-    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=n8n&backgroundColor=4A90E2&radius=50&scale=90" width="120" />
-  </div>
+  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=n8n&backgroundColor=4A90E2&radius=50&scale=90" width="120" />
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <div style="display: inline-block; animation: float 3s ease-in-out infinite 1s;">
-    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=ai&backgroundColor=764ba2&radius=50&scale=90" width="120" />
-  </div>
-</div>
-
-<!--- custom CSS for floating animation --->
-<style>
-  @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-12px); }
-    100% { transform: translateY(0px); }
-  }
-</style>
+  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=ai&backgroundColor=764ba2&radius=50&scale=90" width="120" />
+</p>
 
 <br />
 
-<!--- ANIMATED STATUS BADGES (pulse effect) --->
+<!-- STATUS BADGES -->
 <p align="center">
-  <img src="https://img.shields.io/badge/Workflow-n8n-FF6D5A?style=for-the-badge&logo=n8n&logoColor=white&labelColor=2d2d2d" />
+  <img src="https://img.shields.io/badge/Workflow-n8n-FF6D5A?style=for-the-badge&logo=n8n&logoColor=white" />
   &nbsp;
-  <img src="https://img.shields.io/badge/Status-Production_Ready-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white&labelColor=2d2d2d" />
-  &nbsp;
-  <img src="https://img.shields.io/badge/AI-RAG-9b59b6?style=for-the-badge&logo=openai&logoColor=white" />
+  <img src="https://img.shields.io/badge/Status-Production--Ready-brightgreen?style=for-the-badge" />
 </p>
 
-<p align="center">
-  <img src="https://komarev.com/ghpvc/?username=dentalai&label=Views&color=FF6D5A&style=for-the-badge" />
-  <img src="https://img.shields.io/github/stars/nauli/dentalai?style=for-the-badge&logo=github" />
-</p>
-
+<br />
 <hr />
+<br />
 
-## 📖 Overview
+<!-- TECH STACK BADGES -->
+<div align="center">
+  <h3>🚀 Smart Dashboard & AI Chatbot System</h3>
+  <p><b>Next.js • FastAPI • NeonCloud • n8n • RAG AI</b></p>
+  
+  <img src="https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white" /> &nbsp;
+  <img src="https://img.shields.io/badge/FastAPI-005571?style=flat-square&logo=fastapi" /> &nbsp;
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white" /> &nbsp;
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white" /> &nbsp;
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" />
+</div>
 
-**DentalAI Systems** adalah platform manajemen klinik gigi generasi berikutnya yang menggabungkan:
+<br />
+<br />
+<br />
 
-- ✅ **Dashboard Interaktif** untuk pasien, dokter, dan admin
-- ✅ **Sistem Antrean Real‑Time** dengan notifikasi WhatsApp otomatis
-- ✅ **AI Chatbot Cerdas** berbasis RAG (Retrieval Augmented Generation)
-- ✅ **Workflow n8n** untuk automasi janji temu dan pengingat obat
+<!-- FOOTER -->
+<div align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=16&duration=3000&pause=1000&color=FF6D5A&center=true&vCenter=true&width=435&lines=Made+with+%E2%9D%A4%EF%B8%8F+for+Modern+Dental+Care;Powered+by+n8n+and+OpenAI" />
+  <br />
+  <sub>© 2024 Clinic Nauli Dental Care Systems | Software Engineer | @NauliDentalCare2026</sub>
+</div>
 
-> 💡 Semua data medis dienkripsi penuh dan tersimpan di **Neon Cloud PostgreSQL**.
-
----
-
-## 🧠 Arsitektur Sistem (Live Workflow)
-
+## 🛠️ Tech Stack & WorkFlow
+Sistem ini mengintegrasikan Dashboard User yang responsif dengan automasi workflow dan chatbot Ai cerdas berbasis RAG (Retrieval-Augmented Generation).
+###  Arsitektur Sistem (Live Workflow)
 ```mermaid
 graph TD
-    subgraph Frontend [🖥️ Frontend - Next.js]
-        A[User Dashboard] -->|interaksi| B(Next.js App Router)
+    subgraph Frontend_Layer
+    A[User Dashboard] -->|Interact| B(Next.js App)
     end
 
-    subgraph Backend [⚙️ Backend - FastAPI]
-        B -->|REST API| C{FastAPI Gateway}
-        C -->|CRUD| D[(PostgreSQL / Neon)]
-        C -->|autentikasi| E[Auth JWT]
+    subgraph Backend_Layer
+    B -->|API Request| C{FastAPI Gateway}
+    C -->|Query/Store| D[(PostgreSQL / Neon)]
     end
-
-    subgraph Workflow [🤖 Automasi n8n]
-        C -->|trigger event| F[n8n Webhook]
-        F -->|condition| G{Status Janji}
-        G -->|pending| H[WhatsApp Reminder]
-        G -->|confirmed| I[Email Invoice]
-        G -->|completed| J[Update Rekam Medis]
-    end
-
-    subgraph AI [🧠 AI RAG Chatbot]
-        F -->|query| K[OpenAI Embeddings]
-        K -->|retrieve| L[(Vector DB - Pinecone)]
-        L -->|context| M[GPT-4 Response]
-        M -->|answer| B
+    subgraph Automation_Layer Workflow
+    C -->|Trigger Event| E[n8n Workflow]
+    E -->|Notification| F{Channels}
+    F -->|Send| G[WhatsApp Reminder]
+    F -->|Send| H[Email Notification]
     end
 
     style A fill:#f9f,stroke:#333,stroke-width:2px
     style C fill:#00d1b2,stroke:#333,stroke-width:2px
-    style F fill:#ff6d5a,stroke:#333,stroke-width:2px
-    style H fill:#25D366,stroke:#333,stroke-width:2px
-    style M fill:#9b59b6,stroke:#333,stroke-width:2px
+    style E fill:#ff6d5a,stroke:#333,stroke-width:2px
+    style G fill:#25D366,stroke:#333,stroke-width:2px
