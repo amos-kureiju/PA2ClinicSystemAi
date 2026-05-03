@@ -49,7 +49,7 @@ export default function AdminAppointments() {
     );
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="flex flex-col h-full gap-6 animate-in fade-in duration-500">
             {/* HEADER */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -68,7 +68,7 @@ export default function AdminAppointments() {
             </div>
 
             {/* TABEL DATA */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto flex-1 flex flex-col">
                 <table className="w-full text-left border-collapse text-[13px] min-w-[800px]">
                     <thead>
                         <tr className="bg-slate-50/50">

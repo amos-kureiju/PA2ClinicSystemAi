@@ -69,7 +69,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
     const isHeroPage = pathname === '/patient/dashboard';
 
     return (
-        <div className="min-h-screen bg-white font-sans overflow-x-hidden">
+        <div className="min-h-screen font-sans overflow-x-hidden">
 
             {/* --- NAVBAR DINAMIS (Blur hijau tua saat scroll) --- */}
             <motion.nav
@@ -134,9 +134,9 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                                                         ? isScrolled
                                                             ? 'text-white'  // Active saat scroll: PUTIH
                                                             : 'text-emerald-600'  // Active sebelum scroll: HIJAU
-                                                        : isScrolled
-                                                            ? 'text-white/80 hover:text-white'  // Non-active saat scroll: PUTIH TRANSPARAN
-                                                            : 'text-emerald-500/70 hover:text-emerald-600'  // Non-active sebelum scroll: HIJAU TRANSPARAN
+                                                    : isScrolled
+                                                        ? 'text-white/80 hover:text-white'
+                                                        : 'text-slate-600 hover:text-emerald-600'
                                                     }`}
                                             >
                                                 <span>{item.name}</span>
@@ -169,7 +169,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                                 whileTap={{ scale: 0.95 }}
                                 className={`relative p-2 rounded-full transition-all duration-200 ${isScrolled
                                         ? 'text-slate-500 hover:bg-slate-100'
-                                        : 'text-white/80 hover:bg-white/10'
+                                        : 'text-slate-500 hover:bg-slate-100/60'
                                     }`}
                             >
                                 <Bell size={18} />
@@ -197,7 +197,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                                         <div className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white" />
                                     </div>
                                     <div className="hidden sm:block text-left">
-                                        <p className={`text-[11px] font-semibold leading-tight ${isScrolled ? 'text-slate-700' : 'text-white'}`}>
+                                        <p className={`text-[11px] font-semibold leading-tight ${isScrolled ? 'text-slate-700' : 'text-slate-700'}`}>
                                             Septian Adi
                                         </p>
                                         <p className={`text-[8px] font-medium ${isScrolled ? 'text-emerald-600' : 'text-emerald-300'}`}>

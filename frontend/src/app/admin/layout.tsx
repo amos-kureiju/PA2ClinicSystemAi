@@ -109,13 +109,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     // 4. SYNC AI
     const handleSyncAI = async () => {
-        if (!confirm('Sinkronisasi database AI?')) return;
+        const confirmSync = confirm("Proses sinkronisasi memakan waktu 15-30 detik. Jangan tutup halaman ini. Lanjutkan?");
+        if (!confirmSync) return;
+
         setIsSyncing(true);
         try {
-            await api.post('/chatbot/ingest');
-            alert('✅ Brain Database AI berhasil disinkronkan!');
-        } catch {
-            alert('❌ Gagal memperbarui AI.');
+            // TAMBAHKAN { timeout: 60000 } agar tidak terputus di tengah jalan
+            const res = await api.post('/chatbot/ingest', {}, { timeout: 60000 });
+            alert("✅ " + res.data.message);
+        } catch (err: any) {
+            console.error("Error Detail:", err.response?.data);
+            alert("❌ Gagal Sinkron: Cek terminal Python kamu untuk melihat errornya.");
         } finally {
             setIsSyncing(false);
         }
