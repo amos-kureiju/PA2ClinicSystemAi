@@ -17,12 +17,12 @@ interface Appointment {
     notes?: string;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; badge: string; dot: string }> = {
-    pending:   { label: 'Menunggu',   badge: 'bg-amber-50 text-amber-600 border-amber-200',     dot: 'bg-amber-400' },
-    confirmed: { label: 'Dikonfirmasi', badge: 'bg-blue-50 text-blue-600 border-blue-200',      dot: 'bg-blue-400' },
-    scheduled: { label: 'Terjadwal',  badge: 'bg-indigo-50 text-indigo-600 border-indigo-200',   dot: 'bg-indigo-400' },
-    completed: { label: 'Selesai',    badge: 'bg-emerald-50 text-emerald-600 border-emerald-200', dot: 'bg-emerald-400' },
-    cancelled: { label: 'Dibatalkan', badge: 'bg-red-50 text-red-500 border-red-200',            dot: 'bg-red-400' },
+const STATUS_CONFIG = {
+    pending:   { label: 'Menunggu',     badge: 'bg-emerald-50 text-emerald-600 border-emerald-200', dot: 'bg-emerald-300' },
+    confirmed: { label: 'Dikonfirmasi', badge: 'bg-emerald-50 text-emerald-700 border-emerald-300', dot: 'bg-emerald-500' },
+    scheduled: { label: 'Terjadwal',    badge: 'bg-emerald-50 text-emerald-600 border-emerald-200', dot: 'bg-emerald-400' },
+    completed: { label: 'Selesai',      badge: 'bg-slate-900 text-emerald-400 border-slate-700',    dot: 'bg-emerald-400' },
+    cancelled: { label: 'Dibatalkan',   badge: 'bg-red-50 text-red-500 border-red-200',             dot: 'bg-red-400' },
 };
 
 export default function DoctorQueuePage() {
@@ -92,7 +92,7 @@ export default function DoctorQueuePage() {
                 </div>
                 <button
                     onClick={() => fetchData(true)} disabled={isRefreshing}
-                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-indigo-700 transition-all"
+                    className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-emerald-700 transition-all"
                 >
                     <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} /> Refresh
                 </button>
@@ -101,9 +101,9 @@ export default function DoctorQueuePage() {
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { label: 'Total', value: appointments.length, icon: <Users size={20} />, color: 'bg-indigo-50 text-indigo-600' },
-                    { label: 'Menunggu', value: appointments.filter(a => a.status === 'pending').length, icon: <TimerReset size={20} />, color: 'bg-amber-50 text-amber-500' },
-                    { label: 'Dikonfirmasi', value: appointments.filter(a => a.status === 'confirmed').length, icon: <UserCheck size={20} />, color: 'bg-blue-50 text-blue-500' },
+                    { label: 'Total', value: appointments.length, icon: <Users size={20} />, color: 'bg-emerald-50 text-emerald-600' },
+                    { label: 'Menunggu', value: appointments.filter(a => a.status === 'pending').length, icon: <TimerReset size={20} />, color: 'bg-emerald-50 text-emerald-500' },
+                    { label: 'Dikonfirmasi', value: appointments.filter(a => a.status === 'confirmed').length, icon: <UserCheck size={20} />, color: 'bg-emerald-50 text-emerald-600' },
                     { label: 'Selesai', value: completed, icon: <CheckCircle2 size={20} />, color: 'bg-emerald-50 text-emerald-600' },
                 ].map((s, i) => (
                     <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
@@ -121,12 +121,12 @@ export default function DoctorQueuePage() {
                 <div className="relative flex-1">
                     <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
                     <input type="text" placeholder="Cari nama pasien atau dokter..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none transition-all shadow-sm" />
+                        className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 outline-none transition-all"/>
                 </div>
                 <div className="flex gap-2">
                     {(['all', 'pending', 'confirmed', 'completed'] as const).map(s => (
                         <button key={s} onClick={() => setFilter(s)}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${filter === s ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-400 border-slate-200 hover:border-indigo-300'}`}>
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${filter === s ? 'bg-emerald-600 text-white border-emerald-600 shadow-md' : 'bg-white text-slate-400 border-slate-200 hover:border-emerald-300'}`}>
                             {s === 'all' ? 'Semua' : s === 'pending' ? 'Tunggu' : s === 'confirmed' ? 'Konfirmasi' : 'Selesai'}
                         </button>
                     ))}
@@ -147,7 +147,7 @@ export default function DoctorQueuePage() {
                         <tbody className="divide-y divide-slate-50">
                             {isLoading ? (
                                 <tr><td colSpan={6} className="py-20 text-center">
-                                    <Loader2 className="animate-spin text-indigo-500 mx-auto" size={32} />
+                                    <Loader2 className="animate-spin text-emerald-600 mx-auto" size={32} />
                                     <p className="text-xs text-slate-400 mt-3">Memuat antrian...</p>
                                 </td></tr>
                             ) : filtered.length === 0 ? (
@@ -159,16 +159,16 @@ export default function DoctorQueuePage() {
                                 const st = STATUS_CONFIG[app.status] || STATUS_CONFIG.pending;
                                 return (
                                     <motion.tr key={app.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.03 }} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="px-6 py-4"><span className="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-500">{idx + 1}</span></td>
+                                        <td className="px-6 py-4"><span className="w-8 h-8 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center text-xs font-black text-black">{idx + 1}</span></td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-blue-100 flex items-center justify-center font-black text-indigo-700 text-sm">{app.patient_name.charAt(0)}</div>
+                                                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center font-black text-emerald-700 text-sm">{app.patient_name.charAt(0)}</div>
                                                 <p className="text-sm font-black text-slate-800">{app.patient_name}</p>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
-                                                <Stethoscope size={12} className="text-indigo-400" />
+                                                <Stethoscope size={12} className="text-emerald-400" />
                                                 <p className="text-xs font-bold text-slate-600">{app.doctor_name || 'Belum ditentukan'}</p>
                                             </div>
                                         </td>
@@ -188,7 +188,7 @@ export default function DoctorQueuePage() {
                                         <td className="px-6 py-4 text-right">
                                             {(app.status === 'pending' || app.status === 'confirmed') && (
                                                 <button onClick={() => handleStatusUpdate(app.id, 'completed')}
-                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all">
+                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all">
                                                     Selesai <CheckCircle2 size={12} />
                                                 </button>
                                             )}
