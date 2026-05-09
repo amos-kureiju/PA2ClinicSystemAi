@@ -87,8 +87,8 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                       Sudah scroll  → rounded pill, shadow, sedikit lebih kecil tingginya.
                     */}
                     <div className={`flex items-center justify-between gap-4 transition-all duration-500 ease-in-out ${isScrolled
-                            ? 'bg-slate-900 rounded-2xl shadow-2xl shadow-black/30 border border-white/10 px-5 py-2.5'
-                            : 'bg-transparent px-6 sm:px-10 py-4'
+                        ? 'bg-black/50 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/20 border border-white/10 px-5 py-2.5'
+                        : 'bg-gradient-to-b from-black/30 to-transparent px-6 sm:px-10 py-4'
                         }`}>
 
                         {/* ── Brand ─────────────────────────────────────── */}
@@ -261,7 +261,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
                             transition={{ duration: 0.25, ease: 'easeInOut' }}
-                            className="lg:hidden bg-white border-t border-slate-100 shadow-lg overflow-hidden"
+                            className="lg:hidden bg-white/95 backdrop-blur-xl shadow-lg overflow-hidden"
                         >
                             <div className="px-4 py-3 space-y-0.5">
                                 {navItems.map((item, idx) => {
