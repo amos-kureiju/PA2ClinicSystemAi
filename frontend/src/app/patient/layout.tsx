@@ -63,10 +63,16 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
 
     if (!isAuthorized) return null;
 
-    const isHeroPage = pathname === '/patient/dashboard';
+    const isHeroPage = [
+        '/patient/dashboard',
+        '/patient/appointments',
+        '/patient/records',
+        '/patient/services',
+        '/patient/doctors',
+    ].some(p => pathname.startsWith(p));
 
     return (
-        <div className="min-h-screen font-sans overflow-x-hidden">
+        <div className="min-h-screen font-sans overflow-x-clip bg-[#0a0a0a]">
 
             {/* ── NAVBAR ──────────────────────────────────────────────────── */}
             <motion.nav
