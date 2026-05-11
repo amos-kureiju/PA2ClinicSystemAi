@@ -190,24 +190,24 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, y: 8, scale: 0.96 }}
                                             transition={{ type: 'spring', damping: 22, stiffness: 300 }}
-                                            className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50"
+                                            className="absolute right-0 mt-2 w-64 bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/30 border border-white/10 overflow-hidden z-50"
                                         >
                                             {/* Header */}
-                                            <div className="bg-[#0A1C14] px-4 py-3">
-                                                <p className="text-xs font-black text-emerald-400 uppercase tracking-widest">Aktivitas Saya</p>
+                                            <div className="px-5 py-3 border-b border-white/8">
+                                                <p className="text-xs font-black text-white/50 uppercase tracking-widest">Aktivitas Saya</p>
                                             </div>
                                             <div className="p-1.5 space-y-0.5">
                                                 <Link
                                                     href="/patient/appointments"
                                                     onClick={() => setIsQuickOpen(false)}
                                                 >
-                                                    <button className="w-full px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl flex items-center gap-3 transition-all">
-                                                        <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                                                            <CalendarCheck size={15} className="text-emerald-600" />
+                                                    <button className="w-full px-4 py-3 text-left hover:bg-white/10 rounded-xl flex items-center gap-4 transition-all group cursor-pointer">
+                                                        <div className="w-9 h-9 bg-white/8 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-white/15 transition-all">
+                                                            <CalendarCheck size={16} className="text-white/70 group-hover:text-emerald-400 transition-colors" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-bold leading-tight">Janji Temu</p>
-                                                            <p className="text-[10px] text-slate-400">Kelola reservasi Anda</p>
+                                                            <p className="text-sm font-bold text-white leading-tight">Janji Temu</p>
+                                                            <p className="text-[11px] text-white/40 mt-0.5">Kelola reservasi Anda</p>
                                                         </div>
                                                     </button>
                                                 </Link>
@@ -215,13 +215,13 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                                                     href="/patient/records"
                                                     onClick={() => setIsQuickOpen(false)}
                                                 >
-                                                    <button className="w-full px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl flex items-center gap-3 transition-all">
-                                                        <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                                                            <FileText size={15} className="text-emerald-600" />
+                                                    <button className="w-full px-4 py-3 text-left hover:bg-white/10 rounded-xl flex items-center gap-4 transition-all group cursor-pointer">
+                                                        <div className="w-9 h-9 bg-white/8 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-white/15 transition-all">
+                                                            <FileText size={16} className="text-white/70 group-hover:text-emerald-400 transition-colors" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-bold leading-tight">Rekam Medis</p>
-                                                            <p className="text-[10px] text-slate-400">Riwayat perawatan Anda</p>
+                                                            <p className="text-sm font-bold text-white leading-tight">Rekam Medis</p>
+                                                            <p className="text-[11px] text-white/40 mt-0.5">Riwayat perawatan Anda</p>
                                                         </div>
                                                     </button>
                                                 </Link>
@@ -277,7 +277,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, y: 8, scale: 0.96 }}
                                             transition={{ type: 'spring', damping: 22, stiffness: 300 }}
-                                            className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50"
+                                            className="absolute right-0 mt-2 w-64 bg-[#1a1a1a]/95 backdrop-blur-md rounded-2xl shadow-2xl shadow-black/50 border border-white/8 overflow-hidden z-50"
                                         >
                                             <div className="bg-gradient-to-br from-emerald-600 to-teal-600 px-4 py-3 text-white">
                                                 <div className="flex items-center gap-3">
@@ -288,7 +288,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="p-1.5 space-y-0.5">
+                                            <div className="px-3 py-3 space-y-1">
                                                 <Link href="/patient/profile" onClick={() => setIsProfileOpen(false)}>
                                                     <button className="w-full px-3 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-xl flex items-center gap-3 transition-all">
                                                         <User size={14} className="text-emerald-500" /> Profil Saya
