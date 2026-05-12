@@ -123,7 +123,7 @@ export default function LoginPage() {
                         <span className="text-white font-black italic text-xl">K</span>
                     </div>
                     <div>
-                        <h1 className="text-white text-2xl font-black tracking-tighter italic leading-none">Klinik.AI</h1>
+                        <h1 className="text-white text-2xl font-black tracking-tighter italic leading-none">Klinik Nauli Dental </h1>
                         <p className="text-emerald-300 text-[9px] font-bold uppercase tracking-widest mt-0.5">Sistem Informasi Terintegrasi</p>
                     </div>
                 </div>
