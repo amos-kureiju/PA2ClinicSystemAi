@@ -2,15 +2,15 @@
 import { useEffect, useState } from 'react';
 import api from '@/services/api';
 import {
-    Clock, CheckCircle2, UserRound, Sparkles,
+    Clock, CheckCircle2, UserRound,
     Timer, ClipboardList, Loader2, ArrowRight,
     Stethoscope, CalendarDays, Users, TrendingUp,
-    Activity, ChevronRight
+    ChevronRight, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
-// ── Live Clock Hook ──────────────────────────────────────────────────────────
+// ── Live Clock ───────────────────────────────────────────────────────────────
 function useLiveClock() {
     const [time, setTime] = useState(new Date());
     useEffect(() => {
@@ -20,7 +20,6 @@ function useLiveClock() {
     return time;
 }
 
-// ── Stagger animation helper ─────────────────────────────────────────────────
 const fadeUp = (delay = 0) => ({
     initial: { opacity: 0, y: 18 },
     animate: { opacity: 1, y: 0 },
@@ -29,55 +28,82 @@ const fadeUp = (delay = 0) => ({
 
 export default function DoctorDashboard() {
     const [todayPatients, setTodayPatients] = useState<any[]>([]);
+    const [doctorName, setDoctorName] = useState<string>('');       // ← nama dari /auth/me
+    const [doctorRole, setDoctorRole] = useState<string>('doctor');
     const [stats, setStats] = useState({ todayCount: 0, completedCount: 0 });
     const [isLoading, setIsLoading] = useState(true);
+    const [fetchError, setFetchError] = useState<string | null>(null);
     const now = useLiveClock();
 
+    // ── Fetch: profil + pasien yang relevan ───────────────────────────────────
     useEffect(() => {
         const load = async () => {
+            setIsLoading(true);
+            setFetchError(null);
             try {
-                const res = await api.get('/clinic/appointments');
-                const confirmed = res.data.filter((a: any) => a.status === 'confirmed');
-                const completed = res.data.filter((a: any) => a.status === 'completed');
+                // 1. Siapa yang sedang login?
+                const resMe = await api.get('/auth/me');
+                const name: string = resMe.data.full_name ?? '';
+                const role: string = resMe.data.role ?? 'doctor';
+                setDoctorName(name);
+                setDoctorRole(role);
+
+                // 2. Ambil semua appointments, filter hanya milik dokter ini
+                const resApp = await api.get('/clinic/appointments');
+                const all: any[] = resApp.data ?? [];
+
+                // Filter berdasarkan nama dokter (case-insensitive untuk toleransi typo ringan)
+                const mine = all.filter(
+                    (a) => a.doctor_name?.trim().toLowerCase() === name.trim().toLowerCase()
+                );
+
+                const confirmed = mine.filter((a) => a.status === 'confirmed');
+                const completed = mine.filter((a) => a.status === 'completed');
+
                 setTodayPatients(confirmed);
                 setStats({ todayCount: confirmed.length, completedCount: completed.length });
-            } catch { console.error('Gagal memuat dashboard dokter'); }
-            finally { setIsLoading(false); }
+            } catch (err: any) {
+                console.error('Gagal memuat dashboard dokter:', err);
+                setFetchError('Gagal memuat data. Pastikan koneksi ke server aktif.');
+            } finally {
+                setIsLoading(false);
+            }
         };
         load();
     }, []);
 
+    // ── Format waktu ──────────────────────────────────────────────────────────
     const hh = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
     const ss = now.getSeconds().toString().padStart(2, '0');
-    const tanggal = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const tanggal = now.toLocaleDateString('id-ID', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    });
+
+    // Label ramah untuk role
+    const roleLabel: Record<string, string> = {
+        doctor: 'Dokter',
+        nurse: 'Perawat / Staff Medis',
+        admin: 'Administrator',
+    };
 
     const statCards = [
         {
             label: 'Pasien Antre',
             value: stats.todayCount,
             icon: <Clock size={22} />,
-            accent: 'from-emerald-500 to-emerald-600',
-            bg: 'bg-emerald-50',
-            text: 'text-emerald-700',
-            ring: 'ring-emerald-100',
+            bg: 'bg-emerald-50', text: 'text-emerald-700', ring: 'ring-emerald-100',
         },
         {
             label: 'Selesai Diperiksa',
             value: stats.completedCount,
             icon: <CheckCircle2 size={22} />,
-            accent: 'from-teal-500 to-teal-600',
-            bg: 'bg-teal-50',
-            text: 'text-teal-700',
-            ring: 'ring-teal-100',
+            bg: 'bg-teal-50', text: 'text-teal-700', ring: 'ring-teal-100',
         },
         {
             label: 'Total Pasien',
             value: stats.todayCount + stats.completedCount,
             icon: <Users size={22} />,
-            accent: 'from-green-500 to-emerald-600',
-            bg: 'bg-green-50',
-            text: 'text-green-700',
-            ring: 'ring-green-100',
+            bg: 'bg-green-50', text: 'text-green-700', ring: 'ring-green-100',
         },
         {
             label: 'Progres Hari Ini',
@@ -85,24 +111,26 @@ export default function DoctorDashboard() {
                 ? `${Math.round((stats.completedCount / (stats.todayCount + stats.completedCount)) * 100)}%`
                 : '0%',
             icon: <TrendingUp size={22} />,
-            accent: 'from-emerald-600 to-green-700',
-            bg: 'bg-emerald-50',
-            text: 'text-emerald-800',
-            ring: 'ring-emerald-100',
+            bg: 'bg-emerald-50', text: 'text-emerald-800', ring: 'ring-emerald-100',
         },
     ];
 
     return (
         <div className="space-y-7">
 
-            {/* ══════════════════════════════════════════════════════════════
-                1. WELCOME BANNER + CLOCK
-            ══════════════════════════════════════════════════════════════ */}
+            {/* ── Error Banner ─────────────────────────────────────────────── */}
+            {fetchError && (
+                <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 text-sm font-semibold px-5 py-3 rounded-xl">
+                    <AlertCircle size={16} className="shrink-0" />
+                    {fetchError}
+                </div>
+            )}
+
+            {/* ══ 1. WELCOME BANNER + CLOCK ════════════════════════════════ */}
             <motion.div {...fadeUp(0)} className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
                 {/* Welcome — 2/3 */}
                 <div className="lg:col-span-2 relative overflow-hidden bg-gradient-to-br from-emerald-700 via-emerald-800 to-green-900 rounded-2xl p-8 shadow-xl shadow-emerald-900/20">
-                    {/* Decorative circles */}
                     <div className="absolute -top-10 -right-10 w-52 h-52 bg-white/5 rounded-full pointer-events-none" />
                     <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-white/5 rounded-full pointer-events-none" />
                     <Stethoscope size={160} className="absolute right-6 bottom-0 text-white/5 pointer-events-none" />
@@ -110,17 +138,30 @@ export default function DoctorDashboard() {
                     <div className="relative z-10">
                         <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full mb-5">
                             <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-100">Sesi Kerja Aktif</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-100">
+                                Sesi Kerja Aktif
+                            </span>
                         </div>
 
                         <h1 className="text-3xl font-black italic uppercase tracking-tight text-white leading-tight">
                             Selamat Datang,<br />
-                            <span className="text-emerald-300">dr. Septian Adi</span>
+                            {/* ↓ Nama dokter diambil dari /auth/me, bukan hardcode */}
+                            <span className="text-emerald-300">
+                                {isLoading ? '...' : (doctorName || 'Staff')}
+                            </span>
                         </h1>
+
+                        {/* Role badge kecil */}
+                        {!isLoading && doctorRole && (
+                            <span className="inline-block mt-2 text-[9px] font-black uppercase tracking-widest bg-white/10 border border-white/20 text-emerald-200 px-3 py-1 rounded-full">
+                                {roleLabel[doctorRole] ?? doctorRole}
+                            </span>
+                        )}
+
                         <p className="text-emerald-200/80 text-sm font-medium mt-3 max-w-sm">
                             Hari ini Anda memiliki{' '}
                             <span className="font-black text-white">{stats.todayCount} pasien</span>{' '}
-                            yang menunggu di antrean pemeriksaan.
+                            yang terdaftar ke nama Anda di antrean.
                         </p>
 
                         <div className="flex items-center gap-3 mt-6">
@@ -140,29 +181,22 @@ export default function DoctorDashboard() {
 
                 {/* Live Clock — 1/3 */}
                 <div className="relative overflow-hidden bg-white border border-emerald-100 rounded-2xl p-7 shadow-sm flex flex-col justify-between">
-                    {/* subtle grid pattern */}
                     <div
                         className="absolute inset-0 opacity-[0.03] pointer-events-none"
                         style={{
-                            backgroundImage: 'repeating-linear-gradient(0deg,#059669 0,#059669 1px,transparent 1px,transparent 28px),repeating-linear-gradient(90deg,#059669 0,#059669 1px,transparent 1px,transparent 28px)',
+                            backgroundImage:
+                                'repeating-linear-gradient(0deg,#059669 0,#059669 1px,transparent 1px,transparent 28px),repeating-linear-gradient(90deg,#059669 0,#059669 1px,transparent 1px,transparent 28px)',
                         }}
                     />
-
                     <div className="relative z-10">
                         <p className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.25em] mb-4 flex items-center gap-2">
                             <Clock size={11} /> Waktu Sekarang
                         </p>
-
-                        {/* Digital clock */}
                         <div className="flex items-end gap-1 leading-none">
-                            <span className="text-5xl font-black text-slate-900 tabular-nums tracking-tighter">
-                                {hh}
-                            </span>
+                            <span className="text-5xl font-black text-slate-900 tabular-nums tracking-tighter">{hh}</span>
                             <span className="text-xl font-black text-emerald-500 mb-1 tabular-nums">:{ss}</span>
                             <span className="text-sm font-black text-slate-400 mb-1.5 ml-1">WIB</span>
                         </div>
-
-                        {/* Progress bar — seconds */}
                         <div className="mt-4 h-1 w-full bg-emerald-50 rounded-full overflow-hidden">
                             <div
                                 className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-1000"
@@ -170,7 +204,6 @@ export default function DoctorDashboard() {
                             />
                         </div>
                     </div>
-
                     <div className="relative z-10 mt-5">
                         <p className="text-[11px] font-black text-slate-700 capitalize">{tanggal}</p>
                         <div className="mt-3 pt-3 border-t border-emerald-50 grid grid-cols-2 gap-2">
@@ -187,9 +220,7 @@ export default function DoctorDashboard() {
                 </div>
             </motion.div>
 
-            {/* ══════════════════════════════════════════════════════════════
-                2. STAT CARDS
-            ══════════════════════════════════════════════════════════════ */}
+            {/* ══ 2. STAT CARDS ════════════════════════════════════════════ */}
             <motion.div {...fadeUp(0.1)} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {statCards.map((card, i) => (
                     <motion.div
@@ -213,12 +244,9 @@ export default function DoctorDashboard() {
                 ))}
             </motion.div>
 
-            {/* ══════════════════════════════════════════════════════════════
-                3. PASIEN BERIKUTNYA
-            ══════════════════════════════════════════════════════════════ */}
+            {/* ══ 3. DAFTAR PASIEN HARI INI ════════════════════════════════ */}
             <motion.div {...fadeUp(0.25)} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
 
-                {/* Header */}
                 <div className="px-7 py-5 border-b border-emerald-50 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-emerald-700 text-white rounded-xl flex items-center justify-center shadow-md shadow-emerald-200">
@@ -226,10 +254,11 @@ export default function DoctorDashboard() {
                         </div>
                         <div>
                             <h3 className="text-[13px] font-black uppercase italic tracking-tight text-slate-900 leading-none">
-                                Antrian Pasien
+                                Antrian Pasien Saya
                             </h3>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                                Daftar pemeriksaan hari ini
+                                {/* Tampilkan nama dokter yang sedang login sebagai konteks */}
+                                Pasien terdaftar ke: {isLoading ? '...' : (doctorName || '—')}
                             </p>
                         </div>
                     </div>
@@ -240,7 +269,6 @@ export default function DoctorDashboard() {
                     </Link>
                 </div>
 
-                {/* List */}
                 <div className="divide-y divide-slate-50">
                     {isLoading ? (
                         <div className="py-16 text-center">
@@ -257,14 +285,12 @@ export default function DoctorDashboard() {
                                 className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-7 py-5 hover:bg-emerald-50/40 transition-all group"
                             >
                                 <div className="flex items-center gap-5">
-                                    {/* Nomor antrean */}
                                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-base shrink-0 shadow-sm border ${i === 0
                                             ? 'bg-emerald-700 text-white border-emerald-600 shadow-emerald-200'
                                             : 'bg-white text-emerald-700 border-emerald-100'
                                         }`}>
                                         {i + 1}
                                     </div>
-
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <h4 className="font-black text-slate-800 text-[13px] uppercase italic tracking-tight">
@@ -279,11 +305,13 @@ export default function DoctorDashboard() {
                                         <div className="flex items-center gap-4 mt-1">
                                             <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1.5">
                                                 <Timer size={10} className="text-emerald-500" />
-                                                {new Date(app.appointment_date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+                                                {new Date(app.appointment_date).toLocaleTimeString('id-ID', {
+                                                    hour: '2-digit', minute: '2-digit',
+                                                })} WIB
                                             </p>
                                             <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1.5">
                                                 <ClipboardList size={10} className="text-emerald-500" />
-                                                Pemeriksaan Umum
+                                                {app.service_type ?? 'Pemeriksaan Umum'}
                                             </p>
                                         </div>
                                     </div>
@@ -301,12 +329,19 @@ export default function DoctorDashboard() {
                             </motion.div>
                         ))
                     ) : (
+                        /* ── Empty state informatif ── */
                         <div className="py-20 text-center space-y-3">
                             <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto border border-emerald-100">
                                 <UserRound size={28} className="text-emerald-300" />
                             </div>
-                            <p className="font-black text-slate-400 uppercase tracking-[0.2em] text-[10px]">
-                                Belum ada pasien dikonfirmasi
+                            <p className="font-black text-slate-500 text-sm">
+                                Tidak ada pasien hari ini
+                            </p>
+                            <p className="text-[10px] text-slate-400 max-w-xs mx-auto leading-relaxed">
+                                Pasien akan muncul di sini jika Admin mendaftarkan mereka dengan nama dokter:{' '}
+                                <span className="font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                                    {doctorName || '—'}
+                                </span>
                             </p>
                         </div>
                     )}

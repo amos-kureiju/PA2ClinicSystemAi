@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from app.database.session import get_db
 from app.crud import clinic as crud
 from app.schemas import clinic as schemas
+from app.schemas.user import UserCreate, UserResponse
+from app.core import security
 from app.core.security import (
     require_admin, get_current_user,
     require_doctor_or_admin, require_nurse_or_admin,
@@ -83,16 +85,16 @@ class StaffCreateRequest(BaseModel):
 
 @router.post("/register-staff")
 def register_staff_account(
-    data: StaffCreateRequest, 
+    data: schemas.StaffCreateRequest, # Pastikan panggil dari schemas
     db: Session = Depends(get_db),
-    admin: dict = Depends(require_admin) # Hanya Admin yang bisa panggil
+    admin: dict = Depends(security.require_admin)
 ):
-    # 1. Cek apakah email sudah terdaftar di tabel users
+    # 1. Cek duplikasi
     user_exists = db.query(User).filter(User.email == data.email.lower()).first()
     if user_exists:
-        raise HTTPException(status_code=400, detail="Email sudah digunakan akun lain")
+        raise HTTPException(status_code=400, detail="Email sudah digunakan")
 
-    # 2. Buat akun di tabel USERS (Untuk Login)
+    # 2. Simpan ke tabel USERS (Untuk Login)
     new_user = User(
         email=data.email.lower(),
         full_name=data.name,
@@ -101,19 +103,21 @@ def register_staff_account(
     )
     db.add(new_user)
     
-    # 3. Jika rolenya adalah doctor, buat juga di tabel DOCTORS (Untuk Profil Web)
+    # 3. Simpan ke tabel DOCTORS (Hanya jika role-nya doctor)
     if data.role == "doctor":
         new_doctor = Doctor(
             name=data.name,
             specialty=data.specialty,
             role="doctor",
-            email=data.email.lower()
+            email=data.email.lower(),
+            # Inisialisasi jadwal kosong agar tidak error null nantinya
+            schedules=[] 
         )
         db.add(new_doctor)
 
     try:
         db.commit()
-        return {"message": f"Berhasil mendaftarkan {data.role}: {data.name}"}
+        return {"message": f"Berhasil! Akun {data.role} untuk {data.name} aktif."}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

@@ -9,6 +9,7 @@ class UserBase(BaseModel):
 # Data yang dikirim saat DAFTAR (Tanpa Role!)
 class UserCreate(UserBase):
     password: str
+    role: str
 
 # Data yang dikembalikan setelah berhasil (Ada Role & ID)
 class UserResponse(UserBase):

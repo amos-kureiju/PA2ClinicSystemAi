@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional, List, Any
 
@@ -11,6 +11,13 @@ class DoctorBase(BaseModel):
     phone: Optional[str] = ""
     email: Optional[str] = ""
     experience: Optional[str] = ""
+
+class StaffCreateRequest(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    role: str # 'doctor' atau 'nurse'
+    specialty: Optional[str] = "Umum" # Diperlukan jika role adalah doctor
 
 class DoctorResponse(DoctorBase):
     id: int
