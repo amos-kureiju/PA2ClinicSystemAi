@@ -74,6 +74,50 @@ def delete_doctor(
     db.commit()
     return {"message": "Staff dihapus"}
 
+class StaffCreateRequest(BaseModel):
+    full_name: str
+    email: str
+    password: str
+    specialty: str
+    role: str  # "doctor" | "nurse" | "admin"
+
+@router.post("/register-staff")
+def register_staff_account(
+    data: StaffCreateRequest, 
+    db: Session = Depends(get_db),
+    admin: dict = Depends(require_admin) # Hanya Admin yang bisa panggil
+):
+    # 1. Cek apakah email sudah terdaftar di tabel users
+    user_exists = db.query(User).filter(User.email == data.email.lower()).first()
+    if user_exists:
+        raise HTTPException(status_code=400, detail="Email sudah digunakan akun lain")
+
+    # 2. Buat akun di tabel USERS (Untuk Login)
+    new_user = User(
+        email=data.email.lower(),
+        full_name=data.name,
+        hashed_password=security.get_password_hash(data.password),
+        role=data.role
+    )
+    db.add(new_user)
+    
+    # 3. Jika rolenya adalah doctor, buat juga di tabel DOCTORS (Untuk Profil Web)
+    if data.role == "doctor":
+        new_doctor = Doctor(
+            name=data.name,
+            specialty=data.specialty,
+            role="doctor",
+            email=data.email.lower()
+        )
+        db.add(new_doctor)
+
+    try:
+        db.commit()
+        return {"message": f"Berhasil mendaftarkan {data.role}: {data.name}"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ==========================================
 # UPLOAD FOTO (VALIDASI KETAT)   ✅ KRITIS #2
 # ==========================================
