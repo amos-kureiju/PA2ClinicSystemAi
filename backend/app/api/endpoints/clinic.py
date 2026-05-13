@@ -359,7 +359,8 @@ def get_patients(
     current_user: dict = Depends(require_staff_or_admin)
 ):
     # Mengambil semua user dengan role patient
-    patients = db.query(User).filter(User.role == "patient").all()
+    from app.models.patient import Patient
+    return db.query(Patient).all()
     
     # Format data agar rapi untuk frontend
     return [
@@ -440,7 +441,7 @@ def get_doctor_schedule(
 @router.get("/appointments/my-today")
 def get_doctor_today(
     # ✅ PERBAIKAN 1: Gunakan current_user untuk ambil email yang sedang login
-    current_user: dict = Depends(get_current_user), 
+    current_user: dict = Depends(require_doctor_or_admin),
     db: Session = Depends(get_db)
 ):
     """Dokter melihat pasien yang ditujukan kepadanya HANYA untuk hari ini."""

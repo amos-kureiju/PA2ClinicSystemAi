@@ -49,7 +49,7 @@ export default function DoctorDashboard() {
                 setDoctorRole(role);
 
                 // 2. Ambil semua appointments, filter hanya milik dokter ini
-                const resApp = await api.get('/clinic/appointments');
+                const resApp = await api.get('/clinic/appointments/my-patients');
                 const all: any[] = resApp.data ?? [];
 
                 // Filter berdasarkan nama dokter (case-insensitive untuk toleransi typo ringan)
