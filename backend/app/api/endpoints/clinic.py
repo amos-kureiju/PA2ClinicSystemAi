@@ -435,22 +435,34 @@ def get_doctor_schedule(
 
 @router.get("/appointments/my-today")
 def get_doctor_today(
-    current_user: dict = Depends(require_doctor_or_admin),
+    # ✅ PERBAIKAN 1: Gunakan current_user untuk ambil email yang sedang login
+    current_user: dict = Depends(get_current_user), 
     db: Session = Depends(get_db)
 ):
-    """Dokter melihat pasien yang datang hari ini."""
+    """Dokter melihat pasien yang ditujukan kepadanya HANYA untuk hari ini."""
+    
+    # 1. Cari data diri di tabel User berdasarkan email dari Token Login
     user = db.query(User).filter(User.email == current_user["email"]).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User tidak ditemukan")
-    
+        raise HTTPException(status_code=404, detail="Data User tidak ditemukan")
+
+    # 2. Tentukan rentang waktu hari ini (00:00 sampai 23:59)
     today_start = datetime.combine(date.today(), datetime.min.time())
     today_end = datetime.combine(date.today(), datetime.max.time())
-    
+
+    # 3. Filter Query yang lebih Akurat
     appointments = db.query(Appointment).filter(
+        # A. Filter berdasarkan nama dokter (Harus sama persis dengan full_name di tabel User)
         Appointment.doctor_name == user.full_name,
+        
+        # B. Filter hanya yang jadwalnya hari ini
         Appointment.appointment_date >= today_start,
-        Appointment.appointment_date <= today_end
+        Appointment.appointment_date <= today_end,
+        
+        # Dokter tidak perlu melihat yang masih 'pending' agar tidak bingung
+        Appointment.status == "confirmed" 
     ).order_by(Appointment.appointment_date.asc()).all()
+
     return appointments
 
 

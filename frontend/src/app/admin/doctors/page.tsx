@@ -4,12 +4,11 @@ import api from '@/services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     UserPlus, Trash2, Edit3, Save, X,
-    UserCog, Camera, Upload, CheckCircle2,
+    UserCog, Camera, Upload,
     Search, Stethoscope, BriefcaseMedical, Loader2,
-    MapPin, Clock, CalendarDays, Sparkles, ShieldCheck,
-    Phone, Mail, ChevronRight, Eye
+    MapPin, Clock, CalendarDays,
+    Phone, Mail, Eye, EyeOff, KeyRound, ShieldCheck
 } from 'lucide-react';
-import Link from 'next/link';
 
 export default function ManageDoctors() {
     const [doctors, setDoctors] = useState([]);
@@ -20,6 +19,7 @@ export default function ManageDoctors() {
     const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -31,12 +31,13 @@ export default function ManageDoctors() {
         role: 'doctor',
         phone: '',
         email: '',
+        password: '',         // ← BARU: Password login sementara
         experience: '',
         schedules: [{ day: 'Senin', time: '08:00 - 16:00', loc: 'Nauli Balige' }]
     });
 
     // Filter doctors based on search
-    const filteredDoctors = doctors.filter(doc =>
+    const filteredDoctors = doctors.filter((doc: any) =>
         doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         doc.specialty.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -49,14 +50,13 @@ export default function ManageDoctors() {
     };
 
     const removeScheduleRow = (index: number) => {
-        const updatedSchedules = formData.schedules.filter((_, i) => i !== index);
-        setFormData({ ...formData, schedules: updatedSchedules });
+        setFormData({ ...formData, schedules: formData.schedules.filter((_, i) => i !== index) });
     };
 
     const updateScheduleValue = (index: number, field: string, value: string) => {
-        const updatedSchedules = [...formData.schedules];
-        updatedSchedules[index] = { ...updatedSchedules[index], [field]: value };
-        setFormData({ ...formData, schedules: updatedSchedules });
+        const updated = [...formData.schedules];
+        updated[index] = { ...updated[index], [field]: value };
+        setFormData({ ...formData, schedules: updated });
     };
 
     useEffect(() => { fetchDoctors(); }, []);
@@ -81,6 +81,10 @@ export default function ManageDoctors() {
         e.preventDefault();
         if (!formData.name || !formData.specialty) return alert("Nama dan Spesialisasi wajib diisi!");
 
+        // Validasi password hanya saat tambah baru
+        if (!editingId && !formData.password) return alert("Password sementara wajib diisi untuk akun baru!");
+        if (!editingId && !formData.email) return alert("Email Login wajib diisi untuk akun baru!");
+
         setIsSaving(true);
         try {
             let finalPhotoUrl = formData.photo_url;
@@ -94,18 +98,22 @@ export default function ManageDoctors() {
                 finalPhotoUrl = resUpload.data.url;
             }
 
-            const dataToSave = {
+            // Saat edit: JANGAN kirim password (kecuali diisi)
+            const dataToSave: any = {
                 ...formData,
                 photo_url: finalPhotoUrl,
                 schedules: formData.schedules
             };
 
             if (editingId) {
+                // Edit: hapus password dari payload jika kosong
+                if (!formData.password) delete dataToSave.password;
                 await api.patch(`/clinic/doctors/${editingId}`, dataToSave);
                 alert("✅ Data Berhasil Diperbarui!");
             } else {
-                await api.post('/clinic/doctors', dataToSave);
-                alert("✅ Staff Baru Berhasil Didaftarkan!");
+                // Tambah baru: gunakan endpoint register-staff agar akun login ikut dibuat
+                await api.post('/clinic/register-staff', dataToSave);
+                alert("✅ Akun Staff Berhasil Dibuat! Informasikan email & password ke staff terkait.");
             }
 
             resetForm();
@@ -119,12 +127,13 @@ export default function ManageDoctors() {
         }
     };
 
-    const handleEdit = (doc: any, e: React.MouseEvent) => {
-        e.stopPropagation(); // Mencegah card click terbuka saat klik edit
+    const handleEdit = (doc: any, e?: React.MouseEvent) => {
+        e?.stopPropagation();
         setFormData({
             ...doc,
             phone: doc.phone || '',
             email: doc.email || '',
+            password: '',           // ← Kosongkan password saat edit (keamanan)
             experience: doc.experience || '',
             schedules: doc.schedules || []
         });
@@ -139,7 +148,7 @@ export default function ManageDoctors() {
     };
 
     const handleDelete = async (id: number, e: React.MouseEvent) => {
-        e.stopPropagation(); // Mencegah card click terbuka saat klik hapus
+        e.stopPropagation();
         if (confirm('Hapus staff ini secara permanen dari sistem?')) {
             await api.delete(`/clinic/doctors/${id}`);
             fetchDoctors();
@@ -154,26 +163,30 @@ export default function ManageDoctors() {
             role: 'doctor',
             phone: '',
             email: '',
+            password: '',
             experience: '',
             schedules: [{ day: 'Senin', time: '08:00 - 16:00', loc: 'Nauli Balige' }]
         });
         setSelectedFile(null);
         setPreviewUrl(null);
         setEditingId(null);
+        setShowPassword(false);
         setIsFormOpen(false);
     };
 
+    // Label badge untuk role
+    const roleBadge = (role: string) =>
+        role === 'doctor'
+            ? { label: '🩺 Dokter Spesialis', className: 'bg-emerald-50 text-emerald-700' }
+            : { label: '🚑 Perawat / Staff', className: 'bg-blue-50 text-blue-700' };
+
     return (
         <div className="space-y-6 pb-20">
-            {/* Header Section */}
+            {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
-                        Medical Team
-                    </h1>
-                    <p className="text-sm text-slate-400 mt-0.5">
-                        Kelola data dokter dan staff medis
-                    </p>
+                    <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Medical Team</h1>
+                    <p className="text-sm text-slate-400 mt-0.5">Kelola data & akun login dokter dan staff medis</p>
                 </div>
                 <button
                     onClick={() => setIsFormOpen(true)}
@@ -195,7 +208,7 @@ export default function ManageDoctors() {
                 />
             </div>
 
-            {/* Doctors Grid - Card seperti referensi */}
+            {/* Doctors Grid */}
             {isLoading ? (
                 <div className="flex justify-center py-20">
                     <Loader2 className="animate-spin text-emerald-500" size={40} />
@@ -211,7 +224,6 @@ export default function ManageDoctors() {
                             onClick={() => handleDetail(doctor)}
                             className="bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer"
                         >
-                            {/* Foto Dokter - Lebih Tinggi (aspect 4/3) */}
                             <div className="aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
                                 <img
                                     src={doctor.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doctor.name}`}
@@ -219,18 +231,29 @@ export default function ManageDoctors() {
                                     alt={doctor.name}
                                 />
                             </div>
-
-                            {/* Info Dokter */}
                             <div className="p-4">
-                                <h3 className="text-base font-bold text-slate-800">{doctor.name}</h3>
-                                <p className="text-xs text-emerald-600 font-medium mt-0.5">{doctor.specialty}</p>
+                                <div className="flex items-start justify-between gap-2">
+                                    <div>
+                                        <h3 className="text-base font-bold text-slate-800">{doctor.name}</h3>
+                                        <p className="text-xs text-emerald-600 font-medium mt-0.5">{doctor.specialty}</p>
+                                    </div>
+                                    {/* Role badge kecil */}
+                                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${roleBadge(doctor.role).className}`}>
+                                        {doctor.role === 'doctor' ? '🩺' : '🚑'}
+                                    </span>
+                                </div>
 
-                                {/* Info tambahan */}
                                 <div className="mt-3 space-y-1.5">
                                     {doctor.experience && (
                                         <div className="flex items-center gap-2 text-xs text-slate-500">
                                             <BriefcaseMedical size={12} className="text-slate-400" />
-                                            <span>{doctor.experience} tahun</span>
+                                            <span>{doctor.experience} tahun pengalaman</span>
+                                        </div>
+                                    )}
+                                    {doctor.email && (
+                                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                                            <Mail size={12} className="text-slate-400" />
+                                            <span className="truncate">{doctor.email}</span>
                                         </div>
                                     )}
                                     {doctor.schedules && doctor.schedules.length > 0 && (
@@ -241,7 +264,6 @@ export default function ManageDoctors() {
                                     )}
                                 </div>
 
-                                {/* Tombol Edit & Hapus */}
                                 <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
                                     <button
                                         onClick={(e) => handleEdit(doctor, e)}
@@ -272,7 +294,8 @@ export default function ManageDoctors() {
                     <p className="text-sm text-slate-400 mt-1">Klik tombol "Tambah Staff" untuk menambahkan</p>
                 </div>
             )}
-            {/* DETAIL MODAL - Fullscreen blur yang rapi */}
+
+            {/* DETAIL MODAL */}
             <AnimatePresence>
                 {isDetailOpen && selectedDoctor && (
                     <div
@@ -287,7 +310,6 @@ export default function ManageDoctors() {
                             className="bg-white w-[90%] max-w-md rounded-2xl shadow-2xl relative overflow-hidden max-h-[90vh] overflow-y-auto"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            {/* Foto Header - Persegi Panjang */}
                             <div className="relative h-56 w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
                                 <img
                                     src={selectedDoctor.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedDoctor.name}`}
@@ -300,33 +322,29 @@ export default function ManageDoctors() {
                                 >
                                     <X size={18} />
                                 </button>
+                                {/* Role tag di foto */}
+                                <span className={`absolute bottom-4 left-4 text-xs font-semibold px-3 py-1 rounded-full ${roleBadge(selectedDoctor.role).className}`}>
+                                    {roleBadge(selectedDoctor.role).label}
+                                </span>
                             </div>
 
-                            {/* Body Detail */}
                             <div className="p-6">
                                 <h2 className="text-xl font-bold text-slate-800">{selectedDoctor.name}</h2>
                                 <p className="text-sm text-emerald-600 font-medium mt-0.5">{selectedDoctor.specialty}</p>
 
                                 <div className="mt-5 space-y-3">
-                                    <div className="flex items-center gap-3 text-sm">
-                                        <UserCog size={16} className="text-slate-400" />
-                                        <span className="text-slate-600">{selectedDoctor.role === 'doctor' ? 'Dokter Spesialis' : 'Staff Medis'}</span>
-                                    </div>
-
                                     {selectedDoctor.experience && (
                                         <div className="flex items-center gap-3 text-sm">
                                             <BriefcaseMedical size={16} className="text-slate-400" />
                                             <span className="text-slate-600">{selectedDoctor.experience} tahun pengalaman</span>
                                         </div>
                                     )}
-
                                     {selectedDoctor.phone && (
                                         <div className="flex items-center gap-3 text-sm">
                                             <Phone size={16} className="text-slate-400" />
                                             <span className="text-slate-600">{selectedDoctor.phone}</span>
                                         </div>
                                     )}
-
                                     {selectedDoctor.email && (
                                         <div className="flex items-center gap-3 text-sm">
                                             <Mail size={16} className="text-slate-400" />
@@ -335,7 +353,12 @@ export default function ManageDoctors() {
                                     )}
                                 </div>
 
-                                {/* Jadwal Lengkap */}
+                                {/* Login Info hint */}
+                                <div className="mt-4 flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs px-4 py-2.5 rounded-xl">
+                                    <ShieldCheck size={14} />
+                                    <span>Akun login aktif — staff dapat masuk dengan email di atas</span>
+                                </div>
+
                                 {selectedDoctor.schedules && selectedDoctor.schedules.length > 0 && (
                                     <div className="mt-5 pt-4 border-t border-slate-100">
                                         <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -346,7 +369,7 @@ export default function ManageDoctors() {
                                                 <div key={idx} className="flex items-center gap-2 text-sm text-slate-600">
                                                     <Clock size={14} className="text-slate-400" />
                                                     <span><span className="font-medium">{schedule.day}</span>, {schedule.time}</span>
-                                                    <span className="text-xs text-slate-400">- {schedule.loc}</span>
+                                                    <span className="text-xs text-slate-400">— {schedule.loc}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -357,7 +380,7 @@ export default function ManageDoctors() {
                                     <button
                                         onClick={() => {
                                             setIsDetailOpen(false);
-                                            handleEdit(selectedDoctor, new MouseEvent('click') as any);
+                                            handleEdit(selectedDoctor);
                                         }}
                                         className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-all"
                                     >
@@ -376,7 +399,7 @@ export default function ManageDoctors() {
                 )}
             </AnimatePresence>
 
-            {/* FORM MODAL (tetap sama) */}
+            {/* FORM MODAL — Tambah / Edit Staff */}
             <AnimatePresence>
                 {isFormOpen && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
@@ -386,13 +409,16 @@ export default function ManageDoctors() {
                             exit={{ scale: 0.95, opacity: 0, y: 20 }}
                             className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl relative max-h-[90vh] overflow-y-auto"
                         >
-                            <div className="sticky top-0 bg-white border-b border-slate-100 px-8 py-6 flex justify-between items-center">
+                            {/* Sticky Header */}
+                            <div className="sticky top-0 bg-white border-b border-slate-100 px-8 py-6 flex justify-between items-center z-10">
                                 <div>
                                     <h2 className="text-xl font-black text-slate-800">
-                                        {editingId ? 'Edit Staff Medis' : 'Tambah Staff Baru'}
+                                        {editingId ? 'Edit Staff Medis' : 'Buat Akun Staff Baru'}
                                     </h2>
                                     <p className="text-xs text-slate-400 mt-0.5">
-                                        Isi informasi lengkap staff medis
+                                        {editingId
+                                            ? 'Perbarui data staff — kosongkan password jika tidak ingin mengubahnya'
+                                            : 'Data profil + akun login akan dibuat sekaligus'}
                                     </p>
                                 </div>
                                 <button
@@ -404,7 +430,8 @@ export default function ManageDoctors() {
                             </div>
 
                             <form onSubmit={handleSave} className="p-8 space-y-6">
-                                {/* Upload Foto */}
+
+                                {/* ── Upload Foto ── */}
                                 <div className="flex flex-col items-center">
                                     <div className="relative group cursor-pointer">
                                         <div className="w-32 h-32 rounded-xl overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center shadow-md">
@@ -414,91 +441,144 @@ export default function ManageDoctors() {
                                                 <Camera size={32} className="text-slate-400" />
                                             )}
                                         </div>
-                                        <div className="absolute inset-0 rounded-xl bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                        <div className="absolute inset-0 rounded-xl bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                             <Upload size={20} className="text-white" />
                                         </div>
                                         <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer rounded-xl" />
                                     </div>
-                                    <p className="text-[10px] text-slate-400 mt-2">Klik untuk upload foto (persegi panjang)</p>
+                                    <p className="text-[10px] text-slate-400 mt-2">Klik untuk upload foto staff</p>
                                 </div>
 
-                                <div className="grid md:grid-cols-2 gap-5">
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-600">Nama Lengkap</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Dr. John Doe"
-                                            className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
-                                            value={formData.name}
-                                            onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                            required
-                                        />
+                                {/* ── Section: Data Profil ── */}
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Data Profil</p>
+                                    <div className="grid md:grid-cols-2 gap-5">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold text-slate-600">Nama Lengkap *</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Dr. John Doe, Sp.A"
+                                                className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+                                                value={formData.name}
+                                                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold text-slate-600">Spesialisasi *</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Spesialis Gigi Anak"
+                                                className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+                                                value={formData.specialty}
+                                                onChange={e => setFormData({ ...formData, specialty: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold text-slate-600">Pengalaman (Tahun)</label>
+                                            <input
+                                                type="text"
+                                                placeholder="5"
+                                                className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+                                                value={formData.experience}
+                                                onChange={e => setFormData({ ...formData, experience: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold text-slate-600">Nomor Telepon</label>
+                                            <input
+                                                type="text"
+                                                placeholder="+62 812 3456 7890"
+                                                className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+                                                value={formData.phone}
+                                                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ── Section: Akun Login ── */}
+                                <div className="border-t border-slate-100 pt-5">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Akun Login Staff</p>
+                                    <p className="text-xs text-slate-400 mb-4">
+                                        {editingId
+                                            ? 'Kosongkan password jika tidak ingin mengubahnya.'
+                                            : 'Buat kredensial agar staff dapat login ke sistem.'}
+                                    </p>
+
+                                    <div className="grid md:grid-cols-2 gap-5">
+                                        {/* Email Login */}
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold text-slate-600">
+                                                Email Login {!editingId && <span className="text-red-400">*</span>}
+                                            </label>
+                                            <div className="relative">
+                                                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                                <input
+                                                    type="email"
+                                                    placeholder="dokter@nauli.com"
+                                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+                                                    value={formData.email}
+                                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                                    required={!editingId}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Password */}
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold text-slate-600">
+                                                Password Sementara {!editingId && <span className="text-red-400">*</span>}
+                                            </label>
+                                            <div className="relative">
+                                                <KeyRound size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                                <input
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    placeholder={editingId ? '(tidak berubah jika dikosongkan)' : '••••••••'}
+                                                    className="w-full pl-10 pr-11 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+                                                    value={formData.password}
+                                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                                    required={!editingId}
+                                                    minLength={!editingId ? 6 : undefined}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                                >
+                                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-600">Tipe Jabatan</label>
+                                    {/* Dropdown Role — Full width */}
+                                    <div className="mt-5 space-y-1.5">
+                                        <label className="text-xs font-semibold text-slate-600">Berikan Akses Sebagai</label>
                                         <select
-                                            className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-4 py-3 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none cursor-pointer transition-all appearance-none"
                                             value={formData.role}
                                             onChange={e => setFormData({ ...formData, role: e.target.value })}
                                         >
-                                            <option value="doctor">🩺 Dokter Spesialis</option>
-                                            <option value="nurse">🚑 Perawat / Staff Medis</option>
+                                            <option value="doctor">🩺 Dokter (Akses Rekam Medis Pasiennya)</option>
+                                            <option value="nurse">🚑 Perawat / Staff (Akses Antrean & Layanan)</option>
                                         </select>
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-600">Spesialisasi</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Spesialis Gigi Anak"
-                                            className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
-                                            value={formData.specialty}
-                                            onChange={e => setFormData({ ...formData, specialty: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-600">Pengalaman (Tahun)</label>
-                                        <input
-                                            type="text"
-                                            placeholder="5+ tahun"
-                                            className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
-                                            value={formData.experience}
-                                            onChange={e => setFormData({ ...formData, experience: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-600">Nomor Telepon</label>
-                                        <input
-                                            type="text"
-                                            placeholder="+62 812 3456 7890"
-                                            className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
-                                            value={formData.phone}
-                                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-600">Email</label>
-                                        <input
-                                            type="email"
-                                            placeholder="doctor@nauli.com"
-                                            className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
-                                            value={formData.email}
-                                            onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                        />
+                                        <p className="text-[10px] text-slate-400 mt-1">
+                                            Dokter hanya melihat pasien yang terdaftar ke namanya. Perawat melihat seluruh antrean.
+                                        </p>
                                     </div>
                                 </div>
 
-                                {/* Jadwal Section */}
+                                {/* ── Section: Jadwal ── */}
                                 <div className="border-t border-slate-100 pt-5">
                                     <div className="flex justify-between items-center mb-4">
-                                        <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                                            <CalendarDays size={16} /> Jadwal Praktek
-                                        </h4>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Jadwal Praktek</p>
+                                        </div>
                                         <button
                                             type="button"
                                             onClick={addScheduleRow}
@@ -520,7 +600,7 @@ export default function ManageDoctors() {
                                                 />
                                                 <input
                                                     type="text"
-                                                    placeholder="Jam"
+                                                    placeholder="08:00 - 16:00"
                                                     className="bg-white px-3 py-2 rounded-lg text-sm border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none"
                                                     value={sch.time}
                                                     onChange={(e) => updateScheduleValue(index, 'time', e.target.value)}
@@ -535,7 +615,7 @@ export default function ManageDoctors() {
                                                 <button
                                                     type="button"
                                                     onClick={() => removeScheduleRow(index)}
-                                                    className="text-red-400 hover:text-red-600 transition-colors p-2"
+                                                    className="text-red-400 hover:text-red-600 transition-colors p-2 flex items-center justify-center"
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
@@ -544,12 +624,18 @@ export default function ManageDoctors() {
                                     </div>
                                 </div>
 
+                                {/* Submit */}
                                 <button
+                                    type="submit"
                                     disabled={isSaving}
-                                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-4 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-4 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-60"
                                 >
-                                    {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                                    {editingId ? 'Update Data Staff' : 'Simpan Staff'}
+                                    {isSaving
+                                        ? <><Loader2 className="animate-spin" size={18} /> Menyimpan...</>
+                                        : editingId
+                                            ? <><Save size={18} /> Update Data Staff</>
+                                            : <><UserPlus size={18} /> Buat Akun Staff Sekarang</>
+                                    }
                                 </button>
                             </form>
                         </motion.div>
