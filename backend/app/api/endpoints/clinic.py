@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, File, UploadFile
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, date
@@ -396,9 +397,11 @@ def get_doctor_stats(
     # Ambil data dokter yang sedang login
     user = _get_user_by_token(current_user, db)
     today = date.today()
+
+    my_name = user.full_name.strip().lower() 
     
     # Base query: Pasien yang memanggil nama dokter ini
-    base = db.query(Appointment).filter(Appointment.doctor_name == user.full_name)
+    base = db.query(Appointment).filter(func.lower(Appointment.doctor_name) == my_name)
 
     return {
         "doctor_name": user.full_name,
@@ -620,22 +623,27 @@ def get_patients(
     db: Session = Depends(get_db),
     current_user: dict = Depends(require_staff_or_admin),
 ):
-    # FIX BUG #2: hapus dead code, kembalikan data yang benar
     from app.models.patient import Patient
     patients = db.query(Patient).all()
-    return [
-        {
-            "id":                 p.id,
-            "full_name":          p.full_name,
-            "email":              p.email,
-            "created_at":         getattr(p, "created_at", None),
+    
+    output = []
+    for p in patients:
+        # Gabungka nama
+        full_name = f"{p.first_name} {p.last_name or ''}".strip()
+        
+        output.append({
+            "id": p.id,
+            "full_name": full_name, 
+            "first_name": p.first_name,
+            "last_name": p.last_name,
+            "email": p.email,
+            "phone_number": p.phone_number,
+            "created_at": p.created_at,
             "total_appointments": db.query(Appointment)
-                                    .filter(Appointment.patient_name == p.full_name)
+                                    .filter(func.lower(Appointment.patient_name) == full_name.lower())
                                     .count(),
-        }
-        for p in patients
-    ]
-
+        })
+    return output
 
 @router.patch("/patients/{p_id}")
 def update_patient(
@@ -692,8 +700,12 @@ def create_medical_record(
     try:
         new_record = MedicalRecord(**data.model_dump())
         db.add(new_record)
+
+        appt = db.query(Appointment).filter(Appointment.id == data.appointment_id).first()
+        if appt:
+            appt.status = "completed"
         db.commit()
-        return {"message": "Rekam medis tersimpan"}
+        return {"message": "Rekam medis tersimpan & Pemeriksaan selesai"}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
