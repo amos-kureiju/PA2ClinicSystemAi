@@ -129,7 +129,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
 
                 {/* Logo */}
                 <div className="flex items-center gap-3 px-4 py-5 border-b border-teal-50/50 shrink-0">
-                    <div className="w-8 h-8 bg-teal-700 rounded-lg flex items-center justify-center
+                    <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center
                                     text-white shadow-lg shadow-teal-200 shrink-0">
                         <HeartPulse size={16} />
                     </div>
