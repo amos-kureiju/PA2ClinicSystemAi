@@ -117,20 +117,20 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
     );
 
     return (
-        <div className="min-h-screen bg-[#F0FAF5] flex font-sans">
+        <div className="min-h-screen bg-[#EDF5F2] flex font-sans">
 
             {/* ═══════════════════ SIDEBAR ═══════════════════════════════════ */}
             <aside className={`
                 fixed inset-y-0 left-0 z-50
-                bg-white border-r border-teal-50/50 shadow-sm
+                bg-white border-r border-emerald-100/60 shadow-sm
                 flex flex-col transition-all duration-300
                 ${isSidebarOpen ? 'w-[240px]' : 'w-[72px]'}
             `}>
 
                 {/* Logo */}
-                <div className="flex items-center gap-3 px-4 py-5 border-b border-teal-50/50 shrink-0">
-                    <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center
-                                    text-white shadow-lg shadow-teal-200 shrink-0">
+                <div className="flex items-center gap-3 px-4 py-5 border-b border-emerald-100/50 shrink-0">
+                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg
+                flex items-center justify-center text-white shadow-lg shadow-emerald-200 shrink-0">
                         <HeartPulse size={16} />
                     </div>
                     <AnimatePresence>
@@ -144,7 +144,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                                 <p className="text-base font-black tracking-tighter text-slate-800 leading-none">
                                     Klinik.<span className="text-teal-600">AI</span>
                                 </p>
-                                <p className="text-[9px] text-teal-600 font-bold uppercase tracking-widest mt-0.5">
+                                <p className="text-[9px] text-emerald-600 font-bold uppercase tracking-widest mt-0.5">
                                     Nurse System
                                 </p>
                             </motion.div>
@@ -159,12 +159,12 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="mx-3 mt-4 mb-2 p-3 bg-teal-50/40 rounded-xl border border-teal-100/50 overflow-hidden"
+                            className="mx-3 mt-4 mb-2 p-3 bg-emerald-50/40 rounded-xl border border-emerald-100/60 overflow-hidden"
                         >
-                            <p className="text-[10px] font-black text-teal-900 uppercase leading-none">
+                            <p className="text-[10px] font-black text-slate-800 uppercase leading-none">
                                 Nauli Dental Care
                             </p>
-                            <p className="text-[9px] text-teal-600 font-bold truncate mt-1 italic opacity-70">
+                            <p className="text-[9px] text-emerald-600 font-bold truncate mt-1 italic opacity-70">
                                 {nurseName}
                             </p>
                         </motion.div>
@@ -174,7 +174,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                 {/* Navigation */}
                 <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto py-2">
                     {isSidebarOpen && (
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] px-3 mb-2 opacity-60">
+                        <p className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em] px-3 mb-2">
                             Nurse Menu
                         </p>
                     )}
@@ -186,15 +186,15 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                                     flex items-center gap-2.5 px-3 py-2 rounded-xl
                                     transition-all relative group
                                     ${isActive
-                                        ? 'bg-teal-700 text-white shadow-md shadow-teal-200'
-                                        : 'text-slate-600 hover:bg-teal-50/50 hover:text-teal-700'
+                                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200'
+                                    : 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'
                                     }
                                 `}>
                                     {/* Active indicator */}
                                     {isActive && (
                                         <motion.div
                                             layoutId="nurse-sidebar-line"
-                                            className="absolute -left-1 w-1 h-4 bg-teal-700 rounded-full"
+                                            className="absolute -left-1 w-1 h-4 bg-emerald-600 rounded-full"
                                         />
                                     )}
 
@@ -205,7 +205,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                                     `}>
                                         <item.icon
                                             size={16}
-                                            className={isActive ? 'text-white' : 'text-teal-600'}
+                                            className={isActive ? 'text-white' : 'text-emerald-600'}
                                         />
                                     </div>
 
@@ -225,7 +225,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
 
                                     {/* Tooltip saat sidebar kecil */}
                                     {!isSidebarOpen && (
-                                        <div className="absolute left-full ml-3 px-3 py-1.5 bg-teal-900 text-white
+                                        <div className="absolute left-full ml-3 px-3 py-1.5 bg-emerald-900 text-white
                                                         text-[11px] font-bold rounded-lg opacity-0 group-hover:opacity-100
                                                         pointer-events-none whitespace-nowrap transition-opacity z-50 shadow-lg">
                                             {item.label}
@@ -238,7 +238,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                 </nav>
 
                 {/* Logout */}
-                <div className="p-3 border-t border-teal-50/50 shrink-0">
+                <div className="p-3 border-t border-emerald-100/50 shrink-0">
                     <button
                         onClick={handleLogout}
                         title={!isSidebarOpen ? 'Logout' : undefined}
@@ -262,7 +262,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
             `}>
 
                 {/* ────────────────── HEADER ────────────────────────────────── */}
-                <header className="h-14 bg-white/80 backdrop-blur-md border-b border-teal-50/50
+                <header className="h-14 bg-white/80 backdrop-blur-md border-b border-emerald-100/50
                                    px-6 flex items-center justify-between sticky top-0 z-40 shrink-0">
 
                     {/* Kiri: toggle sidebar + judul */}
@@ -275,7 +275,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                             <Menu size={18} />
                         </button>
                         <h2 className="text-[12px] font-black text-slate-800 tracking-widest
-                                       leading-none uppercase italic border-l-2 border-teal-600 pl-3">
+                                       leading-none uppercase italic border-l-2 border-emerald-500 pl-3">
                             {menuItems.find(i => i.href === pathname)?.label || 'Dashboard'}
                         </h2>
                     </div>
@@ -289,8 +289,8 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                                 onClick={() => { setIsNotifOpen(v => !v); setIsProfileOpen(false); }}
                                 className={`relative p-2 rounded-lg transition-all duration-200
                                     ${isNotifOpen
-                                        ? 'bg-teal-800 text-white shadow-md shadow-teal-900/20'
-                                        : 'text-slate-400 hover:text-white hover:bg-teal-800 hover:shadow-md'
+                                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/20'
+                                    : 'text-slate-400 hover:text-white hover:bg-emerald-600 hover:shadow-md'
                                     }`}
                             >
                                 <BellRing size={16} />
@@ -425,7 +425,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                             </AnimatePresence>
                         </button>
 
-                        <div className="h-5 w-[1px] bg-teal-100 mx-1" />
+                        <div className="h-5 w-[1px] bg-emerald-100 mx-1" />
 
                         {/* ════ PROFILE BUTTON ════════════════════════════ */}
                         <div className="relative" ref={profileRef}>
@@ -434,13 +434,13 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                                 className={`flex items-center gap-2.5 px-3 py-2 rounded-lg
                                             transition-all duration-200 group
                                     ${isProfileOpen
-                                        ? 'bg-teal-800 shadow-lg shadow-teal-900/20'
-                                        : 'hover:bg-teal-800 hover:shadow-md hover:shadow-teal-900/10'
+                                    ? 'bg-emerald-600 shadow-lg shadow-emerald-900/20'
+                                    : 'hover:bg-emerald-600 hover:shadow-md hover:shadow-emerald-900/10'
                                     }`}
                             >
                                 {/* Avatar */}
                                 <div className="relative shrink-0 transition-transform active:scale-90 group-hover:scale-105">
-                                    <div className="w-8 h-8 rounded-lg bg-teal-700 border-2 border-white/20
+                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 border-2 border-white/20
                                                     shadow-sm flex items-center justify-center">
                                         <HeartPulse size={15} className="text-white" />
                                     </div>
@@ -455,7 +455,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                                         {nurseName}
                                     </p>
                                     <p className={`text-[9px] font-bold tracking-widest mt-0.5 uppercase transition-colors
-                                        ${isProfileOpen ? 'text-teal-200' : 'text-teal-600 group-hover:text-teal-300'}`}>
+                                        ${isProfileOpen ? 'text-emerald-200' : 'text-emerald-600 group-hover:text-emerald-300'}`}>
                                         Perawat
                                     </p>
                                 </div>
@@ -481,7 +481,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                                                    shadow-xl border border-teal-100/30 overflow-hidden z-50"
                                     >
                                         {/* Header gradient */}
-                                        <div className="bg-gradient-to-r from-teal-700 to-teal-600 p-4 text-white">
+                                        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 text-white">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center
                                                                 justify-center border-2 border-white/30">
@@ -513,7 +513,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                                                     Role
                                                 </span>
                                                 <span className="flex items-center gap-1 text-[10px] font-black
-                                                                 text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">
+                                                                 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
                                                     <Shield size={9} /> Perawat
                                                 </span>
                                             </div>
@@ -535,9 +535,9 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                                                 onClick={() => { setIsProfileOpen(false); router.push('/nurse/profile'); }}
                                                 className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg
                                                            text-[12px] font-bold text-slate-700
-                                                           hover:bg-teal-50 hover:text-teal-700 transition-all"
+                                                           hover:bg-emerald-50 hover:text-emerald-700 transition-all"
                                             >
-                                                <UserCircle size={16} className="text-teal-600" />
+                                                <UserCircle size={16} className="text-emerald-600" />
                                                 Lihat Profil Saya
                                             </button>
                                             <button
