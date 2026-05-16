@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/services/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import {
     Plus, Trash2, Edit3, Save, X, Camera,
     Stethoscope, Loader2, Image as ImageIcon,
@@ -330,16 +331,20 @@ export default function ManageServices() {
                 </div>
             )}
 
-            {/* FORM MODAL - Modern & Rapi */}
-            <AnimatePresence>
-                {isFormOpen && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl relative my-8"
+            {/* FORM MODAL - Portal agar blur full screen termasuk sidebar */}
+            {typeof window !== 'undefined' && createPortal(
+                <AnimatePresence>
+                    {isFormOpen && (
+                        <div
+                            className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-y-auto"
+                            style={{ zIndex: 99999 }}
                         >
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl relative my-8"
+                            >
                             {/* Header Modal */}
                             <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center rounded-t-2xl">
                                 <div>
@@ -523,8 +528,10 @@ export default function ManageServices() {
                             </form>
                         </motion.div>
                     </div>
-                )}
-            </AnimatePresence>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </div>
     );
 }

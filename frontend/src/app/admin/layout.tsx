@@ -164,7 +164,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* ═══ SIDEBAR ═══════════════════════════════════════════════════ */}
             {/* Mobile: slide in/out | Desktop: collapse to icon-only */}
             <aside className={`
-                fixed lg:sticky lg:top-0 z-50 h-screen
+                fixed lg:sticky lg:top-0 z-30 h-screen
                 bg-white border-r border-emerald-50/50 shadow-sm
                 flex flex-col
                 transition-all duration-150
@@ -327,7 +327,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <main className={`flex-1 flex flex-col min-w-0 h-screen overflow-y-auto transition-all duration-300`}>
 
                 {/* ── HEADER ─────────────────────────────────────────────── */}
-                <header className="h-14 bg-white/80 backdrop-blur-md border-b border-emerald-50/50 px-6 flex items-center justify-between sticky top-0 z-40 shrink-0">
+                <header className="h-14 bg-white/80 backdrop-blur-md border-b border-emerald-50/50 px-6 flex items-center justify-between sticky top-0 z-30 shrink-0">
                     <div className="flex items-center gap-3">
                         {/* Toggle sidebar — desktop */}
                         <button

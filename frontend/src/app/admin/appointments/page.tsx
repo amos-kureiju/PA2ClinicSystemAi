@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/services/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import {
     CalendarCheck2, MessageCircle, Clock, User,
     MoreVertical, CheckCircle2, Search, Edit3,
@@ -153,80 +154,88 @@ export default function AdminAppointments() {
                 </table>
             </div>
 
-            {/* MODAL EDIT PASIEN */}
-            <AnimatePresence>
-                {isEditModalOpen && editingApp && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-white w-full max-w-lg rounded-2xl p-8 shadow-2xl relative"
-                        >
-                            <button
-                                onClick={() => setIsEditModalOpen(false)}
-                                className="absolute top-6 right-6 text-slate-300 hover:text-red-500 transition-all"
+            {/* MODAL EDIT PASIEN — pakai Portal agar blur menutupi sidebar & header */}
+            {typeof window !== 'undefined' && createPortal(
+                <AnimatePresence>
+                    {isEditModalOpen && editingApp && (
+                        <div className="fixed inset-0 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md"
+                            style={{ zIndex: 99999 }}>
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-[0_32px_80px_rgba(0,0,0,0.25)] relative border border-slate-100"
                             >
-                                <X size={22} />
-                            </button>
-                            <h2 className="text-xl font-black text-slate-900 mb-1">Edit Data Pasien</h2>
-                            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-6 italic">Pembaruan Informasi Reservasi</p>
-
-                            <form onSubmit={handleSaveEdit} className="space-y-4">
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Nama Pasien</label>
-                                    <input
-                                        type="text"
-                                        className="w-full p-3 bg-slate-50 rounded-xl border-none font-bold text-sm focus:ring-2 focus:ring-blue-600 outline-none"
-                                        value={editingApp.patient_name || ''}
-                                        onChange={e => setEditingApp({ ...editingApp, patient_name: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">WhatsApp</label>
-                                    <input
-                                        type="text"
-                                        className="w-full p-3 bg-slate-50 rounded-xl border-none font-bold text-sm focus:ring-2 focus:ring-blue-600 outline-none"
-                                        value={editingApp.patient_phone || ''}
-                                        onChange={e => setEditingApp({ ...editingApp, patient_phone: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Alamat</label>
-                                    <input
-                                        type="text"
-                                        className="w-full p-3 bg-slate-50 rounded-xl border-none font-bold text-sm focus:ring-2 focus:ring-blue-600 outline-none"
-                                        value={editingApp.patient_address || ''}
-                                        onChange={e => setEditingApp({ ...editingApp, patient_address: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Jenis Kelamin</label>
-                                    <select
-                                        className="w-full p-3 bg-slate-50 rounded-xl border-none font-bold text-sm focus:ring-2 focus:ring-blue-600 outline-none"
-                                        value={editingApp.patient_gender || ''}
-                                        onChange={e => setEditingApp({ ...editingApp, patient_gender: e.target.value })}
-                                        required
-                                    >
-                                        <option value="">-- Pilih --</option>
-                                        <option value="Laki-laki">Laki-laki</option>
-                                        <option value="Perempuan">Perempuan</option>
-                                    </select>
-                                </div>
                                 <button
-                                    type="submit"
-                                    className="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-100 flex items-center justify-center gap-2 hover:bg-blue-700 transition-all mt-4"
+                                    onClick={() => setIsEditModalOpen(false)}
+                                    className="absolute top-6 right-6 text-slate-300 hover:text-red-500 transition-all"
                                 >
-                                    <Save size={16} /> Simpan Perubahan
+                                    <X size={22} />
                                 </button>
-                            </form>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+                                <h2 className="text-xl font-black text-slate-900 mb-1">Edit Data Pasien</h2>
+                                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-6 italic">
+                                    Pembaruan Informasi Reservasi
+                                </p>
+
+                                <form onSubmit={handleSaveEdit} className="space-y-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Nama Pasien</label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-3 bg-slate-50 rounded-xl border-none font-bold text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                                            value={editingApp.patient_name || ''}
+                                            onChange={e => setEditingApp({ ...editingApp, patient_name: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">WhatsApp</label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-3 bg-slate-50 rounded-xl border-none font-bold text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                                            value={editingApp.patient_phone || ''}
+                                            onChange={e => setEditingApp({ ...editingApp, patient_phone: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Alamat</label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-3 bg-slate-50 rounded-xl border-none font-bold text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                                            value={editingApp.patient_address || ''}
+                                            onChange={e => setEditingApp({ ...editingApp, patient_address: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Jenis Kelamin</label>
+                                        <select
+                                            className="w-full p-3 bg-slate-50 rounded-xl border-none font-bold text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                                            value={editingApp.patient_gender || ''}
+                                            onChange={e => setEditingApp({ ...editingApp, patient_gender: e.target.value })}
+                                            required
+                                        >
+                                            <option value="">-- Pilih --</option>
+                                            <option value="Laki-laki">Laki-laki</option>
+                                            <option value="Perempuan">Perempuan</option>
+                                        </select>
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        className="w-full bg-emerald-600 text-white py-3 rounded-xl font-black text-xs uppercase
+                                       tracking-widest shadow-lg shadow-emerald-100 flex items-center justify-center
+                                       gap-2 hover:bg-emerald-700 transition-all mt-4"
+                                    >
+                                        <Save size={16} /> Simpan Perubahan
+                                    </button>
+                                </form>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </div>
     );
 }
