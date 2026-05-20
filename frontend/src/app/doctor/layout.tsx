@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
     LayoutDashboard, Users, Calendar,
     FileText, LogOut, Stethoscope,
@@ -105,22 +106,33 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
             <aside className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-emerald-50/50 shadow-sm flex flex-col transition-all duration-300 ${isSidebarOpen ? 'w-[240px]' : 'w-[72px]'}`}>
 
                 {/* Logo */}
-                <div className="flex items-center gap-3 px-4 py-5 border-b border-emerald-50/50 shrink-0">
-                    <div className="w-8 h-8 bg-emerald-700 rounded-lg flex items-center justify-center text-white shadow-lg shadow-emerald-200 shrink-0">
-                        <Stethoscope size={16} />
+                <div className={`border-b border-emerald-50/50 shrink-0 flex items-center transition-all duration-150 ${isSidebarOpen ? 'px-4 py-5 gap-3 justify-start' : 'px-2 py-4 justify-center'
+                    }`}>
+                    <div className={`rounded-2xl overflow-hidden flex items-center justify-center bg-white ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-200/60 p-1 shrink-0 transition-all duration-150 ${isSidebarOpen ? 'w-11 h-11' : 'w-12 h-12'
+                        }`}>
+                        <Image
+                            src="/images/Logo1.png"
+                            alt="Nauli Dental Logo"
+                            width={44}
+                            height={44}
+                            className="object-contain w-full h-full"
+                        />
                     </div>
                     <AnimatePresence>
                         {isSidebarOpen && (
                             <motion.div
-                                initial={{ opacity: 0, x: -8 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -8 }}
+                                initial={{ opacity: 0, width: 0 }}
+                                animate={{ opacity: 1, width: 'auto' }}
+                                exit={{ opacity: 0, width: 0 }}
                                 transition={{ duration: 0.15 }}
+                                className="overflow-hidden"
                             >
-                                <p className="text-base font-black tracking-tighter text-slate-800 leading-none">
-                                    Klinik.<span className="text-emerald-700">AI</span>
+                                <p className="text-base font-black tracking-tighter text-slate-800 leading-none whitespace-nowrap">
+                                    Nauli <span className="text-emerald-700">Dental</span>
                                 </p>
-                                <p className="text-[9px] text-emerald-600 font-bold uppercase tracking-widest mt-0.5">Doc System</p>
+                                <p className="text-[9px] text-emerald-600 font-bold uppercase tracking-widest mt-0.5 whitespace-nowrap">
+                                    Doc System
+                                </p>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -365,8 +377,8 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
                             >
                                 {/* Avatar ikon dokter */}
                                 <div className="relative shrink-0 transition-transform active:scale-90 group-hover:scale-105">
-                                    <div className="w-8 h-8 rounded-lg bg-emerald-700 border-2 border-white/20 shadow-sm flex items-center justify-center">
-                                        <Stethoscope size={15} className="text-white" />
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-700 border-2 border-white/20 shadow-sm flex items-center justify-center text-white font-black text-sm">
+                                        {doctorName.charAt(0).toUpperCase()}
                                     </div>
                                     <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 border-2 border-white rounded-full animate-pulse" />
                                 </div>
@@ -398,8 +410,8 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
                                         {/* Header gradient */}
                                         <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 p-4 text-white">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center border-2 border-white/30">
-                                                    <Stethoscope size={20} className="text-white" />
+                                                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center border-2 border-white/30 text-white font-black text-lg">
+                                                    {doctorName.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-[13px] font-black uppercase">{doctorName}</p>

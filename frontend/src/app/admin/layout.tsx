@@ -77,24 +77,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // fetch notifications dari backend
     const refreshNotifications = async () => {
         try {
-            const res = await.api.get ('/clinic/admin/notifications/reservations');
-            const dynamic = res.data.map((n: any) => ({
-                id: item.id,
-                icon: item.status === 'pending'
-                    ? <CalendarClock size={14} />
-                    : <CheckCheck size={14} />,
-                color: item.status === 'pending'
-                    ? 'text-amber-600 bg-amber-50'
-                    : 'text-emerald-600 bg-emerald-50',
-                title: item.title,
-                desc: `${item.patient_name} — ${item.consultation_time}`,
-                time: item.consultation_date,
-                read: item.status !== 'pending',
+            // PERBAIKAN 1: Hapus tanda titik setelah await
+            const res = await api.get('/clinic/admin/notifications/reservations');
+
+            const dynamicNotifs = res.data.map((n: any) => ({
+                // PERBAIKAN 2: Gunakan 'n.id' (sesuai variabel di atas), bukan 'item.id'
+                id: n.id,
+                icon: n.status === 'pending' ? <CalendarClock size={14} /> : <CheckCheck size={14} />,
+                color: n.status === 'pending' ? 'text-amber-600 bg-amber-50' : 'text-emerald-600 bg-emerald-50',
+                title: n.title,
+                desc: `Pasien ${n.patient_name} — ${n.consultation_time}`,
+                time: n.consultation_date,
+                read: n.status !== 'pending'
             }));
-            setNotifications(dynamic);
+
+            setNotifications(dynamicNotifs);
             setPendingCount(res.data.filter((a: any) => a.status === 'pending').length);
-        } catch {
-            // silent — tetap tampilkan kosong
+        } catch (err) {
+            console.error("Gagal memuat notifikasi:", err);
         }
     };
 
@@ -126,11 +126,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     // Notifikasi
     useEffect(() => {
-        api.get('/clinic/appointments').then(res => {
-            const waiting = res.data.filter((a: any) => a.status === 'pending').length;
-            setPendingCount(waiting);
-        });
-    }, []);
+        if (!isAuthorized) return;
+        refreshNotifications();
+        const timer = setInterval(refreshNotifications, 30000);
+        return () => clearInterval(timer);
+    }, [isAuthorized]);
 
     // 3. LOGOUT
     const handleLogout = () => {
@@ -409,7 +409,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             >
                                 <BellRing size={16} />
                                 <AnimatePresence>
-                                    {unreadCount > 0 && (
+                                    {pendingCount > 0 && (
                                         <motion.span
                                             key="badge"
                                             initial={{ scale: 0 }}
@@ -417,7 +417,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                             exit={{ scale: 0 }}
                                             className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white leading-none"
                                         >
-                                            {unreadCount}
+                                            {pendingCount}
                                         </motion.span>
                                     )}
                                 </AnimatePresence>
@@ -444,23 +444,40 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                             )}
                                         </div>
                                         <div className="divide-y divide-slate-50 max-h-72 overflow-y-auto">
-                                            {notifications.map(notif => (
-                                                <button
-                                                    key={notif.id}
-                                                    onClick={() => markRead(notif.id)}
-                                                    className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-all hover:bg-emerald-50/60 ${!notif.read ? 'bg-emerald-50/30' : ''}`}
-                                                >
-                                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${notif.color}`}>{notif.icon}</div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center justify-between gap-2">
-                                                            <p className={`text-[11px] font-black truncate ${!notif.read ? 'text-slate-800' : 'text-slate-500'}`}>{notif.title}</p>
-                                                            {!notif.read && <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0" />}
+                                            {notifications.length === 0 ? (
+                                                <div className="py-10 text-center space-y-2">
+                                                    <BellRing size={24} className="mx-auto text-slate-200" />
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                        Tidak ada aktivitas
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                notifications.map(notif => (
+                                                    <button
+                                                        key={notif.id}
+                                                        onClick={() => {
+                                                            markRead(notif.id);
+                                                            setIsNotifOpen(false);
+                                                            router.push('/admin/notifications');
+                                                        }}
+                                                        className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-all hover:bg-emerald-50/60 ${!notif.read ? 'bg-emerald-50/30' : ''}`}
+                                                    >
+                                                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${notif.color}`}>
+                                                            {notif.icon}
                                                         </div>
-                                                        <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">{notif.desc}</p>
-                                                        <p className="text-[9px] text-slate-400 mt-1 font-bold">{notif.time}</p>
-                                                    </div>
-                                                </button>
-                                            ))}
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center justify-between gap-2">
+                                                                <p className={`text-[11px] font-black truncate ${!notif.read ? 'text-slate-800' : 'text-slate-500'}`}>
+                                                                    {notif.title}
+                                                                </p>
+                                                                {!notif.read && <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0" />}
+                                                            </div>
+                                                            <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">{notif.desc}</p>
+                                                            <p className="text-[9px] text-slate-400 mt-1 font-bold italic">{notif.time}</p>
+                                                        </div>
+                                                    </button>
+                                                ))
+                                            )}
                                         </div>
                                         <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/50">
                                             <button
