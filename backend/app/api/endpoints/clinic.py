@@ -96,6 +96,16 @@ def add_doctor(
     db.refresh(new_doc)
     return new_doc
 
+@router.get("/doctor/notifications")
+def get_doctor_notifications(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_doctor_or_admin)
+):
+    user = _get_user_by_token(current_user, db)
+    return db.query(Appointment).filter(
+        Appointment.doctor_name == user.full_name,
+        Appointment.status == "confirmed"
+    ).order_by(Appointment.id.desc()).limit(5).all()
 
 @router.patch("/doctors/{doc_id}")
 def update_doctor(

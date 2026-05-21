@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
+import api from '@/services/api';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -12,14 +13,6 @@ import {
     CheckCheck, CalendarClock, UserPlus, AlertCircle, Shield, UserCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// ─── Dummy notifikasi dokter ────────────────────────────────────────────────
-const INITIAL_NOTIFICATIONS = [
-    { id: 1, icon: <CalendarClock size={14} />, color: 'text-teal-600 bg-teal-50', title: 'Pasien Baru', desc: 'Ahmad Fauzi telah diantrikan', time: '5 mnt lalu', read: false },
-    { id: 2, icon: <UserPlus size={14} />, color: 'text-emerald-600 bg-emerald-50', title: 'Jadwal Hari Ini', desc: '5 pasien tersisa — 13:00–17:00', time: '30 mnt lalu', read: false },
-    { id: 3, icon: <AlertCircle size={14} />, color: 'text-amber-600 bg-amber-50', title: 'Rekam Medis', desc: 'Data pasien Siti belum dilengkapi', time: '1 jam lalu', read: false },
-    { id: 4, icon: <CheckCheck size={14} />, color: 'text-slate-500 bg-slate-100', title: 'Laporan Selesai', desc: 'Laporan harian berhasil disimpan', time: '2 jam lalu', read: true },
-];
 
 export default function DoctorLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -35,9 +28,9 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
 
     // ── Notifikasi dropdown
     const [isNotifOpen, setIsNotifOpen] = useState(false);
-    const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+    const [notifications, setNotifications] = useState<any[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
     const notifRef = useRef<HTMLDivElement>(null);
-    const unreadCount = notifications.filter(n => !n.read).length;
 
     // ── Dark mode
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -70,6 +63,36 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
         document.documentElement.classList.toggle('dark', isDarkMode);
     }, [isDarkMode]);
 
+    //notif dinamisnya
+    const fetchNotifications = async () => {
+        try {
+            const res = await api.get('/clinic/doctor/notifications');
+            const dynamic = res.data.map((appt: any) => ({
+                id: appt.id,
+                icon: <CalendarClock size={14} />,
+                color: 'text-teal-600 bg-teal-50',
+                title: 'Pasien Menunggu',
+                desc: `${appt.patient_name} — menunggu di antrean`,
+                time: new Date(appt.appointment_date).toLocaleTimeString('id-ID', {
+                    hour: '2-digit', minute: '2-digit'
+                }) + ' WIB',
+                read: false,
+            }));
+            setNotifications(dynamic);
+            setUnreadCount(dynamic.length);
+        } catch {
+            // silent — notifikasi tetap kosong
+        }
+    };
+
+    // ✅ TAMBAH — useEffect memanggil fetch saat authorized
+    useEffect(() => {
+        if (!isAuthorized) return;
+        fetchNotifications();
+        const timer = setInterval(fetchNotifications, 60000); // refresh tiap 1 menit
+        return () => clearInterval(timer);
+    }, [isAuthorized]);
+
     // 4. LOGOUT
     const handleLogout = () => {
         Cookies.remove('token');
@@ -78,8 +101,15 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
         router.push('/login');
     };
 
-    const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    const markRead = (id: number) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    const markAllRead = () => {
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        setUnreadCount(0);
+    };
+
+    const markRead = (id: number) => {
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+    };
 
     const menuItems = [
         { icon: LayoutDashboard, label: 'Dashboard', href: '/doctor' },
@@ -297,25 +327,34 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
                                             )}
                                         </div>
                                         <div className="divide-y divide-slate-50 max-h-72 overflow-y-auto">
-                                            {notifications.map(notif => (
-                                                <button
-                                                    key={notif.id}
-                                                    onClick={() => markRead(notif.id)}
-                                                    className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-all hover:bg-emerald-50/60 ${!notif.read ? 'bg-emerald-50/30' : ''}`}
-                                                >
-                                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${notif.color}`}>
-                                                        {notif.icon}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center justify-between gap-2">
-                                                            <p className={`text-[11px] font-black truncate ${!notif.read ? 'text-slate-800' : 'text-slate-500'}`}>{notif.title}</p>
-                                                            {!notif.read && <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0" />}
+                                            {notifications.length === 0 ? (
+                                                <div className="py-10 text-center space-y-2">
+                                                    <BellRing size={22} className="mx-auto text-slate-200" />
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                        Tidak ada pasien menunggu
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                notifications.map(notif => (
+                                                    <button
+                                                        key={notif.id}
+                                                        onClick={() => markRead(notif.id)}
+                                                        className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-all hover:bg-emerald-50/60 ${!notif.read ? 'bg-emerald-50/30' : ''}`}
+                                                    >
+                                                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${notif.color}`}>
+                                                            {notif.icon}
                                                         </div>
-                                                        <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">{notif.desc}</p>
-                                                        <p className="text-[9px] text-slate-400 mt-1 font-bold">{notif.time}</p>
-                                                    </div>
-                                                </button>
-                                            ))}
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center justify-between gap-2">
+                                                                <p className={`text-[11px] font-black truncate ${!notif.read ? 'text-slate-800' : 'text-slate-500'}`}>{notif.title}</p>
+                                                                {!notif.read && <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0" />}
+                                                            </div>
+                                                            <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">{notif.desc}</p>
+                                                            <p className="text-[9px] text-slate-400 mt-1 font-bold">{notif.time}</p>
+                                                        </div>
+                                                    </button>
+                                                ))
+                                            )}
                                         </div>
                                         <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/50">
                                             <button
