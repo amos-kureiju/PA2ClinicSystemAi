@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/services/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import {
     Search, ClipboardList, User, Calendar,
     ChevronRight, FileText, Activity, X,
@@ -165,83 +166,98 @@ export default function AdminMedicalRecords() {
                 </div>
             </div>
 
-            {/* --- MODAL DETAIL (DOKUMEN KLINIS) --- */}
-            <AnimatePresence>
-                {selectedRecord && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md" onClick={() => setSelectedRecord(null)}>
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full max-w-3xl rounded-[3rem] shadow-2xl relative overflow-hidden border-[8px] border-white"
+            {/* --- MODAL DETAIL — Portal agar blur full screen termasuk sidebar --- */}
+            {typeof window !== 'undefined' && createPortal(
+                <AnimatePresence>
+                    {selectedRecord && (
+                        <div
+                            className="fixed inset-0 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+                            style={{ zIndex: 99999 }}
+                            onClick={() => setSelectedRecord(null)}
                         >
-                            <div className="h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-500 w-full" />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="bg-white w-full max-w-3xl rounded-[3rem] shadow-2xl relative overflow-hidden border-[8px] border-white"
+                            >
+                                <div className="h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-500 w-full" />
 
-                            <div className="p-10">
-                                <div className="flex justify-between items-start mb-8">
-                                    <div className="flex items-center gap-5">
-                                        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-teal-600 border border-teal-100 shadow-inner">
-                                            <FileText size={32} />
+                                <div className="p-10">
+                                    <div className="flex justify-between items-start mb-8">
+                                        <div className="flex items-center gap-5">
+                                            <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-teal-600 border border-teal-100 shadow-inner">
+                                                <FileText size={32} />
+                                            </div>
+                                            <div>
+                                                <h2 className="text-2xl font-black uppercase italic text-slate-800 tracking-tighter">Ringkasan Medis</h2>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Arsip Nauli Dental • ND-{selectedRecord.id}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h2 className="text-2xl font-black uppercase italic text-slate-800 tracking-tighter">Ringkasan Medis</h2>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Arsip Nauli Dental • ND-{selectedRecord.id}</p>
-                                        </div>
+                                        <button onClick={() => setSelectedRecord(null)} className="p-2 bg-slate-50 text-slate-300 hover:text-red-500 rounded-xl transition-all">
+                                            <X size={24} />
+                                        </button>
                                     </div>
-                                    <button onClick={() => setSelectedRecord(null)} className="p-2 bg-slate-50 text-slate-300 hover:text-red-500 rounded-xl transition-all"><X size={24} /></button>
-                                </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="space-y-6">
-                                        <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
-                                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-2">Identitas Pasien</label>
-                                            <h3 className="text-xl font-black text-slate-800 uppercase italic">{selectedRecord.patient_name || "N/A"}</h3>
-                                            <p className="text-xs font-bold text-teal-600 mt-1">{formatDate(selectedRecord.created_at)}</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-6">
+                                            <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
+                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-2">Identitas Pasien</label>
+                                                <h3 className="text-xl font-black text-slate-800 uppercase italic">{selectedRecord.patient_name || "N/A"}</h3>
+                                                <p className="text-xs font-bold text-teal-600 mt-1">{formatDate(selectedRecord.created_at)}</p>
+                                            </div>
+                                            <div className="bg-white p-6 rounded-[2rem] border-2 border-dashed border-slate-100">
+                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-2">Dokter Pemeriksa</label>
+                                                <div className="flex items-center gap-3 font-bold text-slate-700">
+                                                    <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                                                        <Stethoscope size={16} />
+                                                    </div>
+                                                    {selectedRecord.doctor_name || "dr. Septian Adi"}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="bg-white p-6 rounded-[2rem] border-2 border-dashed border-slate-100">
-                                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-2">Dokter Pemeriksa</label>
-                                            <div className="flex items-center gap-3 font-bold text-slate-700">
-                                                <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center"><Stethoscope size={16} /></div>
-                                                {selectedRecord.doctor_name || "dr. Septian Adi"}
+
+                                        <div className="space-y-6">
+                                            <div className="bg-emerald-50/50 p-6 rounded-[2rem] border border-emerald-100">
+                                                <label className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em] block mb-2">Analisa Diagnosa</label>
+                                                <p className="text-sm font-bold text-slate-700 italic leading-relaxed">
+                                                    &quot;{selectedRecord.diagnosis || "Tidak ada data diagnosa"}&quot;
+                                                </p>
+                                            </div>
+                                            <div className="bg-white p-6 rounded-[2rem] border border-slate-100">
+                                                <label className="text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] block mb-2">Prosedur Medis</label>
+                                                <p className="text-sm font-black text-slate-800 flex items-center gap-2 italic">
+                                                    <Pill size={16} className="text-blue-500" /> {selectedRecord.treatment || "Konsultasi Umum"}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-6">
-                                        <div className="bg-emerald-50/50 p-6 rounded-[2rem] border border-emerald-100">
-                                            <label className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em] block mb-2">Analisa Diagnosa</label>
-                                            <p className="text-sm font-bold text-slate-700 italic leading-relaxed">
-                                                &quot;{selectedRecord.diagnosis || "Tidak ada data diagnosa"}&quot;
-                                            </p>
-                                        </div>
-                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100">
-                                            <label className="text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] block mb-2">Prosedur Medis</label>
-                                            <p className="text-sm font-black text-slate-800 flex items-center gap-2 italic">
-                                                <Pill size={16} className="text-blue-500" /> {selectedRecord.treatment || "Konsultasi Umum"}
-                                            </p>
-                                        </div>
+                                    <div className="mt-8 bg-slate-900 p-8 rounded-[2.5rem] shadow-xl text-white">
+                                        <label className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em] block mb-3 italic">
+                                            Instruksi Dokter & Catatan Resep
+                                        </label>
+                                        <p className="text-sm font-medium leading-relaxed italic text-slate-300">
+                                            {selectedRecord.notes || "Pasien disarankan untuk menjaga kebersihan gigi dan melakukan kontrol rutin 6 bulan sekali."}
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-10 pt-8 border-t border-slate-100 flex justify-between items-center">
+                                        <button onClick={() => window.print()} className="flex items-center gap-2 text-[10px] font-black text-teal-600 hover:text-teal-800 transition-all uppercase tracking-widest">
+                                            Cetak Dokumen <Printer size={14} />
+                                        </button>
+                                        <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 italic">
+                                            <MapPin size={12} /> Terverifikasi Digital • Klinik Nauli
+                                        </p>
                                     </div>
                                 </div>
-
-                                <div className="mt-8 bg-slate-900 p-8 rounded-[2.5rem] shadow-xl text-white relative group">
-                                    <label className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em] block mb-3 italic">Instruksi Dokter & Catatan Resep</label>
-                                    <p className="text-sm font-medium leading-relaxed italic text-slate-300">
-                                        {selectedRecord.notes || "Pasien disarankan untuk menjaga kebersihan gigi dan melakukan kontrol rutin 6 bulan sekali."}
-                                    </p>
-                                </div>
-
-                                <div className="mt-10 pt-8 border-t border-slate-100 flex justify-between items-center">
-                                    <button onClick={() => window.print()} className="flex items-center gap-2 text-[10px] font-black text-teal-600 hover:text-teal-800 transition-all uppercase tracking-widest">
-                                        Cetak Dokumen <Printer size={14} />
-                                    </button>
-                                    <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 italic">
-                                        <MapPin size={12} /> Terverifikasi Digital • Klinik Nauli
-                                    </p>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </div>
     );
 }
