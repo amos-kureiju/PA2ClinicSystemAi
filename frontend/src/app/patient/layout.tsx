@@ -107,7 +107,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
                             <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center bg-white shadow-md flex-shrink-0">
                                 {!logoError ? (
                                     <Image
-                                        src="/images/Logo1.png"
+                                        src="/images/Logo.png"
                                         alt="Nauli Dental Logo"
                                         width={40} height={40}
                                         className="object-cover w-full h-full"

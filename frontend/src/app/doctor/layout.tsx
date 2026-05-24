@@ -136,7 +136,7 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
                     <div className={`rounded-2xl overflow-hidden flex items-center justify-center bg-white ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-200/60 p-1 shrink-0 transition-all duration-150 ${isSidebarOpen ? 'w-11 h-11' : 'w-12 h-12'
                         }`}>
                         <Image
-                            src="/images/Logo1.png"
+                            src="/images/Logo.png"
                             alt="Nauli Dental Logo"
                             width={44}
                             height={44}

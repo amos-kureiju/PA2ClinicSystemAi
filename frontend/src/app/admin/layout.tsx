@@ -57,6 +57,8 @@ const INITIAL_NOTIFICATIONS = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const [isSyncing, setIsSyncing] = useState(false);
+    const [showSyncModal, setShowSyncModal] = useState(false);
+    const [syncRews]
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -142,22 +144,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     };
 
     // 4. SYNC AI
-    const handleSyncAI = async () => {
-        const confirmSync = confirm("Proses sinkronisasi memakan waktu 15-30 detik. Jangan tutup halaman ini. Lanjutkan?");
-        if (!confirmSync) return;
+    const handleSyncAI = () => setShowSyncModal(true);
 
-        setIsSyncing(true);
-        try {
-            // TAMBAHKAN { timeout: 60000 } agar tidak terputus di tengah jalan
-            const res = await api.post('/chatbot/ingest', {}, { timeout: 60000 });
-            alert("✅ " + res.data.message);
-        } catch (err: any) {
-            console.error("Error Detail:", err.response?.data);
-            alert("❌ Gagal Sinkron: Cek terminal Python kamu untuk melihat errornya.");
-        } finally {
-            setIsSyncing(false);
-        }
-    };
+const executeSyncAI = async () => {
+    setShowSyncModal(false);
+    setIsSyncing(true);
+    try {
+        const res = await api.post('/chatbot/ingest', {}, { timeout: 60000 });
+        alert("✅ " + res.data.message);
+    } catch (err: any) {
+        console.error("Error Detail:", err.response?.data);
+        alert("❌ Gagal Sinkron: Cek terminal Python kamu.");
+    } finally {
+        setIsSyncing(false);
+    }
+};
 
     const markAllRead = () =>
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
@@ -214,7 +215,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <div className={`rounded-2xl overflow-hidden flex items-center justify-center bg-white ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-200/60 p-1 shrink-0 transition-all duration-150 ${isSidebarOpen ? 'w-11 h-11' : 'w-12 h-12 mx-auto'
                             }`}>
                             <Image
-                                src="/images/Logo1.png"
+                                src="/images/Logo.png"
                                 alt="Nauli Dental Logo"
                                 width={44}
                                 height={44}
@@ -575,6 +576,79 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
             )}
+
+            {/* ── SYNC CONFIRMATION MODAL ─────────────────────────── */}
+<AnimatePresence>
+    {showSyncModal && (
+        <>
+            {/* Backdrop */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+                onClick={() => setShowSyncModal(false)}
+            />
+
+            {/* Modal */}
+            <motion.div
+                initial={{ opacity: 0, scale: 0.92, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.92, y: 20 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+                className="fixed inset-0 z-[101] flex items-center justify-center p-4"
+            >
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-emerald-100">
+
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 flex items-center gap-3">
+                        <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+                            <Database size={18} className="text-white" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-black text-white uppercase tracking-wide">Sinkronisasi AI DATA</p>
+                            <p className="text-[10px] text-emerald-200 font-bold">Knowledge Base Update</p>
+                        </div>
+                    </div>
+
+                    {/* Body */}
+                    <div className="px-6 py-5 space-y-4">
+                        {/* Warning box */}
+                        <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                            <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                            <div>
+                                <p className="text-xs font-black text-amber-700 uppercase tracking-wide">Perhatian</p>
+                                <p className="text-xs text-amber-600 font-medium mt-0.5">
+                                    Proses memakan waktu <span className="font-black">15–30 detik</span>. Jangan tutup atau refresh halaman ini.
+                                </p>
+                            </div>
+                        </div>
+
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                            Sistem akan memperbarui seluruh basis pengetahuan AI dari database klinik. Lanjutkan proses sinkronisasi?
+                        </p>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="px-6 pb-5 flex gap-3">
+                        <button
+                            onClick={() => setShowSyncModal(false)}
+                            className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-all"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            onClick={executeSyncAI}
+                            className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-black uppercase tracking-wide transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                        >
+                            Ya, Sinkronkan
+                        </button>
+                    </div>
+                </div>
+            </motion.div>
+        </>
+    )}
+</AnimatePresence>
         </div>
     );
 }

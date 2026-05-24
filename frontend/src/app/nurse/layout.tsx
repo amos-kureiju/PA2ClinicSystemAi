@@ -156,7 +156,7 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
                      transition-all duration-150
                      ${isSidebarOpen ? 'w-11 h-11' : 'w-12 h-12'}`}>
                         <Image
-                            src="/images/Logo1.png"
+                            src="/images/Logo.png"
                             alt="Nauli Dental Logo"
                             width={44}
                             height={44}
