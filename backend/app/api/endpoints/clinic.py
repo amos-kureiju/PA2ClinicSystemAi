@@ -672,14 +672,42 @@ def get_stats_analytics(
     db: Session = Depends(get_db),
     admin: dict = Depends(require_admin),
 ):
-    """Tren reservasi — implementasi dummy, ganti dengan query GROUP BY saat siap."""
-    import random
-    labels = (
-        ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
-        if period == "weekly"
-        else ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"]
-    )
-    return [{"name": d, "online": random.randint(10, 50)} for d in labels]
+    """Mengambil data asli jumlah pendaftaran untuk grafik."""
+    data_points = []
+    today = date.today()
+
+    if period == "weekly":
+        # Ambil data 7 hari terakhir
+        for i in range(6, -1, -1):
+            target_date = today - timedelta(days=i)
+            # Hitung jumlah appointment pada tanggal tersebut
+            count = db.query(Appointment).filter(
+                func.date(Appointment.appointment_date) == target_date
+            ).count()
+            
+            # Label hari (Sen, Sel, dst)
+            days_name = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
+            data_points.append({
+                "name": days_name[target_date.weekday()],
+                "online": count
+            })
+            
+    else: # Monthly
+        # Ambil data 4 minggu terakhir
+        for i in range(3, -1, -1):
+            start_date = today - timedelta(weeks=i+1)
+            end_date = today - timedelta(weeks=i)
+            count = db.query(Appointment).filter(
+                Appointment.appointment_date >= start_date,
+                Appointment.appointment_date <= end_date
+            ).count()
+            
+            data_points.append({
+                "name": f"Minggu {4-i}",
+                "online": count
+            })
+
+    return data_points
 
 
 # ══════════════════════════════════════════════════════════════════════════════
