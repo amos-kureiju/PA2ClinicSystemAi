@@ -1,9 +1,9 @@
 from app.models.patient import Patient
 from fastapi import APIRouter, Depends, HTTPException, Body, File, UploadFile
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from pydantic import BaseModel, EmailStr
 from app.database.session import get_db
 from app.schemas import clinic as schemas
@@ -102,8 +102,10 @@ def get_doctor_notifications(
     current_user: dict = Depends(require_doctor_or_admin)
 ):
     user = _get_user_by_token(current_user, db)
+    my_name = user.full_name.strip().lower() # Bersihkan nama
+    
     return db.query(Appointment).filter(
-        Appointment.doctor_name == user.full_name,
+        func.lower(Appointment.doctor_name) == my_name, # Gunakan func.lower
         Appointment.status == "confirmed"
     ).order_by(Appointment.id.desc()).limit(5).all()
 

@@ -6,7 +6,7 @@ import {
     Users, Calendar, Zap, MessageSquare,
     ArrowRight, Search, Bell, Clock, CheckCircle2,
     ShieldCheck, TrendingUp, UserCheck, Activity, ArrowUpRight,
-    ChevronLeft, ChevronRight, MoreHorizontal, Star, Award, BookOpen, Stethoscope
+    ChevronLeft, ChevronRight, MoreHorizontal, Star, Award, BookOpen, Stethoscope, BarChart3
 } from 'lucide-react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
