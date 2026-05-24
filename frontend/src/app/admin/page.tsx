@@ -43,19 +43,9 @@ export default function AdminDashboard() {
                 setAnalytics(chartData);
                 setRecentBookings(recent.data);
             } catch (err) {
-                console.error("Gagal sinkronisasi dashboard");
-                // Data dummy untuk testing
-                setAnalytics([
-                    { name: 'Sen', online: 45 },
-                    { name: 'Sel', online: 62 },
-                    { name: 'Rab', online: 38 },
-                    { name: 'Kam', online: 71 },
-                    { name: 'Jum', online: 54 },
-                    { name: 'Sab', online: 33 },
-                    { name: 'Min', online: 28 },
-                ]);
-            } finally {
-                setIsLoading(false);
+                console.error("Gagal sinkronisasi dashboard:", err);
+                // Biarkan analytics kosong — grafik akan tampil kosong, bukan data palsu
+                setAnalytics([]);
             }
         };
         loadAllData();
@@ -139,6 +129,14 @@ export default function AdminDashboard() {
                         </div>
                         <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black italic shadow-lg">K</div>
                     </div>
+                    <button
+                        onClick={() => setViewMode(v => v === 'Weekly' ? 'Weekly' : 'Monthly')}
+                        className="p-2 bg-slate-50 rounded-lg text-slate-400 hover:text-emerald-600
+               hover:bg-emerald-50 transition-all border border-slate-100"
+                        title="Refresh data"
+                    >
+                        <Activity size={14} />
+                    </button>
                 </div>
             </div>
 
@@ -179,7 +177,17 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    <div className="h-[340px] w-full">
+                    <div className="h-[340px] w-full relative">
+                        {isLoading && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center
+                        bg-white/80 backdrop-blur-sm rounded-xl z-10 gap-3">
+                                <div className="w-8 h-8 border-3 border-emerald-200 border-t-emerald-600
+                            rounded-full animate-spin" />
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    Memuat data grafik...
+                                </p>
+                            </div>
+                        )}
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart
                                 data={analytics}
@@ -211,6 +219,17 @@ export default function AdminDashboard() {
                                 />
                             </BarChart>
                         </ResponsiveContainer>
+                        {!isLoading && analytics.length === 0 && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center">
+                                    <BarChart size={22} className="text-emerald-300" />
+                                </div>
+                                <p className="text-sm font-bold text-slate-400">Belum ada data reservasi</p>
+                                <p className="text-xs text-slate-300">
+                                    Data akan muncul otomatis saat pasien mendaftar
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Summary */}
