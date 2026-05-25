@@ -364,21 +364,117 @@ export default function WelcomePage() {
                 </div>
             </div>
 
-            {/* Footer */}
-            <div className="bg-slate-900 py-10 px-6">
-                <div className="max-w-7xl mx-auto text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                        <Sparkles size={20} className="text-emerald-400" />
-                        <span className="text-white font-black text-lg">Nauli<span className="text-emerald-400">Dental</span></span>
+            {/* Footer - Modern Professional seperti Loop Physicians (untuk Klinik Gigi) */}
+            <footer className="bg-white border-t border-emerald-100 pt-16 pb-8 px-6">
+                <div className="max-w-7xl mx-auto">
+                    {/* Grid Utama: 4 Kolom Responsif */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 pb-10 border-b border-emerald-100">
+
+                        {/* Kolom 1: Logo & Tagline */}
+                        <div>
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-md">
+                                    <Stethoscope size={20} className="text-white" />
+                                </div>
+                                <div>
+                                    <h2 className="text-slate-800 font-black text-xl tracking-tight">
+                                        Nauli<span className="text-emerald-600">Dental</span>
+                                    </h2>
+                                    <p className="text-[10px] text-emerald-600 font-bold tracking-wider">DENTAL CLINIC</p>
+                                </div>
+                            </div>
+                            <p className="text-slate-500 text-sm leading-relaxed">
+                                Menghubungkan Anda dengan perawatan gigi modern berbasis AI Automation.
+                                Pengalaman klinik yang nyaman, cepat, dan terjangkau.
+                            </p>
+                        </div>
+
+                        {/* Kolom 2: Company Links */}
+                        <div>
+                            <h3 className="text-slate-800 font-bold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
+                                <div className="w-1 h-5 bg-emerald-500 rounded-full" />
+                                Company Links
+                            </h3>
+                            <ul className="space-y-3">
+                                {['Beranda', 'Tentang Kami', 'Hubungi Kami', 'Cari Jadwal', 'Karir', 'Layanan'].map((link, idx) => (
+                                    <li key={idx}>
+                                        <a href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors duration-300 flex items-center gap-2 group">
+                                            <ArrowRight size={12} className="text-emerald-400 opacity-0 group-hover:opacity-100 transition-all -translate-x-1 group-hover:translate-x-0" />
+                                            {link}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Kolom 3: Office Address (Alamat Lengkap & Rapi) */}
+                        <div>
+                            <h3 className="text-slate-800 font-bold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
+                                <div className="w-1 h-5 bg-emerald-500 rounded-full" />
+                                Office Address
+                            </h3>
+                            <div className="space-y-4">
+                                <div className="flex gap-3">
+                                    <MapPin size={16} className="text-emerald-500 mt-1 flex-shrink-0" />
+                                    <div className="text-slate-500 text-sm leading-relaxed">
+                                        Jl. Kesehatan No. 123, Kelapa Gading, Jakarta Selatan 14240
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <MapPin size={16} className="text-emerald-500 mt-1 flex-shrink-0" />
+                                    <div className="text-slate-500 text-sm leading-relaxed">
+                                        Jl. Boulevard Raya Kav. 1-10, Kelapa Gading, Jakarta Utara 14240
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <MapPin size={16} className="text-emerald-500 mt-1 flex-shrink-0" />
+                                    <div className="text-slate-500 text-sm leading-relaxed">
+                                        Komplek Ruko Emerald Bumi Serpong Damai, Tangerang Selatan 15321
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Kolom 4: Contact Us */}
+                        <div>
+                            <h3 className="text-slate-800 font-bold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
+                                <div className="w-1 h-5 bg-emerald-500 rounded-full" />
+                                Contact Us
+                            </h3>
+                            <ul className="space-y-3">
+                                <li className="flex items-center gap-3 text-slate-500 text-sm">
+                                    <Calendar size={16} className="text-emerald-500" />
+                                    booking@naulidental.com
+                                </li>
+                                <li className="flex items-center gap-3 text-slate-500 text-sm">
+                                    <Phone size={16} className="text-emerald-500" />
+                                    (815) 359-1684 – Office
+                                </li>
+                                <li className="flex items-center gap-3 text-slate-500 text-sm">
+                                    <Clock size={16} className="text-emerald-500" />
+                                    (813) 359-3456 – Fax
+                                </li>
+                                <li className="flex items-center gap-3 text-slate-500 text-sm">
+                                    <Activity size={16} className="text-emerald-500" />
+                                    Mon to Fri, 9:00AM – 5:00PM
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                    <p className="text-slate-400 text-sm mb-4">
-                        Klinik Gigi Modern dengan Teknologi AI • Profesional • Terpercaya
-                    </p>
-                    <p className="text-slate-500 text-xs">
-                        © 2024 Nauli Dental Care. All rights reserved.
-                    </p>
+
+                    {/* Bottom Bar: Copyright & Footer Links */}
+                    <div className="pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <p className="text-slate-400 text-xs">
+                            Nauli Dental LLC {new Date().getFullYear()} | All Rights Reserved.
+                        </p>
+                        <div className="flex gap-6 text-xs">
+                            <a href="#" className="text-slate-400 hover:text-emerald-600 transition-colors">Privacy Policy</a>
+                            <a href="#" className="text-slate-400 hover:text-emerald-600 transition-colors">Terms of Use</a>
+                            <a href="#" className="text-slate-400 hover:text-emerald-600 transition-colors">Accessibility</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </footer>
         </div>
     );
 }
