@@ -9,7 +9,7 @@ class UserBase(BaseModel):
 # Data yang dikirim saat DAFTAR (Tanpa Role!)
 class UserCreate(UserBase):
     password: str
-    role: str
+    role: Optional[str] = "patient" # Default role adalah pasien, tapi bisa diubah oleh admin saat buat staff baru
 
 # Data yang dikembalikan setelah berhasil (Ada Role & ID)
 class UserResponse(UserBase):

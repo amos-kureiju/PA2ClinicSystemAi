@@ -21,6 +21,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
     const [isScrolled, setIsScrolled] = useState(false);
     const [logoError, setLogoError] = useState(false);
     const [isQuickOpen, setIsQuickOpen] = useState(false);
+    const [ShowLog]
 
     // 1. PROTEKSI ROLE PASIEN
     useEffect(() => {
@@ -45,6 +46,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
             localStorage.clear();
             Cookies.remove('token', { path: '/' });
             Cookies.remove('role', { path: '/' });
+            Cookies.remove('user_role', { path: '/' });
             document.cookie.split(';').forEach(c => {
                 document.cookie = c
                     .replace(/^ +/, '')

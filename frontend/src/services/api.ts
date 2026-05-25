@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL
         ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1`
-        : 'http://192.168.56.1:8000/api/v1',
+        : 'http://127.0.0.1:8000/api/v1',
     timeout: 20000,
     headers: {
         'Content-Type': 'application/json',
