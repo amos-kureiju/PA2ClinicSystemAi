@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '@/services/api';
 import {
-    MessageCircle, Send, X, User,
+    MessageCircle, ArrowUp, X, User,
     Maximize2, Minimize2, Trash2, ChevronRight,
     Plus, Search, Edit2, Menu,
     ThumbsUp, ThumbsDown, Copy, Check,
@@ -53,11 +53,8 @@ function ClinicLogo({ size = 32, className = '' }: { size?: number; className?: 
 // ── Avatar bot kecil (logo dalam lingkaran teal) ──────────────────────────
 function BotAvatar({ size = 32 }: { size?: number }) {
     return (
-        <div
-            className="shrink-0 rounded-xl bg-white border border-teal-100 shadow-sm flex items-center justify-center overflow-hidden"
-            style={{ width: size, height: size }}
-        >
-            <ClinicLogo size={size - 6} />
+        <div className="shrink-0 rounded-xl bg-transparent border border-slate-100 ...">
+            <ClinicLogo size={size} />   {/* ← size penuh, tanpa dikurangi */}
         </div>
     );
 }
@@ -252,26 +249,42 @@ export default function Chatbot() {
         <motion.button
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-[9999] flex items-center gap-3
-                       bg-slate-900 text-white pl-2 pr-5 py-2 rounded-2xl
-                       shadow-2xl border border-white/10 hover:border-white/20 transition-all"
+            className="fixed bottom-6 right-6 z-[9999] group
+                   flex flex-col items-center gap-2
+                   w-[88px] py-4 px-3 rounded-[22px]
+                   shadow-2xl transition-all duration-250
+                   bg-[#0f1a14] hover:bg-emerald-600
+                   border border-white/8 hover:border-emerald-400/40"
         >
-            {/* Logo box */}
-            <div className="relative w-11 h-11 bg-white rounded-xl flex items-center justify-center shadow overflow-hidden shrink-0">
-                <ClinicLogo size={36} />
-                {/* ping dot */}
-                <span className="absolute -top-1 -right-1 flex">
-                    <span className="animate-ping absolute w-3 h-3 rounded-full bg-emerald-400 opacity-60" />
-                    <span className="relative w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+            {/* ── Icon box — gelap default, putih/teal saat hover ── */}
+            <div className="relative w-14 h-14 rounded-2xl overflow-hidden
+                        flex items-center justify-center
+                        bg-emerald-600 group-hover:bg-white/20
+                        transition-all duration-250 shadow-lg">
+
+                {/* Logo klinik */}
+                <ClinicLogo size={44} />
+
+                {/* Status dot online — pojok kanan atas */}
+                <span className="absolute top-1 right-1 flex items-center justify-center">
+                    <span className="animate-ping absolute w-2.5 h-2.5 rounded-full bg-emerald-300 opacity-60" />
+                    <span className="relative w-2 h-2 rounded-full bg-emerald-400 border border-white/60" />
                 </span>
             </div>
-            <div className="flex flex-col items-start leading-tight">
-                <span className="text-[14px] font-bold">Tanya AI</span>
-                <span className="text-[10px] text-emerald-400 font-semibold tracking-widest uppercase">Online</span>
-            </div>
+
+            {/* Label */}
+            <span className="text-[12px] font-black text-white/90 group-hover:text-white
+                         tracking-wide leading-none transition-colors duration-200">
+                Tanya AI
+            </span>
+
+            {/* Online indicator teks */}
+            <span className="text-[9px] font-bold text-emerald-400 group-hover:text-emerald-200
+                         uppercase tracking-widest leading-none transition-colors duration-200">
+                ONLINE
+            </span>
         </motion.button>
     );
 
@@ -353,7 +366,9 @@ export default function Chatbot() {
                                                 ? 'bg-teal-50 border border-teal-200'
                                                 : 'hover:bg-white border border-transparent'}`}
                                     >
-                                        <MessageCircle size={13} className={`mt-0.5 shrink-0 ${currentConvId === conv.id ? 'text-teal-500' : 'text-slate-300'}`} />
+                                        <div className={`shrink-0 mt-0.5 rounded-md overflow-hidden transition-all ${currentConvId === conv.id ? 'opacity-100' : 'opacity-40'}`}>
+                                            <ClinicLogo size={16} />
+                                        </div>
                                         <div className="flex-1 min-w-0">
                                             {editingTitleId === conv.id
                                                 ? <input type="text" value={editTitleValue} autoFocus
@@ -406,8 +421,8 @@ export default function Chatbot() {
                             </button>
 
                             {/* Logo klinik di header */}
-                            <div className="w-8 h-8 bg-white rounded-xl border border-slate-200 shadow-sm flex items-center justify-center overflow-hidden">
-                                <ClinicLogo size={28} />
+                            <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center">
+                                <ClinicLogo size={36} />
                             </div>
 
                             <div>
@@ -600,14 +615,14 @@ export default function Chatbot() {
                                            disabled:opacity-40 disabled:cursor-not-allowed
                                            transition-all hover:scale-105 active:scale-95"
                             >
-                                <Send size={14} />
+                                <ArrowUp size={15} strokeWidth={2.5} />
                             </button>
                         </div>
 
                         {/* Footer */}
                         <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center gap-1.5">
-                                <ClinicLogo size={14} className="opacity-50" />
+                                <ClinicLogo size={14} />
                                 <p className="text-[10px] text-slate-400 font-medium">Nauli Dental Care</p>
                             </div>
                             <p className="text-[10px] text-slate-400">
