@@ -2,8 +2,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Calendar, Clock, User, Stethoscope, CheckCircle,
-    XCircle, AlertCircle, Plus, Search, Filter,
-    ChevronRight, Phone, MapPin, CalendarDays
+    XCircle, AlertCircle, Plus, Search,
+    ChevronRight, Phone, CalendarDays, Sparkles
 } from 'lucide-react';
 import { useState, useEffect, Suspense } from 'react';
 import api from '@/services/api';
@@ -18,6 +18,37 @@ interface Appointment {
     notes?: string;
 }
 
+const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; border: string; dot: string }> = {
+    confirmed: { label: 'Dikonfirmasi', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0', dot: '#22c55e' },
+    pending:   { label: 'Menunggu',     bg: '#fffbeb', text: '#b45309', border: '#fde68a', dot: '#f59e0b' },
+    completed: { label: 'Selesai',      bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe', dot: '#3b82f6' },
+    cancelled: { label: 'Dibatalkan',   bg: '#fef2f2', text: '#b91c1c', border: '#fecaca', dot: '#ef4444' },
+};
+
+function StatusBadge({ status }: { status: string }) {
+    const cfg = STATUS_CONFIG[status] ?? { label: status || 'Pending', bg: '#f8fafc', text: '#475569', border: '#e2e8f0', dot: '#94a3b8' };
+    return (
+        <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '5px 12px', borderRadius: 999, fontSize: 11, fontWeight: 700,
+            backgroundColor: cfg.bg, color: cfg.text, border: `1px solid ${cfg.border}`,
+            letterSpacing: '0.01em',
+        }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: cfg.dot, flexShrink: 0 }} />
+            {cfg.label}
+        </span>
+    );
+}
+
+function formatDate(dateStr: string) {
+    try { return new Date(dateStr).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
+    catch { return dateStr; }
+}
+function formatTime(dateStr: string) {
+    try { return new Date(dateStr).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }); }
+    catch { return ''; }
+}
+
 function AppointmentsContent() {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -25,38 +56,20 @@ function AppointmentsContent() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [doctors, setDoctors] = useState<any[]>([]);
-    const [formData, setFormData] = useState({
-        patient_name: '',
-        patient_phone: '',
-        doctor_name: '',
-        appointment_date: ''
-    });
+    const [formData, setFormData] = useState({ patient_name: '', patient_phone: '', doctor_name: '', appointment_date: '' });
     const [submitStatus, setSubmitStatus] = useState({ type: '', msg: '' });
 
-    useEffect(() => {
-        fetchAppointments();
-        fetchDoctors();
-    }, []);
+    useEffect(() => { fetchAppointments(); fetchDoctors(); }, []);
 
     const fetchAppointments = async () => {
-        try {
-            const res = await api.get('/clinic/appointments/me');
-            setAppointments(res.data);
-        } catch (error) {
-            console.error("Gagal memuat janji temu:", error);
-            setAppointments([]); // Jangan tampilkan data orang lain jika gagal
-        } finally {
-            setLoading(false);
-        }
+        try { const res = await api.get('/clinic/appointments/me'); setAppointments(res.data); }
+        catch { setAppointments([]); }
+        finally { setLoading(false); }
     };
 
     const fetchDoctors = async () => {
-        try {
-            const res = await api.get('/clinic/doctors');
-            setDoctors(res.data);
-        } catch {
-            setDoctors([]);
-        }
+        try { const res = await api.get('/clinic/doctors'); setDoctors(res.data); }
+        catch { setDoctors([]); }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -64,242 +77,256 @@ function AppointmentsContent() {
         setSubmitStatus({ type: 'loading', msg: 'Mengirim...' });
         try {
             await api.post('/clinic/appointments', formData);
-            setSubmitStatus({ type: 'success', msg: '✅ Janji temu berhasil dibuat!' });
+            setSubmitStatus({ type: 'success', msg: 'Janji temu berhasil dibuat!' });
             setFormData({ patient_name: '', patient_phone: '', doctor_name: '', appointment_date: '' });
             fetchAppointments();
             setTimeout(() => { setShowForm(false); setSubmitStatus({ type: '', msg: '' }); }, 2000);
         } catch {
-            setSubmitStatus({ type: 'error', msg: '❌ Gagal membuat janji temu.' });
+            setSubmitStatus({ type: 'error', msg: 'Gagal membuat janji temu. Coba lagi.' });
             setTimeout(() => setSubmitStatus({ type: '', msg: '' }), 3000);
         }
     };
 
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case 'confirmed':
-                return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold">
-                        <CheckCircle size={12} /> Dikonfirmasi
-                    </span>
-                );
-            case 'pending':
-                return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-xs font-bold">
-                        <AlertCircle size={12} /> Menunggu
-                    </span>
-                );
-            case 'completed':
-                return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">
-                        <CheckCircle size={12} /> Selesai
-                    </span>
-                );
-            case 'cancelled':
-                return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-bold">
-                        <XCircle size={12} /> Dibatalkan
-                    </span>
-                );
-            default:
-                return (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-slate-50 text-slate-600 rounded-full text-xs font-bold">
-                        <AlertCircle size={12} /> {status || 'Pending'}
-                    </span>
-                );
-        }
-    };
+    const tabs = [
+        { id: 'all',       label: 'Semua',        count: appointments.length },
+        { id: 'pending',   label: 'Menunggu',      count: appointments.filter(a => a.status === 'pending').length },
+        { id: 'confirmed', label: 'Dikonfirmasi',  count: appointments.filter(a => a.status === 'confirmed').length },
+        { id: 'completed', label: 'Selesai',       count: appointments.filter(a => a.status === 'completed').length },
+    ];
 
-    const formatDate = (dateStr: string) => {
-        try {
-            return new Date(dateStr).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        } catch { return dateStr; }
-    };
-
-    const formatTime = (dateStr: string) => {
-        try {
-            return new Date(dateStr).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-        } catch { return ''; }
-    };
-
-    const filteredAppointments = appointments.filter(apt => {
+    const filtered = appointments.filter(apt => {
         if (filter !== 'all' && apt.status !== filter) return false;
         if (searchQuery && !apt.doctor_name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
         return true;
     });
 
-    const tabs = [
-        { id: 'all', label: 'Semua', count: appointments.length },
-        { id: 'pending', label: 'Menunggu', count: appointments.filter(a => a.status === 'pending').length },
-        { id: 'confirmed', label: 'Dikonfirmasi', count: appointments.filter(a => a.status === 'confirmed').length },
-        { id: 'completed', label: 'Selesai', count: appointments.filter(a => a.status === 'completed').length },
-    ];
+    const inputStyle: React.CSSProperties = {
+        width: '100%', padding: '11px 14px 11px 42px',
+        fontSize: 13, fontWeight: 500, color: '#1e293b',
+        backgroundColor: '#f8fafc', border: '1.5px solid #e2e8f0',
+        borderRadius: 10, outline: 'none', boxSizing: 'border-box',
+        transition: 'border-color 0.15s',
+    };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 py-12 px-6">
-                <div className="max-w-5xl mx-auto">
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+
+            {/* ── HERO HEADER ── */}
+            <div style={{
+                background: 'linear-gradient(135deg, #064e3b 0%, #065f46 40%, #047857 100%)',
+                padding: '40px 24px 56px',
+                position: 'relative', overflow: 'hidden',
+            }}>
+                {/* Decorative circles */}
+                <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.04)' }} />
+                <div style={{ position: 'absolute', bottom: -20, left: 60, width: 120, height: 120, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.03)' }} />
+
+                <div style={{ maxWidth: 800, margin: '0 auto', position: 'relative' }}>
+                    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+                        {/* Badge */}
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', padding: '5px 12px', borderRadius: 999, marginBottom: 14, border: '1px solid rgba(255,255,255,0.15)' }}>
+                            <CalendarDays size={11} color="#6ee7b7" />
+                            <span style={{ fontSize: 10, fontWeight: 800, color: '#a7f3d0', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Manajemen Janji Temu</span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
                             <div>
-                                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full mb-3">
-                                    <CalendarDays size={12} className="text-emerald-200" />
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-white">Manajemen Janji Temu</span>
-                                </div>
-                                <h1 className="text-2xl sm:text-3xl font-black text-white">Janji Temu Saya</h1>
-                                <p className="text-emerald-100 text-sm mt-1">Kelola semua jadwal kunjungan Anda</p>
+                                <h1 style={{ fontSize: 28, fontWeight: 900, color: '#fff', margin: 0, lineHeight: 1.2 }}>Janji Temu Saya</h1>
+                                <p style={{ fontSize: 13, color: '#a7f3d0', margin: '6px 0 0', fontWeight: 400 }}>Kelola semua jadwal kunjungan Anda dengan mudah</p>
                             </div>
                             <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
                                 onClick={() => setShowForm(!showForm)}
-                                className="px-5 py-3 bg-white text-emerald-700 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 8,
+                                    padding: '11px 20px', backgroundColor: '#fff',
+                                    color: '#065f46', border: 'none', borderRadius: 12,
+                                    fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                                    boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+                                    flexShrink: 0,
+                                }}
                             >
-                                <Plus size={16} /> Buat Janji Baru
+                                <Plus size={15} /> Buat Janji Baru
                             </motion.button>
+                        </div>
+
+                        {/* Stats row */}
+                        <div style={{ display: 'flex', gap: 10, marginTop: 24, flexWrap: 'wrap' }}>
+                            {[
+                                { label: 'Total', value: appointments.length, color: '#6ee7b7' },
+                                { label: 'Menunggu', value: appointments.filter(a => a.status === 'pending').length, color: '#fcd34d' },
+                                { label: 'Dikonfirmasi', value: appointments.filter(a => a.status === 'confirmed').length, color: '#6ee7b7' },
+                                { label: 'Selesai', value: appointments.filter(a => a.status === 'completed').length, color: '#93c5fd' },
+                            ].map(stat => (
+                                <div key={stat.label} style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', padding: '8px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.12)' }}>
+                                    <div style={{ fontSize: 18, fontWeight: 900, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
+                                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', marginTop: 2, fontWeight: 500 }}>{stat.label}</div>
+                                </div>
+                            ))}
                         </div>
                     </motion.div>
                 </div>
             </div>
 
-            <div className="max-w-5xl mx-auto px-6 py-8">
-                {/* New Appointment Form */}
+            <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 24px 40px' }}>
+
+                {/* ── FORM ── */}
                 <AnimatePresence>
                     {showForm && (
                         <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="mb-8 overflow-hidden"
+                            initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.2 }}
+                            style={{ marginBottom: 24 }}
                         >
-                            <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 md:p-8">
-                                <h3 className="text-lg font-black text-slate-800 mb-5 flex items-center gap-2">
-                                    <Calendar size={20} className="text-emerald-500" /> Formulir Janji Temu Baru
-                                </h3>
-                                <form onSubmit={handleSubmit} className="space-y-4">
-                                    <div className="grid md:grid-cols-2 gap-4">
-                                        <div className="relative">
-                                            <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                                            <input type="text" placeholder="Nama Lengkap" className="w-full pl-12 pr-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all" value={formData.patient_name} onChange={e => setFormData({ ...formData, patient_name: e.target.value })} required />
-                                        </div>
-                                        <div className="relative">
-                                            <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                                            <input type="text" placeholder="Nomor WhatsApp" className="w-full pl-12 pr-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all" value={formData.patient_phone} onChange={e => setFormData({ ...formData, patient_phone: e.target.value })} required />
-                                        </div>
+                            <div style={{ backgroundColor: '#fff', borderRadius: 16, border: '1.5px solid #e2e8f0', padding: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                                    <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Sparkles size={16} color="#059669" />
                                     </div>
-                                    <div className="grid md:grid-cols-2 gap-4">
-                                        <div className="relative">
-                                            <Stethoscope size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" />
-                                            <select className="w-full pl-12 pr-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all" value={formData.doctor_name} onChange={e => setFormData({ ...formData, doctor_name: e.target.value })} required>
+                                    <div>
+                                        <p style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', margin: 0 }}>Formulir Janji Temu Baru</p>
+                                        <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>Isi semua kolom dengan lengkap</p>
+                                    </div>
+                                </div>
+
+                                <form onSubmit={handleSubmit}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                                        {/* Nama */}
+                                        <div style={{ position: 'relative' }}>
+                                            <User size={14} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                            <input type="text" placeholder="Nama Lengkap" required value={formData.patient_name} onChange={e => setFormData({ ...formData, patient_name: e.target.value })} style={inputStyle} />
+                                        </div>
+                                        {/* Telepon */}
+                                        <div style={{ position: 'relative' }}>
+                                            <Phone size={14} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                            <input type="text" placeholder="Nomor WhatsApp" required value={formData.patient_phone} onChange={e => setFormData({ ...formData, patient_phone: e.target.value })} style={inputStyle} />
+                                        </div>
+                                        {/* Dokter */}
+                                        <div style={{ position: 'relative' }}>
+                                            <Stethoscope size={14} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', zIndex: 1 }} />
+                                            <select required value={formData.doctor_name} onChange={e => setFormData({ ...formData, doctor_name: e.target.value })} style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}>
                                                 <option value="">-- Pilih Dokter --</option>
-                                                {doctors.map((d: any) => (
-                                                    <option key={d.id} value={d.name}>{d.name} - {d.specialty}</option>
-                                                ))}
+                                                {doctors.map((d: any) => <option key={d.id} value={d.name}>{d.name} — {d.specialty}</option>)}
                                             </select>
                                         </div>
-                                        <div className="relative">
-                                            <Clock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                                            <input type="datetime-local" className="w-full pl-12 pr-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all" value={formData.appointment_date} onChange={e => setFormData({ ...formData, appointment_date: e.target.value })} required />
+                                        {/* Tanggal */}
+                                        <div style={{ position: 'relative' }}>
+                                            <Clock size={14} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                            <input type="datetime-local" required value={formData.appointment_date} onChange={e => setFormData({ ...formData, appointment_date: e.target.value })} style={inputStyle} />
                                         </div>
                                     </div>
-                                    <div className="flex gap-3">
-                                        <button type="submit" className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all">
+
+                                    <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                                        <button type="submit" style={{ padding: '10px 22px', background: 'linear-gradient(135deg, #059669, #0d9488)', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(5,150,105,0.3)' }}>
                                             {submitStatus.type === 'loading' ? 'Memproses...' : 'Kirim Janji Temu'}
                                         </button>
-                                        <button type="button" onClick={() => setShowForm(false)} className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">
+                                        <button type="button" onClick={() => setShowForm(false)} style={{ padding: '10px 18px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
                                             Batal
                                         </button>
+                                        {submitStatus.msg && (
+                                            <span style={{ fontSize: 12, fontWeight: 600, color: submitStatus.type === 'success' ? '#059669' : submitStatus.type === 'error' ? '#dc2626' : '#0d9488', padding: '8px 12px', backgroundColor: submitStatus.type === 'success' ? '#f0fdf4' : submitStatus.type === 'error' ? '#fef2f2' : '#f0fdfa', borderRadius: 8 }}>
+                                                {submitStatus.msg}
+                                            </span>
+                                        )}
                                     </div>
-                                    {submitStatus.msg && (
-                                        <p className={`text-sm font-medium p-3 rounded-xl ${submitStatus.type === 'success' ? 'text-green-600 bg-green-50' : submitStatus.type === 'error' ? 'text-red-600 bg-red-50' : 'text-emerald-600 bg-emerald-50'}`}>
-                                            {submitStatus.msg}
-                                        </p>
-                                    )}
                                 </form>
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                {/* Filters & Search */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div className="relative flex-1">
-                        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input
-                            type="text"
-                            placeholder="Cari berdasarkan nama dokter..."
-                            className="w-full pl-12 pr-4 py-3 bg-white rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all shadow-sm"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
+                {/* ── SEARCH ── */}
+                <div style={{ position: 'relative', marginBottom: 16 }}>
+                    <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <input
+                        type="text" placeholder="Cari berdasarkan nama dokter..."
+                        value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                        style={{ width: '100%', padding: '12px 16px 12px 42px', fontSize: 13, fontWeight: 500, color: '#1e293b', backgroundColor: '#fff', border: '1.5px solid #e2e8f0', borderRadius: 12, outline: 'none', boxSizing: 'border-box', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+                    />
                 </div>
 
-                {/* Status Tabs */}
-                <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-                    {tabs.map((tab) => (
+                {/* ── TABS ── */}
+                <div style={{ display: 'flex', gap: 8, marginBottom: 20, overflowX: 'auto', paddingBottom: 4 }}>
+                    {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setFilter(tab.id)}
-                            className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${filter === tab.id
-                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
-                                : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200'
-                                }`}
+                            style={{
+                                padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 700,
+                                whiteSpace: 'nowrap', cursor: 'pointer', border: 'none', transition: 'all 0.15s',
+                                backgroundColor: filter === tab.id ? '#059669' : '#fff',
+                                color: filter === tab.id ? '#fff' : '#64748b',
+                                boxShadow: filter === tab.id ? '0 4px 12px rgba(5,150,105,0.25)' : '0 1px 3px rgba(0,0,0,0.06)',
+                            }}
                         >
-                            {tab.label} <span className="ml-1 text-xs opacity-70">({tab.count})</span>
+                            {tab.label}
+                            <span style={{ marginLeft: 6, fontSize: 10, opacity: 0.75 }}>({tab.count})</span>
                         </button>
                     ))}
                 </div>
 
-                {/* Appointments List */}
+                {/* ── LIST ── */}
                 {loading ? (
-                    <div className="text-center py-20">
-                        <div className="w-10 h-10 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4" />
-                        <p className="text-slate-500 text-sm">Memuat janji temu...</p>
+                    <div style={{ textAlign: 'center', padding: '64px 0' }}>
+                        <div style={{ width: 36, height: 36, border: '3px solid #d1fae5', borderTopColor: '#059669', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+                        <p style={{ fontSize: 13, color: '#94a3b8', margin: 0 }}>Memuat janji temu...</p>
+                        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                     </div>
-                ) : filteredAppointments.length === 0 ? (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                        <Calendar size={48} className="mx-auto text-slate-300 mb-4" />
-                        <h3 className="text-lg font-bold text-slate-400 mb-2">Belum Ada Janji Temu</h3>
-                        <p className="text-sm text-slate-400">Buat janji temu pertama Anda dengan dokter spesialis kami</p>
+                ) : filtered.length === 0 ? (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                        style={{ textAlign: 'center', padding: '64px 24px', backgroundColor: '#fff', borderRadius: 16, border: '1.5px solid #e2e8f0' }}>
+                        <div style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                            <Calendar size={24} color="#cbd5e1" />
+                        </div>
+                        <p style={{ fontSize: 15, fontWeight: 700, color: '#334155', margin: '0 0 6px' }}>Belum Ada Janji Temu</p>
+                        <p style={{ fontSize: 12, color: '#94a3b8', margin: 0 }}>Buat janji temu pertama Anda dengan dokter spesialis kami</p>
                     </motion.div>
                 ) : (
-                    <div className="space-y-4">
-                        {filteredAppointments.map((apt, idx) => (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {filtered.map((apt, idx) => (
                             <motion.div
                                 key={apt.id}
-                                initial={{ opacity: 0, y: 20 }}
+                                initial={{ opacity: 0, y: 12 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.05 }}
-                                className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-all group"
+                                transition={{ delay: idx * 0.04 }}
+                                style={{
+                                    backgroundColor: '#fff', borderRadius: 14,
+                                    border: '1.5px solid #e2e8f0', padding: '16px 20px',
+                                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                                    transition: 'box-shadow 0.15s, border-color 0.15s',
+                                    cursor: 'pointer',
+                                }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)'; (e.currentTarget as HTMLDivElement).style.borderColor = '#d1fae5'; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'; (e.currentTarget as HTMLDivElement).style.borderColor = '#e2e8f0'; }}
                             >
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white shrink-0">
-                                            <Stethoscope size={22} />
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+                                        {/* Avatar */}
+                                        <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, #059669, #0d9488)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                            <Stethoscope size={20} color="#fff" />
                                         </div>
-                                        <div>
-                                            <h3 className="font-bold text-slate-800">{apt.doctor_name}</h3>
-                                            <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-500">
-                                                <span className="flex items-center gap-1">
-                                                    <Calendar size={12} className="text-emerald-500" />
+                                        <div style={{ minWidth: 0 }}>
+                                            <p style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{apt.doctor_name}</p>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#64748b' }}>
+                                                    <Calendar size={11} color="#059669" />
                                                     {formatDate(apt.appointment_date)}
                                                 </span>
-                                                <span className="flex items-center gap-1">
-                                                    <Clock size={12} className="text-emerald-500" />
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#64748b' }}>
+                                                    <Clock size={11} color="#059669" />
                                                     {formatTime(apt.appointment_date)} WIB
                                                 </span>
                                             </div>
                                             {apt.notes && (
-                                                <div className="mt-3 bg-emerald-50 text-emerald-700 text-xs px-3 py-2 rounded-lg font-medium">
+                                                <div style={{ marginTop: 8, padding: '6px 10px', backgroundColor: '#f0fdf4', borderRadius: 7, fontSize: 11, color: '#065f46', fontWeight: 500 }}>
                                                     {apt.notes}
                                                 </div>
                                             )}
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4">
-                                        {getStatusBadge(apt.status)}
-                                        <ChevronRight size={16} className="text-slate-300 group-hover:text-emerald-500 transition-colors" />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                                        <StatusBadge status={apt.status} />
+                                        <ChevronRight size={15} color="#cbd5e1" />
                                     </div>
                                 </div>
                             </motion.div>
@@ -313,7 +340,11 @@ function AppointmentsContent() {
 
 export default function AppointmentsPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Memuat...</div>}>
+        <Suspense fallback={
+            <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc' }}>
+                <p style={{ fontSize: 13, color: '#94a3b8' }}>Memuat...</p>
+            </div>
+        }>
             <AppointmentsContent />
         </Suspense>
     );
