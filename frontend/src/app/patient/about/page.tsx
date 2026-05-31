@@ -5,7 +5,8 @@ import {
     MapPin, Phone, Award, Smile, Heart,
     Clock, Mail, Sparkles, ArrowRight,
     Play, ShieldCheck, Users, Star, Zap,
-    CheckCircle2, Building2, CalendarDays, TrendingUp
+    CheckCircle2, Building2, CalendarDays, TrendingUp,
+    ChevronRight, Activity
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -250,9 +251,9 @@ export default function AboutPage() {
                             <div className="bg-white rounded-2xl p-6 border border-emerald-100 shadow-sm space-y-5">
                                 <p className="text-xs font-black uppercase tracking-widest text-slate-400">Kontak & Lokasi</p>
                                 {[
-                                    { icon: MapPin, label: 'Lokasi', val: 'Jl. Balige No. 12, Toba, Sumatera Utara' },
-                                    { icon: Phone, label: 'WhatsApp', val: '+62 821 6352 6363' },
-                                    { icon: Mail, label: 'Email', val: 'info@naulidental.ai' },
+                                    { icon: MapPin, label: 'Lokasi', val: 'Jl. Raja Paindoan No.20A, Balige, Toba, Sumatera Utara 22314' },
+                                    { icon: Phone, label: 'WhatsApp', val: '0812-6530-965' },
+                                    { icon: Mail, label: 'Email', val: 'booking@naulidental.com' },
                                 ].map(({ icon: Icon, label, val }, i) => (
                                     <div key={i} className="flex items-start gap-4">
                                         <div className="w-9 h-9 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -276,16 +277,17 @@ export default function AboutPage() {
                                 </div>
                                 <div className="space-y-3">
                                     {[
-                                        { day: 'Senin – Jumat', time: '08:00 – 21:00', status: 'open' },
-                                        { day: 'Sabtu', time: '09:00 – 17:00', status: 'open' },
-                                        { day: 'Minggu', time: 'Hanya Darurat', status: 'limited' },
+                                        { day: 'Senin – Kamis', time: '10:00 – 19:00', status: 'open' },
+                                        { day: 'Jumat', time: '10:00 – 19:00', status: 'open' },
+                                        { day: 'Sabtu', time: '10:00 – 17:00', status: 'open' },
+                                        { day: 'Minggu', time: 'Tutup', status: 'closed' },
                                     ].map((h, i) => (
                                         <div key={i} className="flex items-center justify-between py-2.5 border-b border-slate-50 last:border-0">
                                             <span className="text-sm text-slate-600 font-medium">{h.day}</span>
                                             <span className={`text-sm font-bold px-3 py-1 rounded-full text-xs
                                                 ${h.status === 'open' ? 'bg-emerald-50 text-emerald-600' :
-                                                    h.status === 'limited' ? 'bg-amber-50 text-amber-600' :
-                                                        'bg-red-50 text-red-500'}`}>
+                                                    h.status === 'closed' ? 'bg-red-50 text-red-500' :
+                                                        'bg-amber-50 text-amber-600'}`}>
                                                 {h.time}
                                             </span>
                                         </div>
@@ -422,6 +424,166 @@ export default function AboutPage() {
                     </motion.div>
                 </div>
             </div>
+
+            {/* ══ FOOTER ════════════════════════════════════════════════════ */}
+            <footer className="bg-white border-t border-emerald-100 pt-16 pb-8 px-6">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 pb-10 border-b border-emerald-100">
+
+                        {/* Kolom 1: Logo & Tagline */}
+                        <div>
+                            <Link href="/patient/dashboard" className="flex items-center gap-3 mb-4 group">
+                                <div className="w-12 h-12 rounded-[1.2rem] overflow-hidden border-2 border-emerald-100 shadow-sm group-hover:border-emerald-200 transition-all flex-shrink-0 bg-white flex items-center justify-center p-1.5">
+                                    <img
+                                        src="/images/Logo.png"
+                                        alt="Nauli Dental"
+                                        className="w-full h-full object-contain"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                            const parent = target.parentElement;
+                                            if (parent) {
+                                                parent.innerHTML = '<span class="text-emerald-600 font-black text-lg">ND</span>';
+                                            }
+                                        }}
+                                    />
+                                </div>
+                                <div className="flex flex-col leading-none">
+                                    <h2 className="text-slate-800 font-black text-[18px] tracking-tighter leading-tight">
+                                        Nauli<span className="text-[#006D44]">Dental</span>
+                                    </h2>
+                                    <p className="text-[9px] text-emerald-600 font-bold tracking-widest uppercase">
+                                        Clinic Care
+                                    </p>
+                                </div>
+                            </Link>
+                            <p className="text-slate-500 text-sm leading-relaxed mt-3">
+                                Nauli Dental Care adalah klinik perawatan gigi yang berlokasi di Balige, Kabupaten Toba, Sumatera Utara.
+                                Klinik ini melayani berbagai macam perawatan gigi umum dan estetika.
+                            </p>
+                        </div>
+
+                        {/* Kolom 2: Company Links */}
+                        <div>
+                            <h3 className="text-slate-800 font-bold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
+                                <div className="w-1 h-5 bg-emerald-500 rounded-full" />
+                                Company Links
+                            </h3>
+                            <ul className="space-y-3">
+                                {[
+                                    { name: 'Beranda', href: '/patient/dashboard' },
+                                    { name: 'Nauli Dental', href: '/patient/about' },
+                                    { name: 'Tim Kami', href: '/patient/doctors' },
+                                    { name: 'Visi & Misi', href: '/patient/visiMisi' },
+                                    { name: 'Layanan', href: '/patient/services' },
+                                    { name: 'Cari Jadwal', href: '/patient/appointments' },
+                                ].map((link, idx) => (
+                                    <li key={idx}>
+                                        <Link href={link.href} className="text-slate-500 hover:text-emerald-600 text-sm transition-colors duration-300 flex items-center gap-2 group">
+                                            <ChevronRight size={12} className="text-emerald-400 opacity-0 group-hover:opacity-100 transition-all -translate-x-1 group-hover:translate-x-0" />
+                                            {link.name}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Kolom 3: Office Address - Data Baru Balige */}
+                        <div>
+                            <h3 className="text-slate-800 font-bold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
+                                <div className="w-1 h-5 bg-emerald-500 rounded-full" />
+                                Office Address
+                            </h3>
+                            <div className="space-y-4">
+                                <div className="flex gap-3 group">
+                                    <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-100 transition">
+                                        <MapPin size={13} className="text-emerald-500" />
+                                    </div>
+                                    <div className="text-slate-500 text-sm leading-relaxed group-hover:text-slate-700 transition">
+                                        Jl. Raja Paindoan No.20A, Lumban Dolok Haume Bange,<br />
+                                        Kec. Balige, Toba, Sumatera Utara 22314
+                                    </div>
+                                </div>
+                                <div className="flex gap-3 group">
+                                    <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-100 transition">
+                                        <MapPin size={13} className="text-emerald-500" />
+                                    </div>
+                                    <div className="text-slate-500 text-sm leading-relaxed group-hover:text-slate-700 transition">
+                                        Koordinat: 2°19'58.7"N 99°03'57.8"E
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Kolom 4: Contact & Hours */}
+                        <div>
+                            <h3 className="text-slate-800 font-bold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
+                                <div className="w-1 h-5 bg-emerald-500 rounded-full" />
+                                Contact & Hours
+                            </h3>
+                            <ul className="space-y-4">
+                                <li className="flex items-center gap-3 group">
+                                    <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-100 transition">
+                                        <Mail size={13} className="text-emerald-500" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Email</p>
+                                        <a href="mailto:booking@naulidental.com" className="text-slate-600 text-sm hover:text-emerald-600 transition">
+                                            booking@naulidental.com
+                                        </a>
+                                    </div>
+                                </li>
+                                <li className="flex items-center gap-3 group">
+                                    <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-100 transition">
+                                        <Phone size={13} className="text-emerald-500" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Telepon</p>
+                                        <a href="tel:+628126530965" className="text-slate-600 text-sm hover:text-emerald-600 transition">
+                                            0812-6530-965
+                                        </a>
+                                    </div>
+                                </li>
+                                <li className="flex gap-3 group">
+                                    <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-100 transition">
+                                        <Clock size={13} className="text-emerald-500" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Jam Operasional</p>
+                                        <div className="text-slate-600 text-sm space-y-0.5">
+                                            <p>Senin - Sabtu: 10.00 - 19.00</p>
+                                            <p className="text-red-500">Minggu: Tutup</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li className="flex items-center gap-3 group">
+                                    <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-100 transition">
+                                        <Activity size={13} className="text-emerald-500" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Status</p>
+                                        <p className="text-slate-600 text-sm flex items-center gap-1">
+                                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                            Buka (Senin - Sabtu)
+                                        </p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <p className="text-slate-400 text-xs">
+                            © {new Date().getFullYear()} Nauli Dental Care - Balige, Toba, Sumatera Utara. All rights reserved.
+                        </p>
+                        <div className="flex gap-6 text-xs">
+                            <Link href="/patient/privacy" className="text-slate-400 hover:text-emerald-600 transition-colors">Privacy Policy</Link>
+                            <Link href="/patient/terms" className="text-slate-400 hover:text-emerald-600 transition-colors">Terms of Use</Link>
+                            <Link href="/patient/accessibility" className="text-slate-400 hover:text-emerald-600 transition-colors">Accessibility</Link>
+                        </div>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 }
