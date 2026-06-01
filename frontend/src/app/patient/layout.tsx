@@ -113,7 +113,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
         { name: 'Nauli Dental', href: '/patient/about', icon: Building2 },
         { name: 'Tim Kami', href: '/patient/doctors', icon: UsersRound },
         { name: 'Visi & Misi', href: '/patient/visiMisi', icon: Target },
-        { name: 'NauliCo', href: '/patient/nauli-co', icon: Sparkles },
+        { name: 'NauliCo', href: '/patient/nauli-co/about', icon: Sparkles },
     ];
 
     if (!isAuthorized) return null;

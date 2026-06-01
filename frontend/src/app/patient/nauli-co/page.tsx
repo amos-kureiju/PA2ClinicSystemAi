@@ -1,166 +1,190 @@
 'use client';
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
-    MessageCircle, ArrowRight, Instagram,
-    Globe, Phone, Mail, MapPin, CheckCircle2, Clock, ChevronLeft
+    ArrowRight, Heart, Users, Star, Sparkles,
+    CheckCircle, Award, TrendingUp, Zap, Stethoscope
 } from 'lucide-react';
 
-export default function NauliCoPage() {
-    const [activeTab, setActiveTab] = useState('About');
+const FadeUp = ({ children, delay = 0, className = '' }: {
+    children: React.ReactNode; delay?: number; className?: string;
+}) => (
+    <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-50px' }}
+        transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+        className={className}
+    >
+        {children}
+    </motion.div>
+);
 
-    const navItems = ['About', 'What\'s New', 'Register as Partner', 'Contact'];
+const perks = [
+    { icon: Heart, label: 'Komunitas Suportif', desc: 'Bergabung dengan ribuan pasien yang saling mendukung perjalanan kesehatan gigi.' },
+    { icon: Star, label: 'Reward Eksklusif', desc: 'Kumpulkan poin di setiap kunjungan, tukarkan dengan diskon dan layanan gratis.' },
+    { icon: Sparkles, label: 'Edukasi Gigi', desc: 'Akses konten edukasi, tips perawatan, dan webinar eksklusif dari dokter kami.' },
+    { icon: Zap, label: 'Prioritas Antrian', desc: 'Member NauliCo mendapat slot prioritas saat pemesanan janji temu online.' },
+    { icon: Award, label: 'Member Badge', desc: 'Badge eksklusif di profil Anda sebagai tanda kepercayaan terhadap NauliDental.' },
+    { icon: TrendingUp, label: 'Benefit Bertingkat', desc: 'Naik level Silver → Gold → Platinum — semakin banyak manfaat yang Anda raih.' },
+];
 
+const stats = [
+    { value: '5.000+', label: 'Member Aktif' },
+    { value: '20 Th', label: 'Pengalaman' },
+    { value: '98%', label: 'Kepuasan Pasien' },
+    { value: '3 Kota', label: 'Cabang Kami' },
+];
+
+export default function NauliCoAboutPage() {
     return (
-        <div className="min-h-screen bg-white font-sans text-slate-800">
+        <div className="bg-white">
 
-            {/* ─── SUB-NAVBAR NAULICO ─── */}
-                <nav className="fixed top-[72px] left-0 right-0 z-[80] bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
-                    <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-                        <div className="flex items-center gap-6">
-                            {/* TOMBOL KEMBALI KE BERANDA UTAMA */}
-                            <Link href="/patient/dashboard" className="flex items-center gap-2 text-slate-400 hover:text-blue-600 transition-all group">
-                                <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                                <span className="text-xs font-bold uppercase tracking-widest">Portal Utama</span>
-                            </Link>
+            {/* ── Hero ── */}
+            <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 px-6 py-20">
+                <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-100/50 rounded-full blur-[80px] pointer-events-none" />
+                <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 items-center relative">
 
-                            <div className="h-4 w-px bg-slate-200" /> {/* Divider */}
-
-                            <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-[10px] font-black italic">N</div>
-                                <span className="text-sm font-black tracking-tighter text-blue-900 uppercase">Nauli<span className="text-blue-500">Co</span></span>
+                    {/* Text */}
+                    <div>
+                        <FadeUp>
+                            <span className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-700 text-[11px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest mb-5">
+                                <Sparkles size={10} /> Komunitas NauliDental
+                            </span>
+                        </FadeUp>
+                        <FadeUp delay={0.08}>
+                            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 leading-[1.08] mb-5">
+                                Apakah Kamu<br />
+                                <span className="text-emerald-500">Yang Berikutnya?</span>
+                            </h1>
+                        </FadeUp>
+                        <FadeUp delay={0.14}>
+                            <p className="text-slate-500 text-base leading-relaxed mb-3">
+                                Jadilah bagian dari gerakan yang tidak hanya mendukung kesehatanmu, tetapi juga mengedukasi masyarakat tentang pentingnya perawatan gigi.
+                            </p>
+                            <p className="text-slate-400 text-sm leading-relaxed mb-8">
+                                <span className="text-emerald-600 font-semibold">NauliCo</span> adalah komunitas kreatif yang lahir dari semangat NauliDental — klinik gigi terpercaya yang telah berkomitmen melayani selama lebih dari 20 tahun.
+                            </p>
+                        </FadeUp>
+                        <FadeUp delay={0.2}>
+                            <div className="flex flex-wrap gap-3">
+                                <Link href="/patient/nauli-co/register-as-partner"
+                                    className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-md shadow-emerald-200 transition-all">
+                                    Gabung Sekarang <ArrowRight size={14} />
+                                </Link>
+                                <Link href="/patient/nauli-co/contact"
+                                    className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-3 rounded-xl text-sm transition-all">
+                                    Hubungi Kami
+                                </Link>
                             </div>
-                        </div>
-
-                        {/* Menu Navigasi NauliCo */}
-                        <div className="hidden md:flex items-center gap-6">
-                            {navItems.map((item) => (
-                                <button
-                                    key={item}
-                                    onClick={() => setActiveTab(item)}
-                                    className={`text-[10px] font-black uppercase tracking-[0.1em] transition-colors ${activeTab === item ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
-                                >
-                                    {item}
-                                </button>
-                            ))}
-                        </div>
+                        </FadeUp>
                     </div>
-                </nav>
 
-            <main className="pt-40 pb-20 px-6">
-                <div className="max-w-7xl mx-auto">
-
-                    {/* ─── HERO SECTION (BIRU MUDA) ─── */}
-                    <section className="relative bg-[#E3F2FD] rounded-[3rem] overflow-hidden min-h-[500px] flex items-center">
-                        <div className="grid md:grid-cols-2 gap-10 p-10 md:p-20 w-full items-center">
-
-                            {/* Teks Kiri */}
-                            <motion.div
-                                initial={{ opacity: 0, x: -30 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="space-y-6 z-10"
-                            >
-                                <h1 className="text-5xl md:text-6xl font-black text-[#01579B] leading-tight tracking-tighter">
-                                    Are You Next?
-                                </h1>
-                                <p className="text-lg text-blue-700/80 font-medium leading-relaxed max-w-md">
-                                    Jadilah bagian dari gerakan yang tidak hanya mendukung passion-mu, tetapi juga mengedukasi masyarakat tentang pentingnya kesehatan gigi yang lebih baik!
-                                </p>
-                                <p className="text-slate-600 leading-relaxed max-w-md">
-                                    Nauli Co. adalah komunitas kreatif yang lahir dari semangat Nauli Dental, sebuah klinik gigi terpercaya yang berkomitmen memberikan layanan terbaik.
-                                </p>
-
-                                <div className="flex gap-4 pt-4">
-                                    <button className="bg-[#0288D1] text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-200 hover:bg-blue-900 transition-all active:scale-95">
-                                        Join Now!
-                                    </button>
+                    {/* Stats card */}
+                    <FadeUp delay={0.18} className="hidden lg:block">
+                        <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-100/80 p-8">
+                            <div className="flex items-center gap-3 mb-6 pb-5 border-b border-slate-50">
+                                <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                                    <Stethoscope size={18} className="text-emerald-500" />
                                 </div>
-                            </motion.div>
-
-                            {/* Gambar Kanan (Gunakan gambar dokter/model Anda) */}
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="relative flex justify-center"
-                            >
-                                <img
-                                    src="/images/doctors.jpg" // Ganti dengan path gambar Anda
-                                    className="w-full max-w-md md:max-w-lg object-cover rounded-[2rem] shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-700"
-                                    alt="NauliCo Community"
-                                />
-                            </motion.div>
-                        </div>
-
-                        {/* Floating Decoration */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -mr-20 -mt-20 blur-3xl" />
-                    </section>
-
-                    {/* ─── CONTACT & INFO SECTION ─── */}
-                    <section className="grid md:grid-cols-3 gap-10 mt-20">
-
-                        {/* Info Klinik */}
-                        <div className="md:col-span-2 space-y-8 bg-slate-50 p-10 rounded-[2.5rem] border border-slate-100">
-                            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Informasi <span className="text-blue-600">Klinik</span></h2>
-                            <div className="grid sm:grid-cols-2 gap-6">
-                                <div className="flex gap-4">
-                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0"><MapPin className="text-blue-500" size={20} /></div>
-                                    <p className="text-sm text-slate-500 leading-relaxed">Jl. Balige No. 12, Toba, Sumatera Utara (Depan Lapangan Sisingamangaraja)</p>
-                                </div>
-                                <div className="flex gap-4">
-                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0"><Clock className="text-blue-500" size={20} /></div>
-                                    <p className="text-sm text-slate-500 leading-relaxed font-bold">Senin - Sabtu<br /><span className="font-normal text-xs text-blue-600">08:00 - 20:00 WIB</span></p>
+                                <div>
+                                    <p className="text-sm font-black text-slate-800">NauliCo Community</p>
+                                    <p className="text-xs text-emerald-500">Komunitas Kesehatan Gigi</p>
                                 </div>
                             </div>
-                            <div className="h-48 w-full bg-slate-200 rounded-3xl overflow-hidden grayscale hover:grayscale-0 transition-all duration-700">
-                                {/* Integrasi Google Maps bisa ditaruh di sini */}
-                                <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold italic uppercase tracking-widest text-xs">Peta Lokasi Klinik</div>
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                {stats.map((s, i) => (
+                                    <motion.div key={i}
+                                        initial={{ opacity: 0, y: 12 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: 0.3 + i * 0.06 }}
+                                        className="bg-slate-50 rounded-2xl p-4 border border-slate-100"
+                                    >
+                                        <p className="text-2xl font-black text-slate-800">{s.value}</p>
+                                        <p className="text-xs text-slate-400 font-medium mt-0.5">{s.label}</p>
+                                    </motion.div>
+                                ))}
+                            </div>
+                            {/* Member levels */}
+                            <div className="space-y-2">
+                                {[
+                                    { level: 'Silver', color: 'text-slate-500 bg-slate-50 border-slate-200', bar: 'bg-slate-400', w: '33%' },
+                                    { level: 'Gold', color: 'text-amber-600 bg-amber-50 border-amber-200', bar: 'bg-amber-400', w: '66%' },
+                                    { level: 'Platinum', color: 'text-teal-600  bg-teal-50  border-teal-200', bar: 'bg-teal-500', w: '100%' },
+                                ].map(m => (
+                                    <div key={m.level} className={`flex items-center gap-3 px-3 py-2 rounded-xl border text-xs font-black ${m.color}`}>
+                                        <span className="w-14">{m.level}</span>
+                                        <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                whileInView={{ width: m.w }}
+                                                viewport={{ once: true }}
+                                                transition={{ duration: 0.7, delay: 0.5 }}
+                                                className={`h-full ${m.bar} rounded-full`}
+                                            />
+                                        </div>
+                                        <CheckCircle size={12} />
+                                    </div>
+                                ))}
                             </div>
                         </div>
-
-                        {/* Hubungi Kami */}
-                        <div className="bg-white border border-slate-100 shadow-xl shadow-slate-200/50 p-10 rounded-[2.5rem] flex flex-col justify-between">
-                            <div className="space-y-6">
-                                <h3 className="text-2xl font-black text-slate-800">Hubungi Kami</h3>
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3 text-slate-500 hover:text-blue-600 transition-colors cursor-pointer">
-                                        <Instagram size={18} /> <span className="text-sm font-bold">@nauli.dental</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-slate-500 hover:text-blue-600 transition-colors cursor-pointer">
-                                        <Globe size={18} /> <span className="text-sm font-bold">www.naulidental.co</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-slate-500 hover:text-blue-600 transition-colors cursor-pointer">
-                                        <Mail size={18} /> <span className="text-sm font-bold">halo@naulidental.co</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <Link href="https://wa.me/0812345678" target="_blank">
-                                <button className="w-full mt-10 bg-[#25D366] text-white py-4 rounded-2xl flex items-center justify-center gap-3 font-black uppercase text-[10px] tracking-widest shadow-lg shadow-green-100 hover:scale-[1.02] transition-all">
-                                    <MessageCircle size={18} /> Chat via WhatsApp
-                                </button>
-                            </Link>
-                        </div>
-                    </section>
+                    </FadeUp>
                 </div>
-            </main>
+            </section>
 
-            {/* ─── FLOATING BUTTONS (PROMO) ─── */}
-            <div className="fixed bottom-10 left-10 z-[100] flex flex-col gap-3">
-                <button className="bg-[#00BCD4] text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-2xl border-2 border-white/20">
-                    Promo!
-                </button>
-                <button className="bg-blue-900 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-2xl border-2 border-white/20">
-                    Join Now!
-                </button>
-            </div>
-
-            {/* Floating WhatsApp ala gambar */}
-            <Link href="#" className="fixed bottom-10 right-10 z-[100]">
-                <div className="bg-[#25D366] w-16 h-16 rounded-full flex items-center justify-center text-white shadow-2xl hover:scale-110 transition-transform">
-                    <MessageCircle size={32} />
+            {/* ── Perks ── */}
+            <section className="py-20 px-6 bg-white">
+                <div className="max-w-6xl mx-auto">
+                    <FadeUp className="text-center mb-14">
+                        <span className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-3 block">Keuntungan Member</span>
+                        <h2 className="text-3xl font-black text-slate-800 mb-3">
+                            Mengapa Bergabung <span className="text-emerald-500">NauliCo?</span>
+                        </h2>
+                        <p className="text-slate-400 text-sm max-w-lg mx-auto">
+                            Nikmati berbagai keuntungan eksklusif yang dirancang untuk mendukung perjalanan kesehatan gigi Anda.
+                        </p>
+                    </FadeUp>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {perks.map((p, i) => (
+                            <FadeUp key={i} delay={i * 0.06}>
+                                <div className="group bg-white border border-slate-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-50 rounded-2xl p-6 transition-all duration-300 h-full">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition-all">
+                                        <p.icon size={18} className="text-emerald-500" />
+                                    </div>
+                                    <h3 className="text-sm font-black text-slate-800 mb-2">{p.label}</h3>
+                                    <p className="text-xs text-slate-400 leading-relaxed">{p.desc}</p>
+                                </div>
+                            </FadeUp>
+                        ))}
+                    </div>
                 </div>
-            </Link>
+            </section>
+
+            {/* ── CTA ── */}
+            <section className="py-16 px-6 bg-slate-50">
+                <div className="max-w-3xl mx-auto text-center">
+                    <FadeUp>
+                        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl p-10 shadow-xl shadow-emerald-200/50 text-white">
+                            <Sparkles size={28} className="mx-auto mb-4 opacity-80" />
+                            <h2 className="text-2xl font-black mb-3">Siap Bergabung?</h2>
+                            <p className="text-emerald-100 text-sm mb-7 max-w-sm mx-auto">
+                                Daftarkan diri Anda dan mulai perjalanan kesehatan gigi yang lebih baik bersama komunitas NauliCo.
+                            </p>
+                            <div className="flex flex-wrap gap-3 justify-center">
+                                <Link href="/patient/nauli-co/register-as-partner"
+                                    className="inline-flex items-center gap-2 bg-white text-emerald-600 font-black text-sm px-6 py-3 rounded-xl hover:bg-emerald-50 shadow-md transition-all">
+                                    Daftar Sekarang <ArrowRight size={14} />
+                                </Link>
+                                <Link href="/patient/nauli-co/contact"
+                                    className="inline-flex items-center gap-2 bg-white/15 border border-white/30 text-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-white/25 transition-all">
+                                    Tanya Dulu
+                                </Link>
+                            </div>
+                        </div>
+                    </FadeUp>
+                </div>
+            </section>
         </div>
     );
 }
