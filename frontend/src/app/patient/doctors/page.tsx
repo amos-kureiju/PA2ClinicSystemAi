@@ -59,9 +59,9 @@ export default function DoctorsPage() {
                 </div>
 
                 {/* Overlay layers */}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-black/20" />
-                <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+                <div className="absolute inset-0 bg-black/40 z-10" /> {/* Overlay gelap tipis agar teks terbaca */}
+                {/* Efek transisi halus ke section berikutnya (menuju warna #EDF5F2) */}
+                <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#EDF5F2] via-[#EDF5F2]/40 to-transparent z-20" />
 
                 {/* Content */}
                 <div className="absolute inset-0 flex items-center">
@@ -149,8 +149,8 @@ export default function DoctorsPage() {
             </div>
 
             {/* ══ DAFTAR DOKTER ═══════════════════════════════════════════ */}
-            <div id="daftar-dokter" className="bg-[#EDF5F2] pb-24">
-                <div className="max-w-7xl mx-auto px-6 sm:px-10 pt-12 space-y-6">
+            <div id="daftar-dokter" className="bg-[#EDF5F2] pb-24 relative z-30">
+                <div className="max-w-7xl mx-auto px-6 sm:px-10 pt-24 space-y-6">
 
                     {/* Header section */}
                     <div className="flex items-center gap-3">
@@ -178,19 +178,6 @@ export default function DoctorsPage() {
                     </div>
 
                     {/* Filter pills */}
-                    <div className="flex flex-wrap gap-2">
-                        {categories.map((cat) => (
-                            <button
-                                key={cat}
-                                onClick={() => setFilter(cat)}
-                                className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest border transition-all ${filter === cat
-                                    ? 'bg-[#0A1C14] text-white border-[#0A1C14] shadow-md'
-                                    : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-400 hover:text-emerald-600'
-                                    }`}
-                            >
-                                {cat}
-                            </button>
-                        ))}
                     </div>
 
                     {/* Grid */}
@@ -243,7 +230,7 @@ export default function DoctorsPage() {
                             ))}
                         </div>
                     )}
-                </div>
+                
             </div>
 
             {/* ══ DETAIL MODAL ════════════════════════════════════════════ */}
