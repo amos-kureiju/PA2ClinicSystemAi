@@ -2,9 +2,8 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import {
-    MapPin, Phone, Clock, Mail, ArrowRight,
-    CheckCircle, ExternalLink, Copy, Navigation,
-    MessageCircle, Instagram, Globe
+    MapPin, Clock, CheckCircle, Copy, Navigation,
+    MessageCircle, Sparkles
 } from 'lucide-react';
 
 /* ── Fade helper ── */
@@ -35,11 +34,8 @@ const JAM_BUKA = [
 
 const hariIni = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][new Date().getDay()];
 
-export default function NauliCoContactPage() {
+export default function ContactPage() {
     const [copied, setCopied] = useState(false);
-    const [form, setForm] = useState({ name: '', phone: '', message: '' });
-    const [sent, setSent] = useState(false);
-
     const alamat = 'Jl. Raja Paindoan No.20A, Lumban Dolok Haume Bange, Kec. Balige, Toba, Sumatera Utara 22314';
 
     const copyAlamat = () => {
@@ -48,81 +44,79 @@ export default function NauliCoContactPage() {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const handleSend = (e: React.FormEvent) => {
-        e.preventDefault();
-        setSent(true);
-        setTimeout(() => setSent(false), 4000);
-        setForm({ name: '', phone: '', message: '' });
-    };
-
     return (
-        <div className="bg-white min-h-[calc(100vh-80px)]">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30">
 
             {/* ══════════════════════════════════════════
-                HERO HEADER
+                HEADER SECTION - Paling Atas
             ══════════════════════════════════════════ */}
-            <section className="bg-gradient-to-br from-[#006D44] via-[#00897B] to-[#006D44] px-6 py-16 md:py-20">
-                <div className="max-w-4xl mx-auto text-center">
-                    <FadeUp>
-                        <span className="inline-block text-[10px] font-black uppercase tracking-[0.25em] text-emerald-300 mb-4">
-                            Hubungi Kami
-                        </span>
-                        <h1 className="text-4xl md:text-5xl font-black text-white leading-tight mb-4">
-                            Kami Siap <span className="text-emerald-300">Melayani</span> Anda
-                        </h1>
-                        <p className="text-white/60 text-base max-w-md mx-auto">
-                            Kunjungi klinik kami atau hubungi langsung — tim kami siap membantu kebutuhan kesehatan gigi Anda.
-                        </p>
-                    </FadeUp>
+            <div className="relative w-full pt-40 pb-20 px-6 overflow-hidden flex items-center justify-center -mt-24">
+                {/* -mt-24 digunakan untuk menarik kontainer ke atas menutupi area navbar */}
 
-                    {/* Quick contact pills */}
-                    <FadeUp delay={0.1} className="flex flex-wrap gap-3 justify-center mt-8">
-                        <a href="tel:+6281265309659"
-                            className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/20 text-white text-sm font-bold px-5 py-2.5 rounded-full transition-all">
-                            <Phone size={14} /> 0812-6530-965
-                        </a>
-                        <a href={`https://wa.me/6281265309659`} target="_blank" rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20b558] text-white text-sm font-bold px-5 py-2.5 rounded-full transition-all shadow-lg shadow-green-900/30">
-                            <MessageCircle size={14} /> Chat WhatsApp
-                        </a>
-                    </FadeUp>
+                {/* Background Image & Overlay Lebih Transparan */}
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="/images/bg/galery5.png"
+                        alt="background"
+                        className="w-full h-full object-cover object-center"
+                    />
+                    {/* Overlay dikurangi kepekatannya (opacity 40%) agar gambar terlihat jelas */}
+                    <div className="absolute inset-0 bg-emerald-950/40" />
                 </div>
-            </section>
+
+                {/* Elemen Dekoratif Blur */}
+                <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl" />
+
+                <div className="max-w-4xl mx-auto text-center relative z-10">
+                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md rounded-full px-4 py-1.5 mb-4 border border-white/30">
+                        <Sparkles size={12} className="text-emerald-300" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white">
+                            NEED HELP? GET IN TOUCH
+                        </span>
+                    </div>
+                    <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter leading-none">
+                        Kami Siap <span className="text-emerald-400">Melayani</span> Anda
+                    </h1>
+                    <p className="text-white/80 text-base max-w-md mx-auto font-medium">
+                        Feel free to reach out to us for any inquiries or assistance. We're here to help!
+                    </p>
+                </div>
+            </div>
 
             {/* ══════════════════════════════════════════
-                MAIN CONTENT
+                MAIN CONTENT - Padat & Rapi
             ══════════════════════════════════════════ */}
-            <section className="max-w-6xl mx-auto px-6 py-14 grid lg:grid-cols-[1fr_1.1fr] gap-10">
+            <div className="max-w-5xl mx-auto px-6 py-10">
 
-                {/* ── KOLOM KIRI: Info + Jam ── */}
-                <div className="space-y-5">
-
-                    {/* Alamat */}
+                {/* Grid 2 Kolom: Alamat & Jam Operasional */}
+                <div className="grid md:grid-cols-2 gap-5 mb-6">
+                    
+                    {/* Kartu Alamat */}
                     <FadeUp>
-                        <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 hover:shadow-md transition-all">
-                            <div className="flex items-start gap-4">
-                                <div className="w-11 h-11 rounded-2xl bg-[#006D44] flex items-center justify-center shrink-0 shadow-md shadow-emerald-200/50">
+                        <div className="bg-white rounded-xl shadow-sm border border-emerald-100 p-5 hover:shadow-md transition-all">
+                            <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0">
                                     <MapPin size={18} className="text-white" />
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Alamat Klinik</p>
-                                    <p className="text-sm font-bold text-slate-800 leading-relaxed">{alamat}</p>
-                                    <div className="flex gap-2 mt-3 flex-wrap">
-                                        {/* Buka di Maps */}
+                                    <p className="text-xs text-slate-600 leading-relaxed">{alamat}</p>
+                                    <div className="flex gap-2 mt-3">
                                         <a
                                             href="https://maps.google.com/maps?q=2.3331763,99.0659975"
                                             target="_blank" rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1.5 bg-[#006D44] hover:bg-emerald-700 text-white text-[11px] font-black px-3.5 py-2 rounded-xl transition-all shadow-sm"
+                                            className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all"
                                         >
-                                            <Navigation size={11} /> Buka di Maps
+                                            <Navigation size={10} /> Buka di Maps
                                         </a>
-                                        {/* Salin alamat */}
                                         <button onClick={copyAlamat}
-                                            className={`inline-flex items-center gap-1.5 text-[11px] font-black px-3.5 py-2 rounded-xl transition-all border
+                                            className={`inline-flex items-center gap-1 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all border
                                                 ${copied
                                                     ? 'bg-emerald-50 border-emerald-300 text-emerald-600'
-                                                    : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700'}`}>
-                                            {copied ? <><CheckCircle size={11} /> Tersalin!</> : <><Copy size={11} /> Salin Alamat</>}
+                                                    : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-300'}`}>
+                                            {copied ? <CheckCircle size={10} /> : <Copy size={10} />}
+                                            {copied ? 'Tersalin' : 'Salin'}
                                         </button>
                                     </div>
                                 </div>
@@ -130,182 +124,106 @@ export default function NauliCoContactPage() {
                         </div>
                     </FadeUp>
 
-                    {/* Telepon */}
+                    {/* Kartu Jam Operasional */}
                     <FadeUp delay={0.06}>
-                        <a href="tel:+6281265309659"
-                            className="flex items-center gap-4 bg-slate-50 border border-slate-100 hover:border-emerald-200 hover:shadow-md rounded-3xl p-5 transition-all group">
-                            <div className="w-11 h-11 rounded-2xl bg-[#006D44] flex items-center justify-center shrink-0 shadow-md shadow-emerald-200/50">
-                                <Phone size={18} className="text-white" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-0.5">Telepon</p>
-                                <p className="text-lg font-black text-slate-800 tracking-tight">0812-6530-965</p>
-                            </div>
-                            <ExternalLink size={15} className="text-slate-300 group-hover:text-emerald-500 transition-colors" />
-                        </a>
-                    </FadeUp>
-
-                    {/* WhatsApp */}
-                    <FadeUp delay={0.09}>
-                        <a href="https://wa.me/6281265309659" target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-4 bg-[#E8F5E9] border border-green-200 hover:border-green-400 hover:shadow-md rounded-3xl p-5 transition-all group">
-                            <div className="w-11 h-11 rounded-2xl bg-[#25D366] flex items-center justify-center shrink-0 shadow-md shadow-green-200/60">
-                                <MessageCircle size={18} className="text-white" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-[10px] font-black text-green-700 uppercase tracking-widest mb-0.5">WhatsApp</p>
-                                <p className="text-sm font-bold text-slate-700">Klik untuk chat langsung</p>
-                            </div>
-                            <ExternalLink size={15} className="text-green-300 group-hover:text-green-500 transition-colors" />
-                        </a>
-                    </FadeUp>
-
-                    {/* Plus Code */}
-                    <FadeUp delay={0.11}>
-                        <div className="flex items-center gap-4 bg-slate-50 border border-slate-100 rounded-3xl p-5">
-                            <div className="w-11 h-11 rounded-2xl bg-slate-700 flex items-center justify-center shrink-0">
-                                <Globe size={18} className="text-white" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Plus Code</p>
-                                <p className="text-sm font-bold text-slate-700">83M8+69 Balige, Toba, Sumatera Utara</p>
-                            </div>
-                        </div>
-                    </FadeUp>
-
-                    {/* Jam Operasional */}
-                    <FadeUp delay={0.13}>
-                        <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6">
-                            <div className="flex items-center gap-3 mb-5">
-                                <div className="w-11 h-11 rounded-2xl bg-[#006D44] flex items-center justify-center shrink-0 shadow-md shadow-emerald-200/50">
+                        <div className="bg-white rounded-xl shadow-sm border border-emerald-100 p-5 hover:shadow-md transition-all">
+                            <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0">
                                     <Clock size={18} className="text-white" />
                                 </div>
-                                <div>
-                                    <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Jam Operasional</p>
-                                    <div className="flex items-center gap-1.5 mt-0.5">
-                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                        <span className="text-xs font-bold text-emerald-600">Buka Sekarang</span>
+                                <div className="flex-1">
+                                    <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Jam Operasional</p>
+                                    <div className="flex items-center gap-1.5 mb-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                        <span className="text-[10px] font-bold text-emerald-600">Buka Hari Ini</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                        {JAM_BUKA.map((item) => {
+                                            const isToday = item.hari === hariIni;
+                                            return (
+                                                <div key={item.hari} className="flex items-center justify-between">
+                                                    <span className={`text-[11px] font-medium ${isToday ? 'text-emerald-700' : 'text-slate-600'}`}>
+                                                        {item.hari}
+                                                    </span>
+                                                    <span className={`text-[11px] font-semibold ${item.buka ? (isToday ? 'text-emerald-600' : 'text-slate-600') : 'text-red-400'}`}>
+                                                        {item.jam}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                {JAM_BUKA.map((item) => {
-                                    const isToday = item.hari === hariIni;
-                                    return (
-                                        <div key={item.hari}
-                                            className={`flex items-center justify-between px-4 py-2.5 rounded-xl transition-all
-                                                ${isToday ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-white'}`}>
-                                            <span className={`text-sm font-bold ${isToday ? 'text-emerald-700' : 'text-slate-600'}`}>
-                                                {item.hari}
-                                                {isToday && <span className="ml-2 text-[9px] font-black bg-emerald-500 text-white px-1.5 py-0.5 rounded-full uppercase tracking-wide">Hari ini</span>}
-                                            </span>
-                                            <span className={`text-sm font-black ${item.buka ? isToday ? 'text-emerald-600' : 'text-slate-700' : 'text-red-400'}`}>
-                                                {item.jam}
-                                            </span>
-                                        </div>
-                                    );
-                                })}
                             </div>
                         </div>
                     </FadeUp>
                 </div>
 
-                {/* ── KOLOM KANAN: Maps + Form ── */}
-                <div className="space-y-5">
-
-                    {/* Google Maps Embed */}
-                    <FadeUp delay={0.08}>
-                        <div className="rounded-3xl overflow-hidden border border-slate-100 shadow-lg shadow-slate-100/80 bg-slate-100">
-                            {/* Maps header */}
-                            <div className="bg-white px-5 py-3.5 flex items-center justify-between border-b border-slate-100">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-red-400" />
-                                    <div className="w-3 h-3 rounded-full bg-amber-400" />
-                                    <div className="w-3 h-3 rounded-full bg-green-400" />
-                                </div>
-                                <p className="text-xs font-bold text-slate-400">Nauli Dental Care — Balige</p>
-                                <a href="https://maps.google.com/maps?q=2.3331763,99.0659975" target="_blank" rel="noopener noreferrer"
-                                    className="text-[10px] font-black text-emerald-600 hover:underline flex items-center gap-1">
-                                    Buka <ExternalLink size={10} />
-                                </a>
+                {/* Kartu WhatsApp - 1/2 lebar saja, tidak memanjang */}
+                <div className="flex justify-center mb-6">
+                    <FadeUp delay={0.09} className="w-full md:w-1/2">
+                        <a href="https://wa.me/628126530965" target="_blank" rel="noopener noreferrer"
+                            className="flex items-center gap-3 bg-[#E8F5E9] rounded-xl shadow-sm border border-green-200 p-4 hover:shadow-md hover:border-green-300 transition-all group">
+                            <div className="w-10 h-10 rounded-lg bg-[#25D366] flex items-center justify-center shrink-0">
+                                <MessageCircle size={18} className="text-white" />
                             </div>
-
-                            {/* Iframe */}
-                            <div className="relative w-full h-[320px]">
-                                <iframe
-                                    src="https://maps.google.com/maps?q=2.3331763,99.0659975&z=17&output=embed"
-                                    width="100%"
-                                    height="100%"
-                                    style={{ border: 0 }}
-                                    allowFullScreen
-                                    loading="lazy"
-                                    referrerPolicy="no-referrer-when-downgrade"
-                                    title="Nauli Dental Care Location"
-                                    className="w-full h-full"
-                                />
+                            <div>
+                                <p className="text-[10px] font-black text-green-700 uppercase tracking-widest">WhatsApp</p>
+                                <p className="text-xs font-bold text-slate-700">0812-6530-965</p>
                             </div>
-
-                            {/* Maps footer */}
-                            <div className="bg-white px-5 py-3 flex items-center justify-between">
-                                <p className="text-[11px] text-slate-400 font-medium">
-                                    Jl. Raja Paindoan No.20A, Balige
-                                </p>
-                                <a href="https://maps.google.com/maps?q=2.3331763,99.0659975" target="_blank" rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 bg-[#006D44] hover:bg-emerald-700 text-white text-[11px] font-black px-4 py-2 rounded-xl transition-all shadow-sm">
-                                    <Navigation size={11} /> Petunjuk Arah
-                                </a>
+                            <div className="ml-auto text-green-500">
+                                <span className="text-[10px] font-bold">Chat →</span>
                             </div>
-                        </div>
-                    </FadeUp>
-
-                    {/* Form kirim pesan */}
-                    <FadeUp delay={0.14}>
-                        <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6">
-                            <h3 className="text-base font-black text-slate-800 mb-1">Kirim Pesan</h3>
-                            <p className="text-xs text-slate-400 mb-5">Kami akan membalas melalui WhatsApp dalam 1×24 jam.</p>
-
-                            {sent ? (
-                                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                                    className="flex flex-col items-center justify-center py-10 gap-3">
-                                    <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
-                                        <CheckCircle size={28} className="text-emerald-500" />
-                                    </div>
-                                    <p className="text-sm font-black text-slate-700">Pesan Terkirim!</p>
-                                    <p className="text-xs text-slate-400">Kami akan menghubungi Anda segera.</p>
-                                </motion.div>
-                            ) : (
-                                <form onSubmit={handleSend} className="space-y-3">
-                                    <div className="grid sm:grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Nama</label>
-                                            <input type="text" placeholder="Nama lengkap" required
-                                                value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">WhatsApp</label>
-                                            <input type="text" placeholder="08xx-xxxx-xxxx" required
-                                                value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
-                                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all" />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Pesan</label>
-                                        <textarea rows={3} placeholder="Pertanyaan atau keluhan Anda..." required
-                                            value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}
-                                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 placeholder:text-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all resize-none" />
-                                    </div>
-                                    <button type="submit"
-                                        className="w-full bg-[#006D44] hover:bg-emerald-700 text-white font-black text-sm py-3.5 rounded-xl shadow-md shadow-emerald-200/50 hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                                        Kirim Pesan <ArrowRight size={15} />
-                                    </button>
-                                </form>
-                            )}
-                        </div>
+                        </a>
                     </FadeUp>
                 </div>
-            </section>
+
+                {/* ══════════════════════════════════════════
+                    GOOGLE MAPS 
+                ══════════════════════════════════════════ */}
+                <FadeUp delay={0.12}>
+                    <div className="rounded-xl overflow-hidden shadow-md border border-emerald-100">
+                        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="flex gap-1">
+                                    <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                                    <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                                    <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+                                </div>
+                                <p className="text-[10px] font-bold text-white/80">Nauli Dental Care — Balige</p>
+                            </div>
+                            <a href="https://maps.google.com/maps?q=2.3331763,99.0659975" target="_blank" rel="noopener noreferrer"
+                                className="text-[9px] font-black text-white/70 hover:text-white flex items-center gap-1 transition">
+                                Buka Maps <Navigation size={9} />
+                            </a>
+                        </div>
+
+                        <div className="relative w-full h-[280px] bg-slate-100">
+                            <iframe
+                                src="https://maps.google.com/maps?q=2.3331763,99.0659975&z=17&output=embed"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0 }}
+                                allowFullScreen
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                title="Nauli Dental Care Location"
+                                className="w-full h-full"
+                            />
+                        </div>
+
+                        <div className="bg-white px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-emerald-100">
+                            <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
+                                <MapPin size={10} className="text-emerald-500" />
+                                Jl. Raja Paindoan No.20A, Balige, Toba
+                            </p>
+                            <a href="https://maps.google.com/maps?q=2.3331763,99.0659975" target="_blank" rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all">
+                                <Navigation size={10} /> Petunjuk Arah
+                            </a>
+                        </div>
+                    </div>
+                </FadeUp>
+            </div>
         </div>
     );
 }

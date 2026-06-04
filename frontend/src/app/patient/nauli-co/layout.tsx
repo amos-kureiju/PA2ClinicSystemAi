@@ -7,8 +7,7 @@ import { ChevronLeft, Menu, X, MessageCircle } from 'lucide-react';
 
 const navLinks = [
     { label: 'About', href: '/patient/nauli-co/about' },
-    { label: "What's New", href: '/patient/nauli-co/whats-new' },
-    { label: 'Register as Partner', href: '/patient/nauli-co/register-as-partner' },
+    { label: "Panduan Klinik", href: '/patient/nauli-co/panduan' },
     { label: 'Contact', href: '/patient/nauli-co/contact' },
 ];
 
@@ -31,9 +30,9 @@ export default function NauliCoLayout({ children }: { children: React.ReactNode 
                 (Navbar hitam portal sudah di-bypass di PatientLayout)
             ════════════════════════════════════════════════════ */}
             <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300
-                ${scrolled
-                    ? 'h-16 bg-white/92 backdrop-blur-md shadow-sm border-b border-slate-100'
-                    : 'h-20 bg-white border-b border-slate-100'}`}
+            ${scrolled
+                    ? 'h-16 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100'
+                    : 'h-20 bg-transparent'}`}
             >
                 <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
 
@@ -42,10 +41,13 @@ export default function NauliCoLayout({ children }: { children: React.ReactNode 
 
                         {/* Tombol kembali ke portal — panah kiri */}
                         <Link href="/patient/dashboard"
-                            className="group flex items-center gap-2 text-slate-400 hover:text-emerald-600 transition-all"
+                            className={`group flex items-center gap-2 transition-all hover:text-emerald-500
+                            ${scrolled ? 'text-slate-400' : 'text-emerald-800/60'}`} // Ubah white/60 jadi emerald/60
                             title="Kembali ke Portal Utama"
                         >
-                            <div className="w-8 h-8 rounded-full border border-slate-200 group-hover:border-emerald-300 group-hover:bg-emerald-50 flex items-center justify-center transition-all">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all
+                             group-hover:border-emerald-400 group-hover:bg-emerald-500/20
+                             ${scrolled ? 'border border-slate-200' : 'border border-emerald-200 bg-white/50'}`}>
                                 <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
                             </div>
                             <span className="text-[10px] font-black uppercase tracking-[0.18em] hidden sm:block">
@@ -59,50 +61,52 @@ export default function NauliCoLayout({ children }: { children: React.ReactNode 
                         {/* Brand NauliCo */}
                         <Link href="/patient/nauli-co/about" className="flex items-center gap-3 group">
                             {/* Logo kotak hijau — mirip referensi Dentes Co */}
-                            <div className="w-10 h-10 rounded-2xl bg-[#006D44] flex items-center justify-center
-                                shadow-md shadow-emerald-200/60 group-hover:shadow-emerald-300/80
-                                group-hover:bg-emerald-600 transition-all overflow-hidden border-2 border-white">
+                            <div className="w-11 h-11 rounded-2xl bg-white border-2 border-emerald-400
+                                shadow-md shadow-emerald-100 group-hover:border-emerald-500
+                                group-hover:shadow-emerald-200 transition-all overflow-hidden
+                                flex items-center justify-center p-1.5">
                                 <img
                                     src="/images/Logo.png"
                                     alt="NauliCo"
-                                    className="w-7 h-7 object-contain brightness-0 invert"
+                                    className="w-full h-full object-contain"
                                     onError={(e) => {
                                         const t = e.target as HTMLImageElement;
                                         t.style.display = 'none';
                                         if (t.parentElement)
-                                            t.parentElement.innerHTML = '<span class="text-white font-black text-base">N</span>';
+                                            t.parentElement.innerHTML = '<span class="text-emerald-600 font-black text-base">N</span>';
                                     }}
                                 />
                             </div>
                             {/* Teks */}
                             <div className="flex flex-col leading-none">
-                                <span className="font-black text-slate-900 text-[18px] tracking-tighter uppercase">
-                                    Nauli<span className="text-emerald-500">Co</span>
+                                <span className={`font-black text-[18px] tracking-tighter uppercase transition-colors duration-300
+                                    ${scrolled ? 'text-slate-900' : 'text-[#005A32]'}`}> {/* Gunakan Hijau Tua */}
+                                    Nauli<span className="text-emerald-500">Dental</span>
                                 </span>
-                                <span className="text-[8px] font-black text-slate-300 uppercase tracking-[0.22em] mt-0.5">
-                                    Community
+                                <span className={`text-[8px] font-black uppercase tracking-[0.22em] mt-0.5 transition-colors duration-300
+                                     ${scrolled ? 'text-slate-300' : 'text-emerald-700/50'}`}>
+                                    Balige
                                 </span>
                             </div>
                         </Link>
                     </div>
 
-                    {/* ── Desktop Nav ── */}
+                    {/* Desktop Nav */}
                     <nav className="hidden md:flex items-center gap-0.5">
                         {navLinks.map(link => {
                             const isActive = pathname === link.href;
                             return (
                                 <Link key={link.href} href={link.href}
                                     className={`relative px-5 py-2 text-[11px] font-black uppercase tracking-widest transition-all duration-200
-                                        ${isActive
-                                            ? 'text-emerald-600'
-                                            : 'text-slate-400 hover:text-slate-800'}`}
+                    ${isActive
+                                            ? scrolled ? 'text-emerald-600' : 'text-emerald-500'
+                                            : scrolled ? 'text-slate-400 hover:text-slate-800' : 'text-[#005A32]/60 hover:text-[#005A32]'}`} // Ubah white/70 jadi emerald gelap
                                 >
                                     {link.label}
                                     {isActive && (
                                         <motion.div
                                             layoutId="naulicoUnderline"
                                             className="absolute bottom-0 left-4 right-4 h-0.5 bg-emerald-500 rounded-full"
-                                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                                         />
                                     )}
                                 </Link>
