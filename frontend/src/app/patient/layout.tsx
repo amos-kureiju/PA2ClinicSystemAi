@@ -113,15 +113,20 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
         { name: 'Nauli Dental', href: '/patient/about', icon: Building2 },
         { name: 'Tim Kami', href: '/patient/doctors', icon: UsersRound },
         { name: 'Visi & Misi', href: '/patient/visiMisi', icon: Target },
-        { name: 'NauliCo', href: '/patient/nauli-co/about', icon: Sparkles },
+        { name: 'Nauli Co', href: '/patient/nauli-co/about', icon: Sparkles },
     ];
 
     if (!isAuthorized) return null;
+    // navbar baru includes
+    const isNauliCoArea = pathname.includes('/nauli-co');
+    if (isNauliCoArea) {
+        return <>{children}</>;
+    }
 
     const isHeroPage = [
         '/patient/dashboard', '/patient/about', '/patient/appointments',
         '/patient/records', '/patient/services', '/patient/visiMisi',
-        '/patient/doctors', '/patient/nauli-co',
+        '/patient/doctors',
     ].some(p => pathname.startsWith(p));
 
     return (
