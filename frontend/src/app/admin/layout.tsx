@@ -65,6 +65,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     const [notifications, setNotifications] = useState<any[]>([]);
     const [pendingCount, setPendingCount] = useState(0);
+    const [syncStatus, setSyncStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [syncMessage, setSyncMessage] = useState("");
 
     // ── sidebar collapse (desktop)
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -79,11 +81,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // fetch notifications dari backend
     const refreshNotifications = async () => {
         try {
-            // PERBAIKAN 1: Hapus tanda titik setelah await
-            const res = await api.get('/clinic/admin/notifications/reservations');
-
+            const res = await api.get('/clinic/admin/notifications/reservations', { timeout: 10000 });
             const dynamicNotifs = res.data.map((n: any) => ({
-                // PERBAIKAN 2: Gunakan 'n.id' (sesuai variabel di atas), bukan 'item.id'
                 id: n.id,
                 icon: n.status === 'pending' ? <CalendarClock size={14} /> : <CheckCheck size={14} />,
                 color: n.status === 'pending' ? 'text-amber-600 bg-amber-50' : 'text-emerald-600 bg-emerald-50',
@@ -92,11 +91,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 time: n.consultation_date,
                 read: n.status !== 'pending'
             }));
-
             setNotifications(dynamicNotifs);
             setPendingCount(res.data.filter((a: any) => a.status === 'pending').length);
-        } catch (err) {
-            console.error("Gagal memuat notifikasi:", err);
+        } catch {
+            // Silent — jangan log error notifikasi agar tidak spam console
         }
     };
 
@@ -147,16 +145,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const handleSyncAI = () => setShowSyncModal(true);
 
     const executeSyncAI = async () => {
-        setShowSyncModal(false);
+        setShowSyncModal(false);   // ← tutup modal konfirmasi dulu
         setIsSyncing(true);
+        setSyncResult(null);       // ← reset result sebelumnya
+
         try {
-            const res = await api.post('/chatbot/ingest', {}, { timeout: 60000 });
-            setSyncResult({ success: true, message: res.data.message || 'AI telah mempelajari database dan folder PDF terbaru.' });
+            const res = await api.post('/chatbot/ingest', {}, { timeout: 120000 });
+            setSyncResult({
+                success: true,
+                message: res.data.message || 'AI berhasil diperbarui.'
+            });
         } catch (err: any) {
-            console.error("Error Detail:", err.response?.data);
-            setSyncResult({ success: false, message: 'Gagal Sinkron. Cek terminal Python untuk melihat detail error.' });
+            // Ambil pesan error dengan aman
+            const detail = err?.response?.data?.detail;
+            const status = err?.response?.status;
+            const isCors = !err?.response && err?.message === 'Network Error';
+
+            let msg = '';
+            if (isCors || !err?.response) {
+                msg = '❌ Tidak dapat terhubung ke server. Pastikan backend Python berjalan.';
+            } else if (status === 500) {
+                msg = `❌ Server error: ${typeof detail === 'string' ? detail : 'Cek terminal Python.'}`;
+            } else if (status === 404) {
+                msg = '❌ Endpoint tidak ditemukan. Cek include_router di main.py.';
+            } else {
+                msg = `❌ Error ${status}: ${err?.message || 'Unknown'}`;
+            }
+
+            setSyncResult({ success: false, message: msg });
         } finally {
-            setIsSyncing(false);
+            setIsSyncing(false);   // ← WAJIB — buka tombol kembali
         }
     };
 
@@ -381,7 +399,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         >
                             <Menu size={18} />
                         </button>
-
                         <h2 className="text-[12px] font-black text-slate-800 tracking-widest leading-none uppercase italic border-l-2 border-emerald-600 pl-3">
                             {navItems.find(i => i.href === pathname)?.name || 'Dashboard'}
                         </h2>

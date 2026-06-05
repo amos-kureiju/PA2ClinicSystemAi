@@ -55,11 +55,8 @@ class ChatbotService:
             self.history_aware_retriever = create_history_aware_retriever(
     self.llm,
     self.vectorstore.as_retriever(
-        search_kwargs={
-            "k": 10,  # Ambil 10 potongan teks (karena chunk kita sekarang kecil)
-            # Hapus score_threshold agar tidak memblokir jawaban yang mungkin relevan
-        }
-    ),
+    search_kwargs={"k": 8}   # hapus score_threshold sama sekali
+),
     contextualize_q_prompt,
 )
 

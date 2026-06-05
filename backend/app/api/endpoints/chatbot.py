@@ -1,11 +1,3 @@
-# backend/app/api/endpoints/chatbot.py
-# ════════════════════════════════════════════════════════════════
-# FIX:
-#   1. Ingest: RecursiveCharacterTextSplitter (chunk 400/overlap 60)
-#   2. Ingest: from_texts DB + add_documents PDF (tidak tumpang tindih)
-#   3. Ingest: gabung dari DB (dokter, layanan) + PDF rekursif
-#   4. Chat  : timeout info ada di error log
-# ════════════════════════════════════════════════════════════════
 
 import os
 from fastapi import APIRouter, HTTPException, Depends
@@ -138,10 +130,9 @@ async def sync_chatbot_knowledge(db: Session = Depends(get_db)):
 
         # ── Text splitter (berlaku untuk DB & PDF) ──────────────────────────
         splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,     # Diperkecil agar lebih fokus pada per baris/poin
-        chunk_overlap=100,   # Overlap ditingkatkan agar tidak ada teks terpotong di tengah
-        separators=["\n\n", "\n", "•", ". ", " ", ""], # Tambahkan separator poin (•)
-        
+    chunk_size=1500,    # ← cukup besar agar "Data Dokter" tidak terpotong
+    chunk_overlap=200,
+    separators=["\n\n", "\n", ". ", " ", ""],
 )
 
         all_docs: list[Document] = []
@@ -174,9 +165,21 @@ async def sync_chatbot_knowledge(db: Session = Depends(get_db)):
         # Layanan
         services = db.query(Service).all()
         for s in services:
+            # Bersihkan harga dari titik/koma jika seandainya tersimpan sebagai string "200.000"
+            raw_price = str(s.price).replace('.', '').replace(',', '')
+            
+            try:
+                # Coba ubah ke angka murni
+                price_numeric = int(raw_price)
+                # Format ulang ke ribuan (contoh: 200.000)
+                price_display = f"{price_numeric:,}".replace(',', '.')
+            except:
+                # Jika gagal (misal harganya tulisan "Gratis" atau "Nego"), pakai aslinya
+                price_display = str(s.price)
+
             db_texts.append(
                 f"Layanan: {s.name}. "
-                f"Biaya estimasi: Rp {s.price:,} (jika tersedia). "
+                f"Biaya estimasi: Rp {price_display}. "
                 f"Deskripsi: {s.description or '-'}. "
                 f"Detail prosedur: {s.detail_info or '-'}."
             )
