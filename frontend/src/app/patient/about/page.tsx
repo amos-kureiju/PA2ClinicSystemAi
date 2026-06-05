@@ -11,90 +11,85 @@ import {
 import Link from 'next/link';
 
 const BG_FALLBACK = [
-    'https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=2070',
-    'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=2070',
-    'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=2070',
+    '/Fasilitas.jpeg',
+    '/Ruang Tunggu .jpeg',
+    '/Fasilitas 2.jpeg',
 ];
 
 const features = [
     {
         icon: ShieldCheck,
         title: 'Steril & Aman',
-        desc: 'Alat sterilisasi berstandar internasional WHO dengan protokol kebersihan ketat setiap hari.',
-        detail: 'Setiap alat disterilisasi menggunakan autoclave bersuhu tinggi sebelum dan sesudah digunakan. Ruangan dibersihkan dengan disinfektan medis setiap pergantian pasien, memastikan lingkungan bebas kuman dan aman untuk seluruh keluarga.',
+        desc: 'Prosedur sterilisasi ketat demi menjaga kebersihan alat medis setiap hari.',
+        detail: 'Setiap alat disterilisasi menggunakan autoclave bersuhu tinggi sebelum digunakan. Ruangan tindakan juga dibersihkan dengan disinfektan medis secara berkala, memastikan lingkungan pengobatan aman bagi seluruh keluarga.',
         color: 'from-emerald-400 to-teal-500'
     },
     {
         icon: Zap,
-        title: 'AI Diagnosis',
-        desc: 'Teknologi deteksi dini karies dan kelainan gigi dengan akurasi 96% berbasis kecerdasan buatan.',
-        detail: 'Sistem AI kami menganalisis foto rontgen dan scan gigi secara real-time untuk mendeteksi karies, radang gusi, dan kelainan struktur gigi lebih awal — memungkinkan penanganan lebih cepat sebelum kondisi memburuk.',
+        title: 'Pemeriksaan Gigi',
+        desc: 'Pemeriksaan gigi yang teliti untuk mendeteksi masalah kesehatan mulut sejak dini.',
+        detail: 'Kami melakukan pengecekan kondisi gigi secara terperinci agar dapat memberikan rekomendasi pencegahan maupun penanganan gigi yang paling tepat untuk Anda.',
         color: 'from-violet-400 to-purple-500'
     },
     {
         icon: Heart,
         title: 'Ramah Pasien',
-        desc: 'Prosedur minim rasa sakit dengan pendekatan personal, nyaman, dan penuh perhatian.',
-        detail: 'Kami menggunakan teknik anestesi terkini dan pendekatan komunikasi yang lembut untuk memastikan setiap pasien — termasuk anak-anak dan lansia — merasa tenang dan nyaman selama perawatan berlangsung.',
+        desc: 'Tindakan yang ramah, santai, and penuh perhatian bagi kenyamanan Anda.',
+        detail: 'Kami mengutamakan teknik penanganan yang komunikatif dan ramah, terutama untuk anak-anak maupun lansia, untuk membantu mengurangi rasa cemas selama tindakan berlangsung.',
         color: 'from-rose-400 to-pink-500'
     },
     {
         icon: Users,
-        title: 'Tim Profesional',
-        desc: '15+ dokter spesialis berpengalaman dan bersertifikat nasional siap melayani Anda.',
-        detail: 'Seluruh dokter kami memiliki sertifikasi dari Konsil Kedokteran Indonesia dan menjalani pelatihan berkelanjutan. Dengan spesialisasi di berbagai bidang dental, kami siap menangani kasus sederhana hingga kompleks.',
+        title: 'Dokter Gigi Terpercaya',
+        desc: 'Didukung oleh 7 dokter spesialis berpengalaman dan berizin resmi.',
+        detail: 'Seluruh dokter gigi di klinik kami telah terdaftar resmi secara nasional dan siap melayani berbagai kebutuhan perawatan gigi Anda dari yang ringan hingga perawatan berkala.',
         color: 'from-amber-400 to-orange-500'
     },
 ];
 
 const gallery = [
     {
-        src: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=800',
+        src: '/Fasilitas.jpeg',
         label: 'Ruang Perawatan',
-        desc: 'Ruangan modern & steril',
-        detail: 'Ruang perawatan kami dirancang dengan standar sterilisasi internasional WHO. Setiap sudut ruangan dijaga kebersihannya dan dilengkapi peralatan dental terkini untuk memastikan kenyamanan dan keamanan Anda.'
+        desc: 'Bersih & Nyaman',
+        detail: 'Ruang perawatan kami mengutamakan kebersihan di setiap sudutnya, dilengkapi dengan peralatan yang memadai untuk menjamin kenyamanan Anda.'
     },
     {
-        src: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=800',
+        src: '/Dokter .jpeg',
         label: 'Tim Dokter',
-        desc: 'Spesialis berpengalaman',
-        detail: 'Tim dokter kami terdiri dari 15+ spesialis gigi yang bersertifikat nasional. Setiap dokter memiliki pengalaman lebih dari 5 tahun di bidangnya, siap memberikan diagnosis yang akurat dan penanganan terbaik.'
+        desc: 'Ramah & Komunikatif',
+        detail: 'Tim dokter gigi kami yang siap memberikan penjelasan yang jelas dan ramah mengenai setiap keluhan gigi Anda.'
     },
     {
-        src: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=800',
-        label: 'Peralatan Modern',
-        desc: 'Teknologi AI terkini',
-        detail: 'Kami menggunakan peralatan dental berteknologi AI terkini, termasuk sistem X-ray digital dan pemindai 3D intraoral, yang memungkinkan diagnosis lebih cepat, akurat, dan minim radiasi.'
+        src: '/Fasilitas 2.jpeg',
+        label: 'Peralatan Medis',
+        desc: 'Higienis & Steril',
+        detail: 'Kami menggunakan peralatan dental yang terjaga kehigienisannya untuk mendukung diagnosis yang akurat dan hasil yang optimal.'
     },
     {
-        src: 'https://images.unsplash.com/photo-1598256989800-fe5f95da9787?q=80&w=800',
+        src: '/Ruang Tunggu .jpeg',
         label: 'Ruang Tunggu',
-        desc: 'Nyaman & bersih',
-        detail: 'Ruang tunggu kami didesain dengan konsep modern dan nyaman. Dilengkapi AC, WiFi gratis, dan area bermain anak, kami memastikan pengalaman berkunjung ke klinik menjadi menyenangkan bagi seluruh keluarga.'
+        desc: 'Santai & Tenang',
+        detail: 'Ruang tunggu yang bersih dan tenang disediakan agar Anda dan keluarga dapat menunggu antrean dengan nyaman.'
     },
 ];
 
 const stats = [
-    { val: '2024', lbl: 'Tahun Berdiri', icon: CalendarDays, suffix: '' },
-    { val: '15', lbl: 'Dokter Spesialis', icon: Users, suffix: '+' },
-    { val: '2.4K', lbl: 'Pasien Terlayani', icon: Smile, suffix: '+' },
-    { val: '96', lbl: 'Tingkat Kepuasan', icon: TrendingUp, suffix: '%' },
+    { val: '2021', lbl: 'Tahun Berdiri', suffix: '' },
+    { val: '7', lbl: 'Dokter Spesialis', suffix: '' },
+    { val: 'Puas & Aman', lbl: 'Pasien Terlayani', suffix: '' },
+    { val: '98', lbl: 'Tingkat Kepuasan', suffix: '%' },
 ];
 
 const values = [
-    'Pelayanan berbasis teknologi AI terkini',
-    'Sterilisasi berstandar internasional WHO',
-    'Konsultasi digital 24 jam via chatbot',
-    'Tim dokter spesialis bersertifikat',
-    'Booking online mudah & cepat',
-    'Fasilitas modern & nyaman',
+    'Pelayanan profesional, ramah, dan tepercaya',
+    'Prosedur sterilisasi peralatan medis yang higienis',
+    'Konsultasi dan kemudahan pendaftaran via WhatsApp',
+    'Tim dokter spesialis berpengalaman dan berizin resmi',
+    'Pendaftaran online yang praktis & cepat',
+    'Fasilitas klinik yang bersih & nyaman',
 ];
 
-const testimonials = [
-    { name: 'Rina Simanjuntak', role: 'Pasien Scaling', rating: 5, text: 'Pelayanan sangat profesional, dokternya ramah dan hasilnya memuaskan. Chatbot AI-nya sangat membantu untuk booking online.', avatar: 'R' },
-    { name: 'Budi Tambunan', role: 'Pasien Behel', rating: 5, text: 'Fasilitas modern dan sangat bersih. Proses pemasangan behel sangat nyaman, tidak terasa sakit sama sekali. Sangat direkomendasikan!', avatar: 'B' },
-    { name: 'Sari Hutabarat', role: 'Pasien Implan', rating: 5, text: 'Awalnya takut implan, tapi tim dokter sangat sabar menjelaskan seluruh prosedurnya. Hasilnya luar biasa, sangat puas!', avatar: 'S' },
-];
 
 function AnimatedCounter({ target, suffix }: { target: number, suffix: string }) {
     const [count, setCount] = useState(0);
@@ -206,8 +201,8 @@ export default function AboutPage() {
                         </h1>
 
                         <p className="text-white/60 text-base leading-relaxed max-w-md">
-                            Klinik gigi modern berbasis AI di Balige — menghadirkan perawatan
-                            akurat, aman, dan nyaman untuk seluruh keluarga Anda sejak 2024.
+                            Klinik gigi modern di Balige — menghadirkan perawatan
+                            aman, ramah, dan nyaman untuk seluruh keluarga Anda sejak 2021.
                         </p>
 
                         <div className="flex items-center gap-3 pt-2 flex-wrap">
@@ -253,15 +248,16 @@ export default function AboutPage() {
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1, duration: 0.6 }}
                             whileHover={{ y: -4 }}
-                            className="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-900/5 border border-emerald-100/80 hover:border-emerald-300/60 hover:shadow-xl transition-all duration-300 cursor-default"
+                            className="bg-white rounded-2xl p-6 shadow-lg shadow-emerald-900/5 border border-emerald-100/80 hover:border-emerald-300/60 hover:shadow-xl transition-all duration-300 cursor-default flex flex-col items-center justify-center min-h-[120px] text-center"
                         >
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 flex items-center justify-center mb-4">
-                                <s.icon size={18} className="text-emerald-600" />
+                            <div className="text-2xl font-black text-slate-800 leading-tight">
+                                {s.val === 'Puas & Aman' ? (
+                                    s.val
+                                ) : (
+                                    <AnimatedCounter target={parseInt(s.val)} suffix={s.suffix} />
+                                )}
                             </div>
-                            <div className="text-2xl font-black text-slate-800 tabular-nums">
-                                <AnimatedCounter target={s.val === '2024' ? 2024 : parseInt(s.val.replace('K', '000').replace('+', ''))} suffix={s.suffix} />
-                            </div>
-                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">{s.lbl}</div>
+                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">{s.lbl}</div>
                         </motion.div>
                     ))}
                 </div>
@@ -282,11 +278,11 @@ export default function AboutPage() {
                     >
                         {/* Gambar — lebih kecil dengan max-w */}
                         <div className="relative rounded-3xl overflow-hidden shadow-xl shadow-emerald-900/10 aspect-[3/4] w-full max-w-xs">
-                            <img
-                                src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=700"
-                                alt="Fasilitas Nauli Dental Care"
-                                className="w-full h-full object-cover"
-                            />
+                             <img
+                                 src="/Ruang Tunggu 2.jpeg"
+                                 alt="Fasilitas Nauli Dental Care"
+                                 className="w-full h-full object-cover"
+                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                         </div>
 
@@ -303,8 +299,8 @@ export default function AboutPage() {
                                     <ShieldCheck size={16} className="text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-xs font-black text-slate-800">Standar WHO</p>
-                                    <p className="text-[10px] text-slate-400">Sterilisasi Internasional</p>
+                                    <p className="text-xs font-black text-slate-800">Higienis</p>
+                                    <p className="text-[10px] text-slate-400">Steril & Bersih</p>
                                 </div>
                             </div>
                         </motion.div>
@@ -317,7 +313,7 @@ export default function AboutPage() {
                             transition={{ delay: 0.5 }}
                             className="absolute -top-3 right-2 bg-emerald-500 rounded-xl px-3 py-2 shadow-lg"
                         >
-                            <p className="text-white text-xs font-black">Est. 2024</p>
+                            <p className="text-white text-xs font-black">Est. 2021</p>
                             <p className="text-emerald-100 text-[9px] font-bold uppercase tracking-wide">Balige, Toba</p>
                         </motion.div>
                     </motion.div>
@@ -340,8 +336,7 @@ export default function AboutPage() {
                                 Keunggulan <span className="text-emerald-600">Layanan</span> Kami
                             </h2>
                             <p className="text-slate-500 text-sm mt-4 leading-relaxed">
-                                Kami menggabungkan teknologi AI mutakhir dengan sentuhan perawatan manusiawi
-                                untuk pengalaman dental terbaik yang pernah Anda rasakan.
+                                Kami mengutamakan pelayanan yang ramah, peralatan yang memadai, serta kebersihan yang terjaga demi memberikan perawatan gigi terbaik untuk Anda di Balige.
                             </p>
                         </div>
 
@@ -401,10 +396,10 @@ export default function AboutPage() {
                                 <span className="text-emerald-600 font-black text-xs uppercase tracking-widest">Galeri Klinik</span>
                             </div>
                             <h2 className="text-4xl font-black text-slate-800 tracking-tight">
-                                Fasilitas <span className="text-emerald-600">Premium</span> Kami
+                                Fasilitas <span className="text-emerald-600">Klinik</span> Kami
                             </h2>
                             <p className="text-slate-500 text-sm mt-2 max-w-sm leading-relaxed">
-                                Didesain untuk kenyamanan dan keamanan pasien dengan standar internasional.
+                                Disediakan untuk kenyamanan dan kebersihan pasien selama menjalani perawatan.
                             </p>
                         </div>
                         <Link href="/patient/services">
@@ -525,12 +520,12 @@ export default function AboutPage() {
                             <div className="relative pl-6 border-l-4 border-emerald-500">
                                 <Quote size={28} className="text-emerald-200 absolute -top-2 -left-2" />
                                 <p className="text-slate-700 text-lg leading-relaxed font-medium">
-                                    <span className="text-emerald-600 font-black">Nauli Dental Care</span> adalah klinik gigi modern berbasis kecerdasan buatan (AI) yang berlokasi di Balige, Sumatera Utara.
+                                    <span className="text-emerald-600 font-black">Nauli Dental Care</span> adalah klinik gigi modern yang berlokasi di Balige, Sumatera Utara.
                                 </p>
                             </div>
 
                             <p className="text-slate-500 text-base leading-relaxed">
-                                Didirikan pada 2024, kami berkomitmen menghadirkan layanan kesehatan gigi berkualitas tinggi dengan teknologi terkini untuk masyarakat Toba dan sekitarnya. Dengan dukungan lebih dari 15 dokter spesialis dan sistem booking digital 24 jam, kami memastikan setiap pasien mendapatkan pelayanan terbaik — cepat, aman, dan nyaman.
+                                Didirikan pada 2012, kami berkomitmen menghadirkan layanan kesehatan gigi berkualitas tinggi untuk masyarakat Toba dan sekitarnya. Dengan dukungan lebih dari 7 dokter spesialis dan sistem booking online yang praktis, kami memastikan setiap pasien mendapatkan pelayanan terbaik — cepat, aman, dan nyaman.
                             </p>
 
                             {/* Komitmen checklist */}
@@ -620,74 +615,19 @@ export default function AboutPage() {
                 </div>
             </div>
 
-            {/* ══ TESTIMONI ══════════════════════════════════════════════════════ */}
-            <div className="py-28 bg-white border-t border-emerald-100">
+            {/* ══ TRUST BAR ══════════════════════════════════════════════════════ */}
+            <div className="py-16 bg-white border-t border-emerald-100">
                 <div className="max-w-7xl mx-auto px-6 sm:px-10">
                     <motion.div
                         initial={{ opacity: 0, y: 16 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="mb-14 text-center"
-                    >
-                        <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 px-4 py-2 rounded-full mb-4">
-                            <Star size={12} className="text-amber-500 fill-amber-500" />
-                            <span className="text-amber-600 font-black text-xs uppercase tracking-widest">Testimoni Pasien</span>
-                        </div>
-                        <h2 className="text-4xl font-black text-slate-800 tracking-tight">
-                            Apa Kata <span className="text-emerald-600">Pasien</span> Kami
-                        </h2>
-                        <p className="text-slate-400 text-sm mt-2">Kepuasan pasien adalah prioritas utama kami</p>
-                    </motion.div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {testimonials.map((t, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.12, duration: 0.6 }}
-                                whileHover={{ y: -5 }}
-                                className="group bg-[#f4f9f6] rounded-3xl p-7 border border-emerald-100 hover:border-emerald-300 hover:bg-white hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-400 cursor-default"
-                            >
-                                {/* Stars */}
-                                <div className="flex gap-1 mb-5">
-                                    {Array(t.rating).fill(0).map((_, s) => (
-                                        <Star key={s} size={14} className="text-amber-400 fill-amber-400" />
-                                    ))}
-                                </div>
-
-                                {/* Quote */}
-                                <div className="relative mb-6">
-                                    <Quote size={20} className="text-emerald-200 mb-2" />
-                                    <p className="text-slate-600 text-sm leading-relaxed">"{t.text}"</p>
-                                </div>
-
-                                {/* Profile */}
-                                <div className="flex items-center gap-3 pt-5 border-t border-emerald-100">
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-black text-base shadow-md">
-                                        {t.avatar}
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-black text-slate-800">{t.name}</p>
-                                        <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wide">{t.role}</p>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-
-                    {/* Trust bar */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 16 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="mt-12 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-center gap-6 text-center sm:text-left"
+                        className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-center gap-8 text-center sm:text-left shadow-sm"
                     >
                         {[
-                            { val: '4.9/5', lbl: 'Rating Google', icon: Star },
-                            { val: '2.4K+', lbl: 'Pasien Puas', icon: Smile },
-                            { val: '96%', lbl: 'Rekomendasikan', icon: Heart },
+                            { val: '4.0/5', lbl: 'Rating Google', icon: Star },
+                            { val: '24', lbl: 'Ulasan Di google', icon: Smile },
+                            { val: '98%', lbl: 'Rekomendasikan', icon: Heart },
                         ].map((item, i) => (
                             <div key={i} className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-white rounded-2xl border border-emerald-100 flex items-center justify-center shadow-sm">

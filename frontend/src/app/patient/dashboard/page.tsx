@@ -76,12 +76,11 @@ export default function WelcomePage() {
     };
 
     const features = [
-        { icon: Zap, title: 'Teknologi AI', desc: 'Diagnosis akurat berbasis kecerdasan buatan terdepan untuk hasil perawatan optimal', color: 'from-emerald-500 to-teal-600' },
-        { icon: Star, title: 'Dokter Spesialis', desc: 'Tim dokter gigi berpengalaman dan bersertifikat siap memberikan yang terbaik', color: 'from-teal-500 to-emerald-600' },
-        { icon: Shield, title: 'Steril & Aman', desc: 'Alat sterilisasi berstandar internasional dengan prosedur keamanan ketat', color: 'from-emerald-600 to-green-600' },
-        { icon: Heart, title: 'Perawatan Nyaman', desc: 'Prosedur minim rasa sakit dengan pengalaman yang menyenangkan bagi semua usia', color: 'from-green-500 to-teal-500' },
-        { icon: Calendar, title: 'Booking 24/7', desc: 'Reservasi kapan saja dan dari mana saja lewat website atau WhatsApp kami', color: 'from-teal-600 to-emerald-500' },
-        { icon: Award, title: 'Bersertifikat', desc: 'Diakui secara resmi dan memenuhi standar pelayanan kesehatan gigi nasional', color: 'from-emerald-500 to-green-500' },
+        { icon: Star, title: 'Dokter Spesialis', desc: 'Dilayani oleh tim dokter gigi berpengalaman dan ramah yang siap memberikan solusi perawatan terbaik untuk menjaga senyum sehat keluarga Anda di Kabupaten Toba.', color: 'from-teal-500 to-emerald-600' },
+        { icon: Shield, title: 'Steril & Aman', desc: 'Kami menerapkan standar sterilisasi alat medis secara menyeluruh dan terjadwal ketat guna menjamin kebersihan, kehigienisan, serta keamanan pasien saat menjalani perawatan.', color: 'from-emerald-600 to-green-600' },
+        { icon: Heart, title: 'Perawatan Nyaman', desc: 'Prosedur tindakan yang minim rasa sakit dengan pendekatan ramah pasien, menciptakan suasana kunjungan yang santai dan menyenangkan bagi anak-anak hingga dewasa.', color: 'from-green-500 to-teal-500' },
+        { icon: Calendar, title: 'Booking Senin – Sabtu', desc: 'Kemudahan pendaftaran jadwal kunjungan secara online yang dilayani setiap hari kerja dari Senin sampai Sabtu, menyesuaikan waktu luang Anda tanpa harus datang mengantre.', color: 'from-teal-600 to-emerald-500' },
+        { icon: Award, title: 'Bersertifikat', desc: 'Seluruh layanan medis dan dokter kami telah terverifikasi resmi oleh lembaga kesehatan nasional, berkomitmen penuh memberikan pelayanan gigi berkualitas tinggi di Balige.', color: 'from-emerald-500 to-green-500' },
     ];
 
     const services = [
@@ -100,10 +99,10 @@ export default function WelcomePage() {
     ];
 
     const stats = [
-        { value: '1.500+', label: 'Pasien Puas', icon: Users },
-        { value: '15+', label: 'Dokter Spesialis', icon: Stethoscope },
-        { value: '24/7', label: 'Layanan Darurat', icon: HeartPulse },
-        { value: '98%', label: 'Tingkat Kepuasan', icon: Smile },
+        { value: 'Puas & Aman', label: 'Prioritas Pasien', icon: null },
+        { value: '7', label: 'Dokter Spesialis', icon: null },
+        { value: 'Senin–Sabtu', label: 'Jadwal Praktik', icon: null },
+        { value: '98%', label: 'Tingkat Kepuasan', icon: null },
     ];
 
     const schedules = [
@@ -159,7 +158,7 @@ export default function WelcomePage() {
                             >
                                 <Sparkles size={12} className="text-emerald-400" />
                                 <span className="text-[10px] font-black uppercase tracking-widest text-white">
-                                    Nauli Dental Care · Est. 2024
+                                    Nauli Dental Care · Est. 2021
                                 </span>
                             </motion.div>
 
@@ -228,22 +227,16 @@ export default function WelcomePage() {
             <div className="relative z-10 -mt-12 px-6 sm:px-10 max-w-7xl mx-auto pb-16">
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {stats.map((s, i) => {
-                        const Icon = s.icon;
                         return (
                             <motion.div
                                 key={i}
                                 {...fadeUp(i * 0.08)}
                                 className="bg-white rounded-2xl border border-emerald-100 shadow-xl
-                                           shadow-emerald-900/8 p-5 text-center hover:shadow-2xl
-                                           hover:-translate-y-1 transition-all group"
+                                           shadow-emerald-900/8 p-6 text-center hover:shadow-2xl
+                                           hover:-translate-y-1 transition-all group flex flex-col items-center justify-center min-h-[120px]"
                             >
-                                <div className="w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl
-                                                flex items-center justify-center mx-auto mb-3
-                                                group-hover:scale-110 transition-transform">
-                                    <Icon size={20} />
-                                </div>
-                                <p className="text-2xl font-black text-slate-900">{s.value}</p>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">
+                                <p className="text-2xl font-black text-slate-900 leading-tight">{s.value}</p>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-2">
                                     {s.label}
                                 </p>
                             </motion.div>
@@ -273,22 +266,16 @@ export default function WelcomePage() {
 
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {features.map((f, i) => {
-                            const Icon = f.icon;
                             return (
                                 <motion.div
                                     key={i}
                                     {...fadeUp(i * 0.07)}
-                                    className="bg-gradient-to-br from-slate-50 to-white rounded-3xl p-7
+                                    className="bg-gradient-to-br from-slate-50 to-white rounded-3xl p-8
                                                border border-emerald-100 hover:shadow-xl hover:border-emerald-200
                                                hover:-translate-y-1.5 transition-all group"
                                 >
-                                    <div className={`w-14 h-14 bg-gradient-to-br ${f.color} rounded-2xl
-                                                    flex items-center justify-center text-white mb-5
-                                                    group-hover:scale-110 transition-transform shadow-lg`}>
-                                        <Icon size={24} />
-                                    </div>
-                                    <h3 className="text-lg font-black text-slate-800 mb-2">{f.title}</h3>
-                                    <p className="text-sm text-slate-500 leading-relaxed">{f.desc}</p>
+                                    <h3 className="text-lg font-black text-slate-800 mb-2.5 group-hover:text-emerald-600 transition-colors">{f.title}</h3>
+                                    <p className="text-sm text-slate-500 leading-relaxed font-medium">{f.desc}</p>
                                 </motion.div>
                             );
                         })}
@@ -328,7 +315,7 @@ export default function WelcomePage() {
                                 className="absolute -bottom-4 -right-4 bg-emerald-600 text-white
                                            rounded-2xl px-5 py-3 shadow-xl border-4 border-white"
                             >
-                                <p className="text-xs font-black uppercase tracking-wider">Est. 2024</p>
+                                <p className="text-xs font-black uppercase tracking-wider">Est. 2021</p>
                                 <p className="text-2xl font-black">Balige</p>
                             </motion.div>
                         </motion.div>
@@ -353,7 +340,7 @@ export default function WelcomePage() {
                             </p>
                             <p className="text-slate-500 leading-relaxed">
                                 Berlokasi strategis di jantung kota Balige, kami melayani pasien dari berbagai penjuru
-                                Sumatera Utara dengan dedikasi penuh dan standar internasional. Setiap kunjungan Anda
+                                Sumatera Utara dengan dedikasi penuh. Setiap kunjungan Anda
                                 adalah prioritas utama kami.
                             </p>
 
@@ -413,7 +400,7 @@ export default function WelcomePage() {
                                 </h2>
                                 <p className="text-slate-500 mt-3 leading-relaxed">
                                     Isi formulir di sebelah kanan dan kami akan mengkonfirmasi jadwal Anda
-                                    melalui WhatsApp dalam waktu singkat. Tanggal dan waktu reservasi
+                                    melalui WhatsApp dalam waktu singkat.Tanggal dan waktu reservasi
                                     menyesuaikan dengan jadwal dokter yang masih tersedia.
                                 </p>
                             </div>
