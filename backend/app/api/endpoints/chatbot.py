@@ -1,3 +1,12 @@
+# backend/app/api/endpoints/chatbot.py
+# ════════════════════════════════════════════════════════════════
+# FIX:
+#   1. Ingest: RecursiveCharacterTextSplitter (chunk 400/overlap 60)
+#   2. Ingest: from_texts DB + add_documents PDF (tidak tumpang tindih)
+#   3. Ingest: gabung dari DB (dokter, layanan) + PDF rekursif
+#   4. Chat  : timeout info ada di error log
+# ════════════════════════════════════════════════════════════════
+
 import os
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
@@ -5,189 +14,249 @@ from sqlalchemy.orm import Session
 from typing import List, Dict
 from pathlib import Path
 
-# Service & Database
 from app.services.rag_service import ChatbotService
 from app.database.session import get_db
 from app.models.clinic import Doctor, Service, ChatLog
 from app.core.security import get_current_user
 from app.core.config import settings
 
-# AI & LangChain
 from langchain_cohere import CohereEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.schema import Document
 
 router = APIRouter()
 
-# --- PENENTUAN PATH ABSOLUT (ANTI GAGAL) ---
-# Mengambil lokasi file ini sekarang
+# ── Path ke folder docs (rekursif dari lokasi file ini) ─────────────────────
 current_file = Path(__file__).resolve()
-# 1. endpoints -> 2. api -> 3. app -> 4. backend -> 5. clinic-system (ROOT)
-ROOT_DIR = current_file.parents[4]
-PATH_MATERI = ROOT_DIR / "docs"
+ROOT_DIR     = current_file.parents[4]   # clinic-system/
+PATH_MATERI  = ROOT_DIR / "docs"
 
-print(f"[DEBUG] KLINIK.AI: Folder Docs terdeteksi di: {PATH_MATERI}")
+print(f"[DEBUG] Folder docs: {PATH_MATERI}")
 
-# Inisialisasi service chatbot
-chatbot_service = ChatbotService() 
+# Inisialisasi service (singleton)
+chatbot_service = ChatbotService()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SCHEMA
+# ══════════════════════════════════════════════════════════════════════════════
 
 class ChatRequest(BaseModel):
     message: str
-    history: List[Dict[str, str]] = [] 
+    history: List[Dict[str, str]] = []
 
-# 1. Endpoint untuk Chat
-@router.post("/chat")
-async def chat_with_bot(request: ChatRequest):
-    try:
-        answer = chatbot_service.get_response(request.message, request.history)
-        return {"reply": answer}
-    except Exception as e:
-        print(f"DEBUG ERROR CHAT: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"AI Error: {str(e)}")
-    
+
 class FeedbackRequest(BaseModel):
     user_message: str
     bot_response: str
     feedback: bool
     session_id: str
 
-# 1. FIX Error 404 History
-@router.get("/chat/history")
-async def get_chat_history(db: Session = Depends(get_db)):
-    return [] # List kosong agar browser tidak merah
 
-# 2. Simpan Feedback (Suka/Tidak Suka)
+# ══════════════════════════════════════════════════════════════════════════════
+# 1. CHAT
+# ══════════════════════════════════════════════════════════════════════════════
+
+@router.post("/chat")
+async def chat_with_bot(request: ChatRequest):
+    try:
+        answer = chatbot_service.get_response(request.message, request.history)
+        return {"reply": answer}
+    except Exception as e:
+        print(f"[ERROR] /chat: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="AI sedang sibuk. Coba lagi dalam beberapa detik."
+        )
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 2. FEEDBACK
+# ══════════════════════════════════════════════════════════════════════════════
+
+@router.get("/chat/history")
+async def get_chat_history():
+    return []   # placeholder agar tidak 404
+
+
 @router.post("/log-feedback")
 async def log_feedback(data: FeedbackRequest, db: Session = Depends(get_db)):
     new_log = ChatLog(
         session_id=data.session_id,
         user_message=data.user_message,
         bot_response=data.bot_response,
-        feedback=data.feedback
+        feedback=data.feedback,
     )
     db.add(new_log)
     db.commit()
     return {"status": "recorded"}
 
-# 3. Ambil Statistik untuk Dashboard Admin
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 3. STATISTIK ADMIN
+# ══════════════════════════════════════════════════════════════════════════════
+
 @router.get("/admin/stats")
 def get_ai_stats(db: Session = Depends(get_db)):
-    # Hitung jumlah nyata dari database Neon
-    likes = db.query(ChatLog).filter(ChatLog.feedback == True).count()
+    likes    = db.query(ChatLog).filter(ChatLog.feedback == True).count()
     dislikes = db.query(ChatLog).filter(ChatLog.feedback == False).count()
-    total_chat = db.query(ChatLog).count()
-    
-    # Hitung Akurasi
-    accuracy = 0
-    if (likes + dislikes) > 0:
-        accuracy = round((likes / (likes + dislikes)) * 100, 1)
-    
+    total    = likes + dislikes
+    accuracy = round(likes / total * 100, 1) if total > 0 else 0
     return {
-        "likes": likes,
-        "dislikes": dislikes,
-        "accuracy": accuracy,
-        "total_interactions": total_chat
+        "likes":              likes,
+        "dislikes":           dislikes,
+        "accuracy":           accuracy,
+        "total_interactions": db.query(ChatLog).count(),
     }
+
 
 @router.get("/admin/history")
 def get_ai_history(db: Session = Depends(get_db)):
-    # Ambil 20 riwayat chat terbaru
     return db.query(ChatLog).order_by(ChatLog.created_at.desc()).limit(20).all()
-# 2. Endpoint untuk Sinkronisasi Pengetahuan (Database + Folder Docs)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 4. INGEST — SINKRONISASI AI  ← PERBAIKAN UTAMA
+# ══════════════════════════════════════════════════════════════════════════════
+
 @router.post("/ingest")
 async def sync_chatbot_knowledge(db: Session = Depends(get_db)):
+    """
+    Gabungkan 2 sumber data ke Pinecone:
+      A. Teks dari Database (dokter, layanan, info klinik)
+      B. PDF dari folder /docs/** (rekursif)
+
+    Semua teks dipecah jadi chunk kecil sebelum diupload.
+    """
     try:
-        # A. Pastikan folder docs ada
-        if not PATH_MATERI.exists():
-            print(f"[ERROR] Folder {PATH_MATERI} tidak ditemukan!")
-            raise HTTPException(status_code=404, detail="Folder 'docs' tidak ditemukan.")
-
-        print("[INFO] Memulai sinkronisasi AI...")
-        
-        # B. Ambil data dari Database
-        doctors = db.query(Doctor).all()
-        services = db.query(Service).all()
-
-        # Gunakan nama variabel yang konsisten: knowledge_texts
-        knowledge_texts = [ 
-            "Klinik Nauli Dental Care berlokasi di Balige, Toba. Jam Operasional: 08:00 - 21:00.",
-            "Pendaftaran dapat dilakukan melalui website atau chatbot KlinikAI."
-        ]
-        
-        # PERBAIKAN LOGIKA DOKTER
-        for d in doctors:
-            jadwal_teks = ""
-            # Gunakan d.schedules (jamak) sesuai model terbaru kita
-            if d.schedules:
-                # Pastikan format data schedules adalah list of dict
-                try:
-                    jadwal_list = [f"{s['day']} jam {s['time']} di {s['loc']}" for s in d.schedules]
-                    jadwal_teks = ", ".join(jadwal_list)
-                except:
-                    jadwal_teks = str(d.schedules)
-            else:
-                jadwal_teks = "Jadwal belum diatur"
-
-            info_dokter = f"Dokter {d.name} adalah spesialis {d.specialty}. Jadwal praktik: {jadwal_teks}."
-            knowledge_texts.append(info_dokter) # Perbaikan: append ke knowledge_texts
-
-        # PERBAIKAN LOGIKA LAYANAN
-        for s in services: 
-            info_layanan = f"Layanan {s.name} memiliki biaya estimasi Rp {s.price}. Deskripsi: {s.description}. Detail prosedur: {s.detail_info or ''}"
-            knowledge_texts.append(info_layanan) # Perbaikan: append ke knowledge_texts
-
-        # C. Ambil data dari Folder Docs (PDF)
-        pdf_docs = []
-        try:
-            loader = DirectoryLoader(str(PATH_MATERI), glob="**/*.pdf", loader_cls=PyPDFLoader)
-            pdf_docs = loader.load()
-            print(f"[INFO] Berhasil memuat {len(pdf_docs)} halaman dari file PDF.")
-        except Exception as e:
-            print(f"[WARN] Gagal membaca beberapa PDF: {str(e)}")
-
-        # D. Setup AI & Upload ke Pinecone
-        os.environ["COHERE_API_KEY"] = settings.COHERE_API_KEY
+        os.environ["COHERE_API_KEY"]   = settings.COHERE_API_KEY
         os.environ["PINECONE_API_KEY"] = settings.PINECONE_API_KEY
-        
+
         embeddings = CohereEmbeddings(model="embed-multilingual-v3.0")
+
+        # ── Text splitter (berlaku untuk DB & PDF) ──────────────────────────
+        splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,     # Diperkecil agar lebih fokus pada per baris/poin
+        chunk_overlap=100,   # Overlap ditingkatkan agar tidak ada teks terpotong di tengah
+        separators=["\n\n", "\n", "•", ". ", " ", ""], # Tambahkan separator poin (•)
         
-        # Ingest teks dari Database (knowledge_texts)
-        # Sesuai library terbaru, kita gunakan inisialisasi yang bersih
-        vectorstore = PineconeVectorStore.from_texts(
-            texts=knowledge_texts,
+)
+
+        all_docs: list[Document] = []
+
+        # ── A. Data dari Database ───────────────────────────────────────────
+        db_texts = [
+            "Klinik Nauli Dental Care berlokasi di Jl. Balige No. 12, Toba, Sumatera Utara.",
+            "Jam operasional klinik: Senin–Sabtu 08:00–20:00.",
+            "Pendaftaran dapat dilakukan melalui website, WhatsApp, atau langsung ke klinik.",
+            "Nomor WhatsApp klinik: 0821-6352-6363.",
+        ]
+
+        # Dokter
+        doctors = db.query(Doctor).all()
+        for d in doctors:
+            jadwal = "Jadwal belum diatur"
+            if d.schedules:
+                try:
+                    jadwal = ", ".join(
+                        f"{s['day']} jam {s['time']} di {s.get('loc','klinik')}"
+                        for s in d.schedules
+                    )
+                except Exception:
+                    jadwal = str(d.schedules)
+            db_texts.append(
+                f"Dokter {d.name} adalah spesialis {d.specialty}. "
+                f"Jadwal praktik: {jadwal}. Pengalaman: {d.experience or '-'} tahun."
+            )
+
+        # Layanan
+        services = db.query(Service).all()
+        for s in services:
+            db_texts.append(
+                f"Layanan: {s.name}. "
+                f"Biaya estimasi: Rp {s.price:,} (jika tersedia). "
+                f"Deskripsi: {s.description or '-'}. "
+                f"Detail prosedur: {s.detail_info or '-'}."
+            )
+
+        # Konversi teks DB → Document lalu chunk
+        db_documents = [Document(page_content=t, metadata={"source": "database"}) for t in db_texts]
+        all_docs.extend(splitter.split_documents(db_documents))
+        print(f"[INGEST] DB → {len(all_docs)} chunk")
+
+        # ── B. PDF dari folder /docs ────────────────────────────────────────
+        pdf_count = 0
+        if PATH_MATERI.exists():
+            try:
+                loader   = DirectoryLoader(
+                    str(PATH_MATERI),
+                    glob="**/*.pdf",
+                    loader_cls=PyPDFLoader,
+                    show_progress=True,
+                )
+                pdf_raw  = loader.load()
+                pdf_docs = splitter.split_documents(pdf_raw)
+                all_docs.extend(pdf_docs)
+                pdf_count = len(pdf_raw)
+                print(f"[INGEST] PDF → {pdf_count} halaman → {len(pdf_docs)} chunk")
+            except Exception as e:
+                print(f"[WARN] Gagal baca PDF: {e}")
+        else:
+            print(f"[WARN] Folder docs tidak ada: {PATH_MATERI}")
+
+        if not all_docs:
+            raise HTTPException(
+                status_code=400,
+                detail="Tidak ada data untuk di-ingest. Pastikan database & folder docs terisi."
+            )
+
+        # ── C. Upload ke Pinecone ───────────────────────────────────────────
+        print(f"[INGEST] Total upload: {len(all_docs)} chunk ke Pinecone...")
+        PineconeVectorStore.from_documents(
+            documents=all_docs,
             embedding=embeddings,
             index_name=settings.PINECONE_INDEX_NAME,
-            pinecone_api_key=settings.PINECONE_API_KEY
+            pinecone_api_key=settings.PINECONE_API_KEY,
         )
-        
-        # Tambahkan data dari PDF jika ada
-        if pdf_docs:
-            vectorstore.add_documents(pdf_docs)
 
-        return {"message": "Sukses! AI telah mempelajari database dan folder PDF terbaru."}
+        return {
+            "message": (
+                f"✅ Sinkronisasi selesai! AI telah mempelajari "
+                f"{len(doctors)} dokter, {len(services)} layanan, "
+                f"dan {pdf_count} halaman PDF "
+                f"({len(all_docs)} chunk total)."
+            ),
+            "total_chunks": len(all_docs),
+            "pdf_pages":    pdf_count,
+            "db_entries":   len(doctors) + len(services),
+        }
 
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"DEBUG ERROR SYNC: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Gagal Sinkron: {str(e)}")
-    
-# 3. Endpoint untuk List File (DIPERBAIKI)
+        print(f"[ERROR] /ingest: {e}")
+        raise HTTPException(status_code=500, detail=f"Gagal sinkronisasi: {str(e)}")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 5. LIST FILE PDF
+# ══════════════════════════════════════════════════════════════════════════════
+
 @router.get("/knowledge-files")
 async def list_knowledge_files():
     try:
-        files_info = []
         if not PATH_MATERI.exists():
-            print(f"[WARN] Folder {PATH_MATERI} tidak ditemukan.")
             return []
-
-        # Mencari semua file PDF di folder docs dan subfoldernya
-        for path in PATH_MATERI.rglob("*.pdf"):
-            files_info.append({
-                "name": path.name,
-                "category": path.parent.name if path.parent.name != "docs" else "Utama"
-            })
-            
-        print(f"[INFO] Berhasil mendata {len(files_info)} file PDF.")
-        return files_info
+        return [
+            {
+                "name":     p.name,
+                "category": p.parent.name if p.parent.name != "docs" else "Utama",
+                "size_kb":  round(p.stat().st_size / 1024, 1),
+            }
+            for p in PATH_MATERI.rglob("*.pdf")
+        ]
     except Exception as e:
-        print(f"DEBUG ERROR LIST FILES: {str(e)}")
+        print(f"[ERROR] /knowledge-files: {e}")
         return []

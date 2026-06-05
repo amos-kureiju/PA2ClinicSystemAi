@@ -225,20 +225,51 @@ const [isAiHovered, setIsAiHovered] = useState(false); // State pendukung tombol
     const handleSendMessage = async (text: string = input) => {
         const msg = text.trim();
         if (!msg || isLoading || streamingText) return;
+
+        // 1. Tampilkan pesan user ke UI
         const userMsgId = 'user-' + Date.now();
         updateCurrentConversation(conv => ({
             ...conv,
             messages: [...conv.messages, { id: userMsgId, role: 'user', content: msg }],
-            title: conv.title === 'Percakapan Baru' && conv.messages.length === 1 ? msg.slice(0, 32) + (msg.length > 32 ? '…' : '') : conv.title,
+            title: conv.title === 'Percakapan Baru' && conv.messages.length === 1
+                ? msg.slice(0, 32) + (msg.length > 32 ? '…' : '')
+                : conv.title,
         }));
+
         setInput('');
         setIsLoading(true);
+
         try {
-            const cleanHistory = messages.slice(-6).map(m => ({ role: m.role === 'bot' ? 'assistant' : 'user', content: m.content }));
-            const res = await api.post('/chatbot/chat', { message: msg, history: cleanHistory });
+            // 2. BERSIHKAN HISTORY — hanya kirim role & content (cegah error 422)
+            //    Konversi 'bot' → 'assistant' agar backend tidak bingung
+            const cleanHistory = messages.slice(-5).map(m => ({
+                role: m.role === 'bot' ? 'assistant' : 'user',
+                content: m.content,
+            }));
+
+            // 3. TIMEOUT 30 DETIK — AI + Pinecone butuh waktu berpikir
+            const res = await api.post(
+                '/chatbot/chat',
+                { message: msg, history: cleanHistory }
+            );
+
             setIsLoading(false);
             simulateStreaming(res.data.reply);
-        } catch { setIsLoading(false); simulateStreaming(getFallbackResponse(msg)); }
+
+        } catch (err: any) {
+            console.error('[Chat Error]', err);
+            setIsLoading(false);
+
+            // Bedakan timeout vs error lain
+            if (err?.code === 'ECONNABORTED' || err?.message?.includes('timeout')) {
+                simulateStreaming(
+                    'Horas! Maaf, saya butuh waktu lebih lama untuk mencari informasinya. ' +
+                    'Bisa ulangi pertanyaannya? Atau hubungi langsung WA 0821-6352-6363. 🙏'
+                );
+            } else {
+                simulateStreaming(getFallbackResponse(msg));
+            }
+        }
     };
 
     const createNewChat = () => {

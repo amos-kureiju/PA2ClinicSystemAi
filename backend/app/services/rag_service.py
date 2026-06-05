@@ -60,7 +60,6 @@ class ChatbotService:
             question_answer_chain = create_stuff_documents_chain(self.llm, qa_prompt)
             self.rag_chain = create_retrieval_chain(self.history_aware_retriever, question_answer_chain)
             print("[INFO] Chatbot Service Berhasil Dibuat!")
-            
         except Exception as e:
             print(f"[ERROR] GAGAL MEMBUAT CHATBOT SERVICE: {str(e)}")
 
