@@ -239,7 +239,7 @@ export default function AboutPage() {
 
             {/* ══ STATS — GLASS CARDS ════════════════════════════════════════════ */}
             <div className="max-w-7xl mx-auto px-6 sm:px-10 -mt-8 mb-28 relative z-10">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                     {stats.map((s, i) => (
                         <motion.div
                             key={i}
@@ -248,16 +248,23 @@ export default function AboutPage() {
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1, duration: 0.6 }}
                             whileHover={{ y: -4 }}
-                            className="bg-white rounded-2xl p-6 shadow-lg shadow-emerald-900/5 border border-emerald-100/80 hover:border-emerald-300/60 hover:shadow-xl transition-all duration-300 cursor-default flex flex-col items-center justify-center min-h-[120px] text-center"
+                            className="relative overflow-hidden bg-white rounded-[2rem] border border-emerald-100/60 p-8 flex flex-col items-center justify-center min-h-[180px] text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(16,185,129,0.12)] transition-all duration-300 group cursor-default"
                         >
-                            <div className="text-2xl font-black text-slate-800 leading-tight">
-                                {s.val === 'Puas & Aman' ? (
-                                    s.val
-                                ) : (
-                                    <AnimatedCounter target={parseInt(s.val)} suffix={s.suffix} />
-                                )}
+                            {/* Decorative background glows */}
+                            <div className="absolute -right-8 -top-8 w-32 h-32 bg-emerald-50 rounded-full blur-2xl group-hover:bg-emerald-100 transition-colors duration-500" />
+                            <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-teal-50 rounded-full blur-2xl group-hover:bg-teal-100 transition-colors duration-500" />
+
+                            <div className="relative z-10 w-full">
+                                <div className="text-3xl lg:text-4xl font-black text-slate-800 tracking-tight leading-none mb-3">
+                                    {s.val === 'Puas & Aman' ? (
+                                        s.val
+                                    ) : (
+                                        <AnimatedCounter target={parseInt(s.val)} suffix={s.suffix} />
+                                    )}
+                                </div>
+                                <div className="w-12 h-1 bg-emerald-100 mx-auto rounded-full mb-3 group-hover:bg-emerald-400 group-hover:w-16 transition-all duration-300" />
+                                <div className="text-[11px] lg:text-xs font-bold text-slate-400 uppercase tracking-[0.15em] group-hover:text-emerald-600 transition-colors">{s.lbl}</div>
                             </div>
-                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">{s.lbl}</div>
                         </motion.div>
                     ))}
                 </div>

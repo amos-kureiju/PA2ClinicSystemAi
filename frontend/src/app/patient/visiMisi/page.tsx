@@ -60,8 +60,8 @@ export default function VisiMisiPage() {
 
     const stats = [
         { value: '50+', label: 'Prosedur Harian', icon: Activity },
-        { value: '2.4K+', label: 'Pasien Puas', icon: Heart },
-        { value: '15+', label: 'Dokter Spesialis', icon: Award },
+        { value: 'Puas & Aman', label: 'Pasien Terlayani', icon: Heart },
+        { value: '7', label: 'Dokter Spesialis', icon: Award },
         { value: '98%', label: 'Kepuasan Pasien', icon: TrendingUp },
     ];
 
@@ -72,10 +72,10 @@ export default function VisiMisiPage() {
     ];
 
     const misiItems = [
-        'Memberikan edukasi gigi berbasis Chatbot RAG 24 jam.',
-        'Menerapkan teknologi minimal invasif untuk kenyamanan pasien.',
-        'Menjamin keamanan data medis lewat enkripsi cloud berlapis.',
-        'Melakukan riset AI untuk diagnosis penyakit gigi mulut.',
+        'Menyediakan pelayanan kesehatan gigi dan mulut yang profesional, higienis, dan sesuai dengan standar medis terkini.',
+        'Memberikan pelayanan yang ramah, responsif, dan solutif demi menciptakan pengalaman berobat yang nyaman bagi setiap pasien.',
+        'Mengedukasi masyarakat Balige dan sekitarnya tentang pentingnya menjaga kesehatan gigi dan mulut secara mandiri.',
+        'Menghadirkan teknologi dan peralatan perawatan gigi yang modern untuk mendukung diagnosis serta tindakan yang akurat.',
     ];
 
     const news = [
@@ -211,7 +211,7 @@ export default function VisiMisiPage() {
 
             {/* ══ STATS ════════════════════════════════════════════════════ */}
             <div className="max-w-7xl mx-auto px-6 sm:px-10 py-20">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                     {stats.map((s, i) => (
                         <motion.div
                             key={i}
@@ -219,13 +219,21 @@ export default function VisiMisiPage() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.08 }}
-                            className="bg-white border border-[#D4EDE5] rounded-2xl p-7 text-center hover:shadow-md hover:border-emerald-300 transition-all group"
+                            className="relative overflow-hidden bg-white rounded-[2rem] border border-emerald-100/60 p-8 flex flex-col items-center justify-center min-h-[180px] text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(16,185,129,0.12)] hover:-translate-y-1.5 transition-all duration-300 group"
                         >
-                            <div className="w-11 h-11 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                <s.icon size={20} className="text-emerald-600" />
+                            {/* Decorative background glows */}
+                            <div className="absolute -right-8 -top-8 w-32 h-32 bg-emerald-50 rounded-full blur-2xl group-hover:bg-emerald-100 transition-colors duration-500" />
+                            <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-teal-50 rounded-full blur-2xl group-hover:bg-teal-100 transition-colors duration-500" />
+
+                            <div className="relative z-10 w-full">
+                                <h3 className="text-3xl lg:text-4xl font-black text-slate-800 tracking-tight leading-none mb-3">
+                                    {s.value}
+                                </h3>
+                                <div className="w-12 h-1 bg-emerald-100 mx-auto rounded-full mb-3 group-hover:bg-emerald-400 group-hover:w-16 transition-all duration-300" />
+                                <p className="text-[11px] lg:text-xs font-bold text-slate-400 uppercase tracking-[0.15em] group-hover:text-emerald-600 transition-colors">
+                                    {s.label}
+                                </p>
                             </div>
-                            <h3 className="text-3xl font-black text-slate-800">{s.value}</h3>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">{s.label}</p>
                         </motion.div>
                     ))}
                 </div>
@@ -245,7 +253,7 @@ export default function VisiMisiPage() {
                     {/* Foto kiri */}
                     <div className="relative rounded-3xl overflow-hidden shadow-xl aspect-[4/3]">
                         <img
-                            src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=900"
+                            src="/testimoni.jpeg"
                             alt="Nauli Dental - Visi"
                             className="w-full h-full object-cover"
                         />
@@ -263,20 +271,11 @@ export default function VisiMisiPage() {
                             Visi
                         </h2>
 
-                        <blockquote className="text-xl md:text-2xl text-slate-700 font-medium leading-relaxed border-l-4 border-emerald-500 pl-5">
-                            "Menjadi pioneer klinik gigi digital di Sumatera Utara yang mengedepankan
-                            akurasi diagnosa AI dan kenyamanan pasien kelas dunia pada tahun 2030."
+                        <blockquote className="text-lg md:text-xl text-slate-700 font-medium leading-relaxed border-l-4 border-emerald-500 pl-5">
+                            "Menjadi klinik perawatan gigi dan mulut terpercaya di Balige yang memberikan pelayanan medis berkualitas tinggi, modern, dan mengutamakan kenyamanan serta keselamatan pasien."
                         </blockquote>
 
-                        <p className="text-slate-500 text-sm leading-relaxed">
-                            Nauli Dental Care berkomitmen menjadi pusat rujukan kesehatan gigi terdepan
-                            di wilayah Sumatera Utara, dengan mengintegrasikan teknologi kecerdasan buatan
-                            ke dalam setiap aspek pelayanan — dari diagnosis hingga perawatan pasca-tindakan.
-                        </p>
 
-                        <div className="flex items-center gap-2 text-emerald-600 font-black text-xs uppercase tracking-widest pt-2">
-                            Target 2030 <ArrowRight size={13} />
-                        </div>
                     </div>
                 </motion.div>
 
@@ -299,7 +298,7 @@ export default function VisiMisiPage() {
                             Misi
                         </h2>
 
-                        <p className="text-slate-500 text-sm leading-relaxed">
+                        <p className="text-slate-500 text-lg md:text-xl leading-relaxed">
                             Langkah-langkah nyata yang kami jalani setiap hari untuk mewujudkan visi
                             menjadi klinik gigi digital terbaik di Sumatera Utara:
                         </p>
@@ -310,7 +309,7 @@ export default function VisiMisiPage() {
                                     <span className="w-7 h-7 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center flex-shrink-0 text-emerald-600 font-black text-xs group-hover:bg-emerald-500 group-hover:text-white group-hover:border-emerald-500 transition-all">
                                         {i + 1}
                                     </span>
-                                    <p className="text-slate-600 text-sm leading-relaxed pt-1">{item}</p>
+                                    <p className="text-slate-600 text-lg md:text-xl leading-relaxed pt-1">{item}</p>
                                 </li>
                             ))}
                         </ol>
@@ -319,7 +318,7 @@ export default function VisiMisiPage() {
                     {/* Foto kanan */}
                     <div className="relative rounded-3xl overflow-hidden shadow-xl aspect-[4/3] order-1 md:order-2">
                         <img
-                            src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=900"
+                            src="/images/bg/keunggulan.png"
                             alt="Nauli Dental - Misi"
                             className="w-full h-full object-cover"
                         />
@@ -330,69 +329,6 @@ export default function VisiMisiPage() {
             </div>
 
 
-
-            {/* ══ BERITA ═══════════════════════════════════════════════════ */}
-            <div id="berita" className="py-24">
-                <div className="max-w-7xl mx-auto px-6 sm:px-10">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-14">
-                        <div>
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-1 h-6 bg-emerald-500 rounded-full" />
-                                <span className="text-emerald-600 font-black text-xs uppercase tracking-widest">Berita & Update</span>
-                            </div>
-                            <h2 className="text-4xl font-black text-slate-900 tracking-tight">
-                                Kabar Klinik <span className="text-emerald-600">Terkini</span>
-                            </h2>
-                        </div>
-                        <button className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-emerald-600 transition-all uppercase tracking-widest">
-                            Lihat Semua <ChevronRight size={13} />
-                        </button>
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-5">
-                        {news.map((n, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 16 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                                whileHover={{ y: -4 }}
-                                className="bg-white border border-[#D4EDE5] rounded-2xl overflow-hidden hover:shadow-lg hover:border-emerald-200 transition-all group cursor-pointer"
-                            >
-                                <div className="relative h-44 overflow-hidden">
-                                    <img
-                                        src={n.img}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                        alt={n.title}
-                                        onError={(e) => {
-                                            const target = e.currentTarget;
-                                            if (target.src !== n.fallbackImg) {
-                                                target.src = n.fallbackImg;
-                                            }
-                                        }}
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                    <div className="absolute top-4 left-4 bg-emerald-500/90 backdrop-blur-sm px-2.5 py-1 rounded-full">
-                                        <span className="text-[9px] font-black text-white uppercase tracking-wider">{n.tag}</span>
-                                    </div>
-                                    <div className="absolute bottom-4 left-4 flex items-center gap-1.5">
-                                        <Calendar size={11} className="text-white/70" />
-                                        <span className="text-[10px] text-white/70 font-medium">{n.date}</span>
-                                    </div>
-                                </div>
-                                <div className="p-5">
-                                    <h4 className="text-sm font-black text-slate-800 leading-tight group-hover:text-emerald-700 transition-colors">{n.title}</h4>
-                                    <p className="text-xs text-slate-400 mt-2 leading-relaxed line-clamp-2">{n.desc}</p>
-                                    <div className="flex items-center gap-2 text-emerald-600 font-bold text-[10px] uppercase tracking-widest mt-4 group-hover:gap-3 transition-all">
-                                        Baca Selengkapnya <ArrowRight size={11} />
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </div>
 
             {/* ══ QUOTE ════════════════════════════════════════════════════ */}
             <div className="bg-[#0A1C14] py-24 relative overflow-hidden">
@@ -407,7 +343,7 @@ export default function VisiMisiPage() {
                         <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-black text-lg">N</div>
                         <div className="text-left">
                             <p className="text-sm font-black text-white">Nauli Dental Care</p>
-                            <p className="text-xs text-white/35 mt-0.5">Est. 2024 · Balige, Sumatera Utara</p>
+                            <p className="text-xs text-white/35 mt-0.5">Est. 2021 · Balige, Sumatera Utara</p>
                         </div>
                     </div>
                 </div>

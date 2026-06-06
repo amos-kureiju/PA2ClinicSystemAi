@@ -225,20 +225,27 @@ export default function WelcomePage() {
 
             {/* ══ STATS STRIP ═══════════════════════════════════════════════ */}
             <div className="relative z-10 -mt-12 px-6 sm:px-10 max-w-7xl mx-auto pb-16">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                     {stats.map((s, i) => {
                         return (
                             <motion.div
                                 key={i}
                                 {...fadeUp(i * 0.08)}
-                                className="bg-white rounded-2xl border border-emerald-100 shadow-xl
-                                           shadow-emerald-900/8 p-6 text-center hover:shadow-2xl
-                                           hover:-translate-y-1 transition-all group flex flex-col items-center justify-center min-h-[120px]"
+                                className="relative overflow-hidden bg-white rounded-[2rem] border border-emerald-100/60 p-8 flex flex-col items-center justify-center min-h-[180px] text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(16,185,129,0.12)] hover:-translate-y-1.5 transition-all duration-300 group"
                             >
-                                <p className="text-2xl font-black text-slate-900 leading-tight">{s.value}</p>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-2">
-                                    {s.label}
-                                </p>
+                                {/* Decorative background glows */}
+                                <div className="absolute -right-8 -top-8 w-32 h-32 bg-emerald-50 rounded-full blur-2xl group-hover:bg-emerald-100 transition-colors duration-500" />
+                                <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-teal-50 rounded-full blur-2xl group-hover:bg-teal-100 transition-colors duration-500" />
+
+                                <div className="relative z-10 w-full">
+                                    <h3 className="text-3xl lg:text-4xl font-black text-slate-800 tracking-tight leading-none mb-3">
+                                        {s.value}
+                                    </h3>
+                                    <div className="w-12 h-1 bg-emerald-100 mx-auto rounded-full mb-3 group-hover:bg-emerald-400 group-hover:w-16 transition-all duration-300" />
+                                    <p className="text-[11px] lg:text-xs font-bold text-slate-400 uppercase tracking-[0.15em] group-hover:text-emerald-600 transition-colors">
+                                        {s.label}
+                                    </p>
+                                </div>
                             </motion.div>
                         );
                     })}
