@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -8,7 +10,7 @@ class Appointment(BaseModel):
     appointment_date: datetime
     patient_address: Optional[str] = None
     patient_gender: Optional[str] = None
-
+    patient_notes: Optional[str] = None
 class AppointmentCreate(Appointment):
     pass
 
