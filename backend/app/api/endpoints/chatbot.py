@@ -15,8 +15,8 @@ from app.core.config import settings
 from langchain_cohere import CohereEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.schema import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
 
 router = APIRouter()
 
@@ -187,7 +187,7 @@ async def sync_chatbot_knowledge(db: Session = Depends(get_db)):
         # Konversi teks DB → Document lalu chunk
         db_documents = [Document(page_content=t, metadata={"source": "database"}) for t in db_texts]
         all_docs.extend(splitter.split_documents(db_documents))
-        print(f"[INGEST] DB → {len(all_docs)} chunk")
+        print(f"[INGEST] DB -> {len(all_docs)} chunk")
 
         # ── B. PDF dari folder /docs ────────────────────────────────────────
         pdf_count = 0
@@ -203,7 +203,7 @@ async def sync_chatbot_knowledge(db: Session = Depends(get_db)):
                 pdf_docs = splitter.split_documents(pdf_raw)
                 all_docs.extend(pdf_docs)
                 pdf_count = len(pdf_raw)
-                print(f"[INGEST] PDF → {pdf_count} halaman → {len(pdf_docs)} chunk")
+                print(f"[INGEST] PDF -> {pdf_count} halaman -> {len(pdf_docs)} chunk")
             except Exception as e:
                 print(f"[WARN] Gagal baca PDF: {e}")
         else:

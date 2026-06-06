@@ -24,7 +24,7 @@ os.environ["PINECONE_API_KEY"] = settings.PINECONE_API_KEY
 class ChatbotService:
     def __init__(self):
         try:
-            print(f"[INFO] Inisialisasi Chatbot → Index: {settings.PINECONE_INDEX_NAME}")
+            print(f"[INFO] Inisialisasi Chatbot -> Index: {settings.PINECONE_INDEX_NAME}")
 
             # ── 1. Embedding & Vectorstore ──────────────────────────────────
             self.embeddings = CohereEmbeddings(model="embed-multilingual-v3.0")
