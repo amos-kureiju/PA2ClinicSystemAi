@@ -119,8 +119,13 @@ function AppointmentsContent() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className={labelClass}>Nama Lengkap Pasien</label>
-                                    <input type="text" placeholder="Masukkan nama" required className={inputClass}
-                                        value={formData.patient_name} onChange={e => setFormData({ ...formData, patient_name: e.target.value })} />
+                                    <input type="text" placeholder="Masukkan nama lengkap" required className={inputClass}
+                                        maxLength={50}
+                                        value={formData.patient_name}
+                                        onChange={e => {
+                                            const val = e.target.value.replace(/[^a-zA-ZÀ-ÿ\s.]/g, '');
+                                            setFormData({ ...formData, patient_name: val });
+                                        }} />
                                 </div>
                                 <div>
                                     <label className={labelClass}>Jenis Kelamin</label>
@@ -134,13 +139,44 @@ function AppointmentsContent() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className={labelClass}>Nomor WhatsApp</label>
-                                    <input type="tel" placeholder="0812..." required className={inputClass}
-                                        value={formData.patient_phone} onChange={e => setFormData({ ...formData, patient_phone: e.target.value })} />
+                                    <div className="relative">
+                                        <input
+                                            type="tel"
+                                            placeholder="08xx / +62xx / 62xx"
+                                            required
+                                            maxLength={15}
+                                            className={inputClass}
+                                            value={formData.patient_phone}
+                                            onChange={e => {
+                                                const raw = e.target.value.replace(/[^\d+\-]/g, '');
+                                                const digitsOnly = raw.replace(/\D/g, '');
+                                                const maxDigits = digitsOnly.startsWith('62') ? 13 : 12;
+                                                if (digitsOnly.length <= maxDigits) {
+                                                    setFormData({ ...formData, patient_phone: raw });
+                                                }
+                                            }}
+                                        />
+                                        {formData.patient_phone && (
+                                            <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold pointer-events-none
+                                                ${formData.patient_phone.replace(/\D/g, '').length < 10 ? 'text-red-400' : 'text-emerald-500'}`}>
+                                                {formData.patient_phone.replace(/\D/g, '').length}/
+                                                {formData.patient_phone.replace(/\D/g, '').startsWith('62') ? '13' : '12'}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div>
                                     <label className={labelClass}>Alamat Tinggal</label>
-                                    <input type="text" placeholder="Kota / Alamat lengkap" required className={inputClass}
-                                        value={formData.patient_address} onChange={e => setFormData({ ...formData, patient_address: e.target.value })} />
+                                    <input type="text" placeholder="Jl. Nama Jalan No. ..." required className={inputClass}
+                                        maxLength={100}
+                                        value={formData.patient_address}
+                                        onChange={e => {
+                                            const val = e.target.value;
+                                            // Karakter pertama wajib huruf, setelahnya boleh angka
+                                            if (val === '' || /^[a-zA-ZÀ-ÿ]/.test(val)) {
+                                                setFormData({ ...formData, patient_address: val });
+                                            }
+                                        }} />
                                 </div>
                             </div>
 

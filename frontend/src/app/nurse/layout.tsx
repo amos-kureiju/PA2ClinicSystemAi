@@ -120,7 +120,6 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
         { icon: Users2, label: 'Daftar Pasien', href: '/nurse/patients' },
         { icon: Stethoscope, label: 'Layanan Klinik', href: '/nurse/services' },
         { icon: Activity, label: 'Catatan Medis', href: '/nurse/records' },
-        { icon: UserCircle, label: 'Profil Saya', href: '/nurse/profile' },
     ];
 
     // ── Loading gate
@@ -523,15 +522,6 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
 
                                         {/* Menu items */}
                                         <div className="py-2 px-2">
-                                            <button
-                                                onClick={() => { setIsProfileOpen(false); router.push('/nurse/profile'); }}
-                                                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg
-                                                           text-[12px] font-bold text-slate-700
-                                                           hover:bg-emerald-50 hover:text-emerald-700 transition-all"
-                                            >
-                                                <UserCircle size={16} className="text-emerald-600" />
-                                                Lihat Profil Saya
-                                            </button>
                                             <button
                                                 onClick={handleLogout}
                                                 className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg
