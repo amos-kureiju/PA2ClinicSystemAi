@@ -343,28 +343,53 @@ def create_appointment(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    """Pasien membuat janji temu baru (status awal: pending)."""
     try:
         user = _get_user_by_token(current_user, db)
+        
+        # 1. Simpan Janji Temu (Appointment)
+        # Kita gunakan data.model_dump() untuk mengambil semua input dari frontend
         new_appo = Appointment(
             **data.model_dump(),
             status="pending",
             user_id=user.id,
         )
         db.add(new_appo)
+
+        # 2. Tambah ke daftar pasien jika belum ada
+        existing_patient = db.query(Patient).filter(Patient.email == user.email).first()
+
+        if not existing_patient:
+            # Pecah nama (Septian Hts -> Septian & Hts)
+            name_parts = user.full_name.split(" ", 1)
+            f_name = name_parts[0]
+            l_name = name_parts[1] if len(name_parts) > 1 else ""
+
+            # Gunakan getattr untuk menghindari error jika field tidak ada di form
+            new_p = Patient(
+                full_name=user.full_name,
+                email=user.email,
+                phone_number=data.patient_phone,
+                # Gunakan .get() atau getattr agar jika kosong tidak crash
+                address=getattr(data, 'address', '-'),
+                gender=getattr(data, 'gender', '-'),
+                created_at=datetime.utcnow()
+            )
+            db.add(new_p)
+
         db.commit()
         db.refresh(new_appo)
         return new_appo
-    except HTTPException:
-        raise
+
     except Exception as e:
         db.rollback()
+        # CETAK ERROR KE TERMINAL AGAR KAMU TAHU MASALAHNYA
+        print(f"CRASH SAAT DAFTAR: {str(e)}") 
         raise HTTPException(status_code=500, detail=f"Gagal mendaftar: {str(e)}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 5. APPOINTMENT — DOKTER (filter hanya milik dokter yang login)
-# ══════════════════════════════════════════════════════════════════════════════
+# ══════════════════════════════════
 
 @router.get("/appointments/my-patients")
 def get_my_patients(
@@ -676,59 +701,61 @@ def get_stats_analytics(
     admin: dict = Depends(require_admin),
 ):
     data_points = []
-
-    # ✅ PERBAIKAN UTAMA: Gunakan timezone WIB bukan UTC
+    # Set zona waktu ke Jakarta
     WIB = pytz.timezone("Asia/Jakarta")
     now_wib = datetime.now(WIB)
-    today_wib = now_wib.date()  # Tanggal HARI INI versi WIB
+    today_wib = now_wib.date()
 
-    if period == "weekly":
-        for i in range(6, -1, -1):
-            target_date = today_wib - timedelta(days=i)
+    try:
+        if period == "weekly":
+            # Looping 7 hari terakhir
+            for i in range(6, -1, -1):
+                target_date = today_wib - timedelta(days=i)
+                
+                # Buat rentang waktu dari jam 00:00:00 sampai 23:59:59 (WIB)
+                start_wib = WIB.localize(datetime.combine(target_date, datetime.min.time()))
+                end_wib = WIB.localize(datetime.combine(target_date, datetime.max.time()))
+                
+                # Konversi rentang tersebut ke UTC agar cocok dengan database Neon
+                start_utc = start_wib.astimezone(pytz.utc).replace(tzinfo=None)
+                end_utc = end_wib.astimezone(pytz.utc).replace(tzinfo=None)
 
-            # Konversi target_date ke range datetime WIB
-            start_wib = WIB.localize(datetime.combine(target_date, datetime.min.time()))
-            end_wib   = WIB.localize(datetime.combine(target_date, datetime.max.time()))
+                # Hitung data dalam rentang tersebut
+                count = db.query(Appointment).filter(
+                    Appointment.appointment_date >= start_utc,
+                    Appointment.appointment_date <= end_utc
+                ).count()
+                
+                days_name = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
+                data_points.append({
+                    "name": days_name[target_date.weekday()],
+                    "online": count
+                })
+                
+        else: # monthly (Tampilan per minggu dalam sebulan terakhir)
+            for i in range(3, -1, -1):
+                target_end_date = today_wib - timedelta(days=i * 7)
+                target_start_date = target_end_date - timedelta(days=6)
+                
+                start_utc = WIB.localize(datetime.combine(target_start_date, datetime.min.time())).astimezone(pytz.utc).replace(tzinfo=None)
+                end_utc = WIB.localize(datetime.combine(target_end_date, datetime.max.time())).astimezone(pytz.utc).replace(tzinfo=None)
 
-            # Konversi ke UTC untuk query database
-            start_utc = start_wib.astimezone(pytz.utc).replace(tzinfo=None)
-            end_utc   = end_wib.astimezone(pytz.utc).replace(tzinfo=None)
+                count = db.query(Appointment).filter(
+                    Appointment.appointment_date >= start_utc,
+                    Appointment.appointment_date <= end_utc
+                ).count()
+                
+                data_points.append({
+                    "name": f"W-{4-i}",
+                    "online": count
+                })
 
-            count = db.query(Appointment).filter(
-                Appointment.appointment_date >= start_utc,
-                Appointment.appointment_date <= end_utc,
-            ).count()
+        return data_points
 
-            names = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
-            data_points.append({
-                "name": names[target_date.weekday()],
-                "online": count,
-                "full_date": target_date.strftime("%Y-%m-%d"),
-            })
+    except Exception as e:
+        print(f"GRAFIK ERROR: {str(e)}")
+        return []
 
-    else:  # Bulanan — per minggu
-        for i in range(3, -1, -1):
-            # Start dan end dalam WIB
-            start_date = today_wib - timedelta(days=(i + 1) * 7)
-            end_date   = today_wib - timedelta(days=i * 7)
-
-            start_wib = WIB.localize(datetime.combine(start_date, datetime.min.time()))
-            end_wib   = WIB.localize(datetime.combine(end_date, datetime.max.time()))
-
-            start_utc = start_wib.astimezone(pytz.utc).replace(tzinfo=None)
-            end_utc   = end_wib.astimezone(pytz.utc).replace(tzinfo=None)
-
-            count = db.query(Appointment).filter(
-                Appointment.appointment_date >= start_utc,
-                Appointment.appointment_date <= end_utc,
-            ).count()
-
-            data_points.append({
-                "name": f"Minggu {4 - i}",
-                "online": count,
-            })
-
-    return data_points
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -736,29 +763,24 @@ def get_stats_analytics(
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.get("/patients")
-def get_patients(
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(require_staff_or_admin),
-):
+def get_patients(db: Session = Depends(get_db), current_user: dict = Depends(require_staff_or_admin)):
     from app.models.patient import Patient
     patients = db.query(Patient).all()
     
     output = []
     for p in patients:
-        # Gabungka nama
-        full_name = f"{p.first_name} {p.last_name or ''}".strip()
-        
+        # Hitung jumlah janji berdasarkan nama lengkap
+        count = db.query(Appointment).filter(
+            func.lower(Appointment.patient_name) == p.full_name.lower()
+        ).count()
+
         output.append({
             "id": p.id,
-            "full_name": full_name, 
-            "first_name": p.first_name,
-            "last_name": p.last_name,
+            "full_name": p.full_name, # Frontend akan membaca ini dengan lancar
             "email": p.email,
             "phone_number": p.phone_number,
             "created_at": p.created_at,
-            "total_appointments": db.query(Appointment)
-                                    .filter(func.lower(Appointment.patient_name) == full_name.lower())
-                                    .count(),
+            "total_appointments": count
         })
     return output
 
