@@ -23,7 +23,7 @@ function useLiveClock() {
 const fadeUp = (delay = 0) => ({
     initial: { opacity: 0, y: 18 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.45, ease: 'easeOut', delay },
+    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] as const, delay },
 });
 
 export default function DoctorDashboard() {
@@ -233,7 +233,7 @@ export default function DoctorDashboard() {
                         key={card.label}
                         initial={{ opacity: 0, y: 14 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.15 + i * 0.07, duration: 0.4, ease: 'easeOut' }}
+                        transition={{ delay: 0.15 + i * 0.07, duration: 0.4, ease: [0.16, 1, 0.3, 1] as const }}
                         className={`bg-white rounded-2xl border shadow-sm p-5 ring-1 ${card.ring} hover:shadow-md hover:-translate-y-0.5 transition-all group`}
                     >
                         <div className="flex items-start justify-between mb-4">

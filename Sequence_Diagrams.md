@@ -4,30 +4,30 @@ Dokumen ini memuat Sequence Diagram lengkap untuk setiap Use Case yang ada pada 
 
 ---
 
-    ## 1. Autentikasi (Umum untuk Semua Aktor)
+## 1. Autentikasi (Umum untuk Semua Aktor)
 
-    ### 1.1 Login (termasuk *Verifikasi Akun*)
-    ```mermaid
-    sequenceDiagram
-        participant A as Aktor (User/Dokter/Admin/Perawat)
-        participant UI as Frontend
-        participant API as Backend (auth.py)
-        participant DB as Database
-        A->>UI: Input Email & Password
-        UI->>API: POST /login
-        API->>DB: Cek Email User
-        DB-->>API: Data User & Password Hash
-        API->>API: Verifikasi Password Hash
-        alt Kredensial Valid
-            API-->>UI: Return Access Token (JWT)
-            UI->>API: GET /me (mengambil role & data user)
-            API-->>UI: Return Data User
-            UI-->>A: Redirect ke Dashboard Sesuai Role
-        else Kredensial Invalid
-            API-->>UI: 401 Unauthorized
-            UI-->>A: Tampilkan Pesan Error
-        end
-    ```
+### 1.1 Login (termasuk *Verifikasi Akun*)
+```mermaid
+sequenceDiagram
+    participant A as Aktor (User/Dokter/Admin/Perawat)
+    participant UI as Frontend
+    participant API as Backend (auth.py)
+    participant DB as Database
+    A->>UI: Input Email & Password
+    UI->>API: POST /login
+    API->>DB: Cek Email User
+    DB-->>API: Data User & Password Hash
+    API->>API: Verifikasi Password Hash
+    alt Kredensial Valid
+        API-->>UI: Return Access Token (JWT)
+        UI->>API: GET /me (mengambil role & data user)
+        API-->>UI: Return Data User
+        UI-->>A: Redirect ke Dashboard Sesuai Role
+    else Kredensial Invalid
+        API-->>UI: 401 Unauthorized
+        UI-->>A: Tampilkan Pesan Error
+    end
+```
 
 ### 1.2 Logout
 ```mermaid
@@ -139,6 +139,73 @@ sequenceDiagram
     UI-->>P: Tampilkan Notifikasi Perubahan Disimpan
 ```
 
+### 2.7 Melihat Nauli Dental
+```mermaid
+sequenceDiagram
+    participant P as Pasien
+    participant UI as Frontend
+    participant API as Backend (clinic.py)
+    participant DB as Database
+    P->>UI: Akses Menu Tentang Nauli Dental
+    UI->>API: GET /clinic/profile
+    API->>DB: Query Informasi Profil Klinik
+    DB-->>API: Data Profil & Sejarah Klinik
+    API-->>UI: Return Data Profil Klinik
+    UI-->>P: Tampilkan Halaman Nauli Dental
+```
+
+### 2.8 Melihat Visi & Misi
+```mermaid
+sequenceDiagram
+    participant P as Pasien
+    participant UI as Frontend
+    participant API as Backend (clinic.py)
+    participant DB as Database
+    P->>UI: Akses Halaman Visi & Misi
+    UI->>API: GET /clinic/vision-mission
+    API->>DB: Query Data Visi & Misi Klinik
+    DB-->>API: Data Visi & Misi
+    API-->>UI: Return Data Visi & Misi
+    UI-->>P: Tampilkan Halaman Visi & Misi
+```
+
+### 2.9 Melihat Naulico (termasuk About, Panduan Klinik, & Contact)
+```mermaid
+sequenceDiagram
+    participant P as Pasien
+    participant UI as Frontend
+    participant API as Backend (clinic.py)
+    participant DB as Database
+    
+    rect rgb(240, 253, 250)
+        Note over P, DB: <<Include>> Melihat About
+        P->>UI: Akses Halaman Naulico
+        UI->>API: GET /clinic/about
+        API->>DB: Query Data Informasi About
+        DB-->>API: Data About
+        API-->>UI: Return Data About
+        UI-->>P: Tampilkan Halaman Utama Naulico (About)
+    end
+
+    opt <<Extend>> Melihat Panduan Klinik
+        P->>UI: Klik Link Panduan Klinik
+        UI->>API: GET /clinic/guide
+        API->>DB: Query Data Panduan/SOP Klinik
+        DB-->>API: Data Panduan
+        API-->>UI: Return Data Panduan
+        UI-->>P: Tampilkan Halaman Panduan Klinik
+    end
+
+    opt <<Extend>> Melihat Contact
+        P->>UI: Klik Link Contact / Hubungi Kami
+        UI->>API: GET /clinic/contact
+        API->>DB: Query Informasi Kontak Klinik
+        DB-->>API: Data Kontak & Lokasi
+        API-->>UI: Return Data Kontak
+        UI-->>P: Tampilkan Halaman Contact
+    end
+```
+
 ---
 
 ## 3. Dokter
@@ -185,7 +252,7 @@ sequenceDiagram
     API->>DB: Simpan Catatan Rekam Medis (Diagnosis, Resep, dll)
     DB-->>API: Sukses Menyimpan
     API-->>UI: Return Konfirmasi Rekam Medis
-    UI->>API: PATCH /appointments/{app_id}/status (Selesai)
+    UI-->>API: PATCH /appointments/{app_id}/status (Selesai)
     API-->>UI: Status Diperbarui
     UI-->>D: Tampilkan Notifikasi Selesai Pemeriksaan
 ```
@@ -205,7 +272,22 @@ sequenceDiagram
     UI-->>D: Tampilkan Tabel Antrian Pasien Dokter
 ```
 
-### 3.6 Mengelola Profil (Dokter)
+### 3.6 Mengakses Laporan Medis
+```mermaid
+sequenceDiagram
+    participant D as Dokter
+    participant UI as Frontend
+    participant API as Backend
+    participant DB as Database
+    D->>UI: Buka Menu Laporan Medis
+    UI->>API: GET /reports/medical-summary (menggunakan token JWT Dokter)
+    API->>DB: Query Rekapitulasi Penyakit & Statistik Kunjungan Pasien
+    DB-->>API: Data Laporan & Agregasi
+    API-->>UI: Return Laporan Medis (JSON / PDF link)
+    UI-->>D: Tampilkan Laporan Medis & Grafik Statistik
+```
+
+### 3.7 Mengelola Profil (Dokter)
 ```mermaid
 sequenceDiagram
     participant D as Dokter
@@ -328,7 +410,37 @@ sequenceDiagram
     UI-->>Ad: Tampilkan Grafik, Total Reservasi & Monitoring Realtime
 ```
 
-### 4.8 Verifikasi Administrator & 4.9 Mengelola Pengaturan Sistem
+### 4.8 Mengakses Notifikasi
+```mermaid
+sequenceDiagram
+    participant Ad as Admin
+    participant UI as Frontend
+    participant API as Backend (notifications.py)
+    participant DB as Database
+    Ad->>UI: Buka Halaman Notifikasi Admin
+    UI->>API: GET /admin/notifications (menggunakan token JWT Admin)
+    API->>DB: Query Notifikasi Terbaru (Reservasi Baru, dsb)
+    DB-->>API: List Notifikasi
+    API-->>UI: Return List Notifikasi
+    UI-->>Ad: Tampilkan Pusat Notifikasi Admin
+```
+
+### 4.9 Mengakses AI Data
+```mermaid
+sequenceDiagram
+    participant Ad as Admin
+    participant UI as Frontend
+    participant API as Backend (chatbot.py)
+    participant DB as Database
+    Ad->>UI: Buka Menu AI Data / Chat Logs
+    UI->>API: GET /chatbot/logs (menggunakan token JWT Admin)
+    API->>DB: Ambil Log Pertanyaan Pasien & Respons AI
+    DB-->>API: Data Riwayat Chat & Statistik AI
+    API-->>UI: Return Data Log & Feedback Chatbot
+    UI-->>Ad: Tampilkan Monitoring AI Data & Penggunaan Chatbot
+```
+
+### 4.10 Verifikasi Administrator & 4.11 Mengelola Pengaturan Sistem
 ```mermaid
 sequenceDiagram
     participant Ad as Admin
@@ -400,7 +512,43 @@ sequenceDiagram
     UI-->>Pr: Tampilkan Notifikasi Pemeriksaan Awal Disimpan
 ```
 
-### 5.6 Mengelola Profil (Perawat)
+### 5.6 Melihat Layanan Klinik
+```mermaid
+sequenceDiagram
+    participant Pr as Perawat
+    participant UI as Frontend
+    participant API as Backend (services.py)
+    participant DB as Database
+    Pr->>UI: Buka Menu Layanan Klinik
+    UI->>API: GET /services
+    API->>DB: Query Daftar Layanan Klinik Aktif
+    DB-->>API: Data Layanan (Nama, Harga, Estimasi Waktu)
+    API-->>UI: Return Data Layanan
+    UI-->>Pr: Tampilkan Informasi Layanan Klinik
+```
+
+### 5.7 Mengelola Pengaturan
+```mermaid
+sequenceDiagram
+    participant Pr as Perawat
+    participant UI as Frontend
+    participant API as Backend (settings.py)
+    participant DB as Database
+    Pr->>UI: Buka Menu Pengaturan Perawat / Sistem
+    UI->>API: GET /settings/nurse-preferences
+    API->>DB: Query Preferensi & Pengaturan Awal
+    DB-->>API: Data Pengaturan
+    API-->>UI: Return Data Pengaturan
+    UI-->>Pr: Tampilkan Form Pengaturan
+    Pr->>UI: Ubah Konfigurasi (Misal: Status Tugas/Poli)
+    UI->>API: PATCH /settings/nurse-preferences
+    API->>DB: Simpan Perubahan Pengaturan
+    DB-->>API: Sukses
+    API-->>UI: Return Konfirmasi Status Tersimpan
+    UI-->>Pr: Tampilkan Notifikasi Pengaturan Berhasil Diperbarui
+```
+
+### 5.8 Mengelola Profil (Perawat)
 ```mermaid
 sequenceDiagram
     participant Pr as Perawat
