@@ -252,7 +252,7 @@ export default function PatientServicesPage() {
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent" />
                                     <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm rounded-xl px-3 py-1.5 shadow-sm">
                                         <p className="text-xs font-black text-emerald-700">
-                                            Rp {item.price?.toLocaleString()}
+                                            {item.price?.toLocaleString()}
                                         </p>
                                     </div>
                                     <div className="absolute top-3 left-3 bg-emerald-500/90 backdrop-blur-sm rounded-lg px-2.5 py-1">
@@ -597,7 +597,7 @@ export default function PatientServicesPage() {
                                         </div>
                                         <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2">
                                             <p className="text-base font-black text-emerald-700">
-                                                Rp {selectedService.price?.toLocaleString()}
+                                                {selectedService.price?.toLocaleString()}
                                             </p>
                                         </div>
                                     </div>
