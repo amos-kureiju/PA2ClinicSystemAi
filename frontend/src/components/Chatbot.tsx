@@ -41,7 +41,7 @@ const SUGGESTIONS = [
     'Langkah Pendaftaran Nauli Dental Care?',
 ];
 
-function ClinicLogo({ size = 32, className = '' }: { size?: number; className?: string }) {
+function ClinicLogo({ size = 32, className = '', style }: { size?: number; className?: string; style?: React.CSSProperties }) {
     return (
         <img
             src="/images/icon.png"
@@ -49,7 +49,7 @@ function ClinicLogo({ size = 32, className = '' }: { size?: number; className?: 
             width={size}
             height={size}
             className={`object-contain block ${className}`}
-            style={{ width: size, height: size, flexShrink: 0 }}
+            style={{ width: size, height: size, flexShrink: 0, ...style }}
         />
     );
 }
@@ -623,7 +623,7 @@ const [isAiHovered, setIsAiHovered] = useState(false); // State pendukung tombol
                                             key={text}
                                             onClick={() => handleSendMessage(text)}
                                             style={{
-                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                display: 'flex', justifyContent: 'space-between',
                                                 padding: '0 16px', backgroundColor: '#fff',
                                                 border: '1px solid #e2e8f0', borderRadius: 10,
                                                 fontSize: 13, fontWeight: 500, color: '#334155',

@@ -15,10 +15,20 @@ import os
 from langchain_cohere import ChatCohere, CohereEmbeddings
 from langchain_pinecone import PineconeVectorStore
 
-# ── FIX IMPORT (bukan langchain_classic) ─────────────────────────
-from langchain.chains import create_retrieval_chain
-from langchain.chains import create_history_aware_retriever
-from langchain.chains.combine_documents import create_stuff_documents_chain
+# ── FIX IMPORT untuk langchain/langchain_classic ─────────────────
+try:
+    from langchain_classic.chains.retrieval import create_retrieval_chain
+    from langchain_classic.chains.history_aware_retriever import create_history_aware_retriever
+    from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+except ImportError:
+    try:
+        from langchain.chains.retrieval import create_retrieval_chain
+        from langchain.chains.history_aware_retriever import create_history_aware_retriever
+        from langchain.chains.combine_documents import create_stuff_documents_chain
+    except ImportError:
+        from langchain.chains import create_retrieval_chain
+        from langchain.chains import create_history_aware_retriever
+        from langchain.chains.combine_documents import create_stuff_documents_chain
 # ─────────────────────────────────────────────────────────────────
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -32,7 +42,7 @@ os.environ["PINECONE_API_KEY"] = settings.PINECONE_API_KEY
 class ChatbotService:
     def __init__(self):
         try:
-            print(f"[INFO] Inisialisasi Chatbot → Index: {settings.PINECONE_INDEX_NAME}")
+            print(f"[INFO] Inisialisasi Chatbot - Index: {settings.PINECONE_INDEX_NAME}")
 
             # ── 1. Embedding & Vectorstore ──────────────────────────────────
             self.embeddings = CohereEmbeddings(model="embed-multilingual-v3.0")
@@ -106,7 +116,7 @@ ATURAN WAJIB:
             self.rag_chain = create_retrieval_chain(
                 self.history_aware_retriever, question_answer_chain
             )
-            print("[INFO] ✅ Chatbot Service siap!")
+            print("[INFO] Chatbot Service siap!")
 
         except Exception as e:
             print(f"[ERROR] Gagal inisialisasi: {e}")

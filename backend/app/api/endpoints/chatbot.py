@@ -16,8 +16,19 @@ from app.core.config import settings
 from langchain_cohere import CohereEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.schema import Document
+
+try:
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+except ImportError:
+    try:
+        from langchain.text_splitter import RecursiveCharacterTextSplitter
+    except ImportError:
+        from langchain_classic.text_splitter import RecursiveCharacterTextSplitter
+
+try:
+    from langchain_core.documents import Document
+except ImportError:
+    from langchain.schema import Document
 
 router = APIRouter()
 
