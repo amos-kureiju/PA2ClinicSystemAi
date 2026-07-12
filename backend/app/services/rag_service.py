@@ -82,21 +82,8 @@ class ChatbotService:
 
             # k=6 → ambil 6 chunk agar info yang tersebar di PDF tetap terjangkau
             self.history_aware_retriever = create_history_aware_retriever(
-                self.llm,
-                self.vectorstore.as_retriever(search_kwargs={"k": 6}),
-                contextualize_q_prompt,
-            )
-
-            # ── 3. Prompt utama: KETAT + instruksi DETAIL ──────────────────
-            system_prompt = """Anda adalah asisten medis resmi "KlinikAI" dari Nauli Dental Care Balige.
-
-TUGAS: Jawab pertanyaan pasien berdasarkan KONTEKS DOKUMEN di bawah ini secara mendetail dan akurat.
-
-KONTEKS DOKUMEN:
-{context}
-
-ATURAN WAJIB:
-1. Gunakan informasi dari KONTEKS DOKUMEN sebagai prioritas utama. Jangan mengarang data spesifik klinik (seperti jadwal, harga, atau daftar dokter) yang tidak tercantum di dokumen.
+      ATURAN WAJIB:
+1. Gunakan informasi dari KONTEKS DOKUMEN dan INFORMASI PASIEN sebagai prioritas utama. Jangan mengarang data spesifik klinik (seperti jadwal, harga, atau daftar dokter) yang tidak tercantum di dokumen.
 2. [Opsi A - Guardrails]: Jika pengguna menanyakan topik di luar kesehatan gigi, kedokteran gigi, atau informasi klinik Nauli Dental Care Balige (misalnya topik politik, resep masakan, matematika, pemrograman, sains umum, dll), Anda WAJIB menolak secara sopan menggunakan kalimat persis seperti berikut:
    "Maaf, sebagai asisten medis KlinikAI, saya hanya dapat membantu menjawab pertanyaan seputar kesehatan gigi, layanan, jadwal dokter, dan informasi di Nauli Dental Care Balige. Ada yang bisa saya bantu terkait kesehatan gigi Anda?"
 3. [Opsi B - Edukasi Umum + CTA]: Jika pasien bertanya mengenai keluhan medis gigi secara umum (misal: "Mengapa gigi saya sering ngilu saat minum dingin?") tetapi penjelasannya tidak ada secara mendetail di KONTEKS DOKUMEN, Anda diperbolehkan memberikan penjelasan medis dasar secara umum (menggunakan basis pengetahuan umum Anda), namun WAJIB diakhiri dengan anjuran konsultasi seperti berikut:
@@ -111,7 +98,9 @@ ATURAN WAJIB:
 9. Jawab dalam Bahasa Indonesia yang ramah dan profesional.
 10. Jika pasien menyebutkan keluhan serius atau ingin diperiksa langsung, tanyakan dengan ramah: "Apakah Anda ingin saya bantu jadwalkan konsultasi dengan dokter kami sekarang?"
 11. Jika pasien menyebut nama dokter spesifik (misal "drg. Yetti"), konfirmasikan: "Baik, saya akan teruskan permintaan Anda ke drg. Yetti. Tim kami akan segera menghubungi Anda."
-12. Jangan berpura-pura sudah membuat jadwal — cukup sampaikan bahwa permintaan sedang diteruskan ke tim medis."""
+12. Jangan berpura-pura sudah membuat jadwal — cukup sampaikan bahwa permintaan sedang diteruskan ke tim medis.
+13. Jika INFORMASI PASIEN menunjukkan PASIEN LAMA, sapa dengan hangat dan sebutkan riwayat singkatnya bila relevan dengan pertanyaan.
+14. Jika INFORMASI PASIEN menunjukkan PASIEN BARU, sambut ramah dan tawarkan pendaftaran/konsultasi pertama."""
 
 
             qa_prompt = ChatPromptTemplate.from_messages([
@@ -132,7 +121,7 @@ ATURAN WAJIB:
             self.is_ready = False
             print(f"[ERROR] Gagal inisialisasi ChatbotService (koneksi bermasalah): {e}")
 
-    def get_response(self, query: str, history: list = []) -> str:
+    def get_response(self, query: str, history: list = [], personal_context: str = "") -> str:
         # Coba inisialisasi ulang jika sebelumnya gagal (misal koneksi kembali tersedia)
         if not self.is_ready:
             print("[INFO] Mencoba inisialisasi ulang ChatbotService...")
@@ -143,7 +132,6 @@ ATURAN WAJIB:
                 "Horas! Maaf, saat ini layanan asisten AI sedang mengalami gangguan koneksi ke basis data pengetahuan kami. "
                 "Silakan tanyakan langsung melalui WhatsApp di nomor 0821-6352-6363 atau kunjungi klinik kami."
             )
-
         try:
             # ── Konversi history → LangChain format ──────────────────────
             chat_history = []
@@ -169,6 +157,7 @@ ATURAN WAJIB:
             result = self.rag_chain.invoke({
                 "input":        query,
                 "chat_history": chat_history,
+                "personal_context": personal_context,
             })
 
             answer = (result.get("answer") or "").strip()

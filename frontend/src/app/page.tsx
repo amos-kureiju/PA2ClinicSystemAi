@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Clock, Activity } from 'lucide-react';
+import { ShieldCheck, Clock, Activity, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 /* ─── Data (tidak diubah) ───────────────────────────────────────────────── */
@@ -340,6 +340,31 @@ export default function WelcomePage() {
 
             {/* ── Action cards ─────────────────────────────── */}
             <div className="flex flex-col gap-3 mt-8">
+              {/* Cari bagian ini di file Welcome/Landing Page kamu */}
+              {/* Jelajahi Tanpa Akun — pill button, jelas terlihat, konsisten dgn 2 card di atas */}
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="flex justify-center pt-2"
+              >
+                <motion.div whileHover={{ y: -2, scale: 1.01 }} whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}>
+                  <Link
+                    href="/patient/dashboard"
+                    className="group flex items-center gap-2.5 rounded-full px-6 py-3
+          text-[12px] font-bold uppercase tracking-[0.1em]
+          text-emerald-300 border border-emerald-400/40
+          bg-emerald-500/10 backdrop-blur-md
+          hover:bg-emerald-500/20 hover:border-emerald-400/60 hover:text-emerald-200
+          transition-all shadow-lg shadow-emerald-900/20"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
+                    Masuk Tanpa Akun
+                    <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </motion.div>
+              </motion.div>
 
               {/* Daftar Pasien Baru */}
               <motion.div whileHover={{ y: -4, scale: 1.01 }} whileTap={{ scale: 0.98 }}
@@ -361,7 +386,7 @@ export default function WelcomePage() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <div className="text-[17px] font-black text-white tracking-tight">Daftar Pasien Baru</div>
+                    <div className="text-[17px] font-black text-white tracking-tight">Daftar Akun Baru</div>
                     <div className="text-[12px] text-white/75 mt-0.5">Registrasi dan nikmati layanan kesehatan gigi terbaik</div>
                   </div>
                   <motion.div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0"
@@ -394,7 +419,7 @@ export default function WelcomePage() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <div className="text-[17px] font-black text-white tracking-tight">Masuk ke Sistem</div>
+                    <div className="text-[17px] font-black text-white tracking-tight">Login</div>
                     <div className="text-[12px] text-white/50 mt-0.5">Akses jadwal, rekam medis & kelola akun Anda</div>
                   </div>
                   <motion.div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0"
