@@ -1,6 +1,22 @@
 import os
+import sys
+from dotenv import load_dotenv
+
+# Force UTF-8 encoding for stdout on Windows to prevent Emoji print errors
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8')
+
+# Load environment variables from the .env file in the backend directory
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+try:
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+except ImportError:
+    try:
+        from langchain.text_splitter import RecursiveCharacterTextSplitter
+    except ImportError:
+        from langchain_classic.text_splitter import RecursiveCharacterTextSplitter
 from langchain_cohere import CohereEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from app.core.config import settings
@@ -10,8 +26,8 @@ os.environ["COHERE_API_KEY"] = settings.COHERE_API_KEY
 os.environ["PINECONE_API_KEY"] = settings.PINECONE_API_KEY
 
 def upload_knowledge_multi_folder():
-    # 1. PERBAIKAN: Nama folder di gambar kamu adalah 'docs', bukan 'dokumen'
-    base_path = '../docs' 
+    # Resolve base_path absolutely relative to this script's directory
+    base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'docs')) 
     
     # 2. PERBAIKAN: Pastikan nama sub-folder sama persis dengan di gambar
     sub_folders = ['klinik_umum', 'prosedur_medis']

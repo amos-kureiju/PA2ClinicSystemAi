@@ -87,7 +87,7 @@ export default function NurseServicesPage() {
                                 <div className="flex items-center justify-between pt-4 border-t border-slate-50">
                                     {svc.price ? (
                                         <span className="flex items-center gap-1.5 text-sm font-black text-teal-600">
-                                            <DollarSign size={14} /> Rp {svc.price.toLocaleString('id-ID')}
+                                            <DollarSign size={14} /> {svc.price.toLocaleString('id-ID')}
                                         </span>
                                     ) : (
                                         <span className="text-xs text-slate-300 font-bold">Harga belum diatur</span>

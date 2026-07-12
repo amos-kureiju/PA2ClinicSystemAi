@@ -62,8 +62,8 @@ export default function LoginPage() {
             const { access_token, role, full_name, } = res.data;
 
             const expires = 1 / 24;
-            Cookies.set('token', access_token, { expires, sameSite: 'strict' });
-            Cookies.set('role', role, { expires, sameSite: 'strict' });
+            Cookies.set('token', access_token, { expires, sameSite: 'strict', path: '/' });
+            Cookies.set('role', role, { expires, sameSite: 'strict', path: '/' });
             localStorage.setItem('token', access_token);
             localStorage.setItem('user_role', role);
             localStorage.setItem('user_name', full_name || ''); 

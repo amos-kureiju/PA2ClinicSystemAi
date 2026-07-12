@@ -127,7 +127,7 @@ export default function ProfilePage() {
         finally { setSaving(false); }
     };
 
-    const logout = () => { localStorage.clear(); Cookies.remove('token'); router.push('/login'); };
+    const logout = () => { localStorage.clear(); Cookies.remove('token', { path: '/' }); router.push('/login'); };
     const completion = pct(user);
     const r = 44, circ = 2 * Math.PI * r, dash = (completion / 100) * circ;
 

@@ -41,6 +41,16 @@ os.environ["PINECONE_API_KEY"] = settings.PINECONE_API_KEY
 
 class ChatbotService:
     def __init__(self):
+        self.embeddings = None
+        self.vectorstore = None
+        self.llm = None
+        self.history_aware_retriever = None
+        self.rag_chain = None
+        self.is_ready = False
+        
+        self.initialize_service()
+
+    def initialize_service(self):
         try:
             print(f"[INFO] Inisialisasi Chatbot - Index: {settings.PINECONE_INDEX_NAME}")
 
@@ -86,23 +96,22 @@ KONTEKS DOKUMEN:
 {context}
 
 ATURAN WAJIB:
-1. Gunakan HANYA informasi dari KONTEKS DOKUMEN. Dilarang mengarang.
-2. Jika ditanya NAMA DOKTER → sebutkan SEMUA nama dokter dari konteks.
-3. Jika ditanya HARGA → sebutkan angka persis dari konteks.
-4. Jika ditanya GEJALA/PENANGANAN → jelaskan sesuai data, berikan detail.
-5. Jika informasi TIDAK ADA di konteks → balas:
+1. Gunakan informasi dari KONTEKS DOKUMEN sebagai prioritas utama. Jangan mengarang data spesifik klinik (seperti jadwal, harga, atau daftar dokter) yang tidak tercantum di dokumen.
+2. [Opsi A - Guardrails]: Jika pengguna menanyakan topik di luar kesehatan gigi, kedokteran gigi, atau informasi klinik Nauli Dental Care Balige (misalnya topik politik, resep masakan, matematika, pemrograman, sains umum, dll), Anda WAJIB menolak secara sopan menggunakan kalimat persis seperti berikut:
+   "Maaf, sebagai asisten medis KlinikAI, saya hanya dapat membantu menjawab pertanyaan seputar kesehatan gigi, layanan, jadwal dokter, dan informasi di Nauli Dental Care Balige. Ada yang bisa saya bantu terkait kesehatan gigi Anda?"
+3. [Opsi B - Edukasi Umum + CTA]: Jika pasien bertanya mengenai keluhan medis gigi secara umum (misal: "Mengapa gigi saya sering ngilu saat minum dingin?") tetapi penjelasannya tidak ada secara mendetail di KONTEKS DOKUMEN, Anda diperbolehkan memberikan penjelasan medis dasar secara umum (menggunakan basis pengetahuan umum Anda), namun WAJIB diakhiri dengan anjuran konsultasi seperti berikut:
+   "Namun, untuk mendapatkan diagnosa yang akurat dan penanganan yang tepat, kami menyarankan Anda memeriksakan diri langsung ke dokter gigi kami. Apakah Anda ingin saya jadwalkan konsultasi dengan dokter gigi Nauli Dental Care?"
+4. Jika ditanya NAMA DOKTER → sebutkan SEMUA nama dokter dari konteks.
+5. Jika ditanya HARGA → sebutkan angka persis dari konteks.
+6. Jika ditanya GEJALA/PENANGANAN → jelaskan sesuai data, berikan detail.
+7. Jika informasi non-medis klinik (seperti harga layanan spesifik, jadwal operasional/dokter tertentu, dll) TIDAK ADA di konteks → balas:
    "Horas! Maaf, informasi tersebut belum tersedia di data kami.
    Hubungi WA 0821-6352-6363 atau kunjungi Jl. Balige No. 12, Toba."
-6. Gunakan sapaan "Horas!" hanya di awal jawaban positif.
-7. Jawab dalam Bahasa Indonesia yang ramah dan profesional.
-8. Jika pasien menyebutkan keluhan serius atau ingin diperiksa langsung,
-   tanyakan dengan ramah: "Apakah Anda ingin saya bantu jadwalkan
-   konsultasi dengan dokter kami sekarang?"
-9. Jika pasien menyebut nama dokter spesifik (misal "drg. Yetti"),
-   konfirmasikan: "Baik, saya akan teruskan permintaan Anda ke drg. Yetti.
-   Tim kami akan segera menghubungi Anda."
-10. Jangan berpura-pura sudah membuat jadwal — cukup sampaikan bahwa
-    permintaan sedang diteruskan ke tim medis."""
+8. Gunakan sapaan "Horas!" hanya di awal jawaban positif.
+9. Jawab dalam Bahasa Indonesia yang ramah dan profesional.
+10. Jika pasien menyebutkan keluhan serius atau ingin diperiksa langsung, tanyakan dengan ramah: "Apakah Anda ingin saya bantu jadwalkan konsultasi dengan dokter kami sekarang?"
+11. Jika pasien menyebut nama dokter spesifik (misal "drg. Yetti"), konfirmasikan: "Baik, saya akan teruskan permintaan Anda ke drg. Yetti. Tim kami akan segera menghubungi Anda."
+12. Jangan berpura-pura sudah membuat jadwal — cukup sampaikan bahwa permintaan sedang diteruskan ke tim medis."""
 
 
             qa_prompt = ChatPromptTemplate.from_messages([
@@ -116,13 +125,25 @@ ATURAN WAJIB:
             self.rag_chain = create_retrieval_chain(
                 self.history_aware_retriever, question_answer_chain
             )
+            self.is_ready = True
             print("[INFO] Chatbot Service siap!")
 
         except Exception as e:
-            print(f"[ERROR] Gagal inisialisasi: {e}")
-            raise
+            self.is_ready = False
+            print(f"[ERROR] Gagal inisialisasi ChatbotService (koneksi bermasalah): {e}")
 
     def get_response(self, query: str, history: list = []) -> str:
+        # Coba inisialisasi ulang jika sebelumnya gagal (misal koneksi kembali tersedia)
+        if not self.is_ready:
+            print("[INFO] Mencoba inisialisasi ulang ChatbotService...")
+            self.initialize_service()
+
+        if not self.is_ready:
+            return (
+                "Horas! Maaf, saat ini layanan asisten AI sedang mengalami gangguan koneksi ke basis data pengetahuan kami. "
+                "Silakan tanyakan langsung melalui WhatsApp di nomor 0821-6352-6363 atau kunjungi klinik kami."
+            )
+
         try:
             # ── Konversi history → LangChain format ──────────────────────
             chat_history = []

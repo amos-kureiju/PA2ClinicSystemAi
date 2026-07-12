@@ -129,8 +129,8 @@ export default function NurseLayout({ children }: { children: React.ReactNode })
 
     // 4. LOGOUT
     const handleLogout = () => {
-        Cookies.remove('token');
-        Cookies.remove('role');
+        Cookies.remove('token', { path: '/' });
+        Cookies.remove('role', { path: '/' });
         localStorage.clear();
         router.push('/login');
     };

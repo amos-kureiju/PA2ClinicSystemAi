@@ -25,6 +25,14 @@ function AppointmentsContent() {
         api.get('/clinic/doctors').then(res => setDoctors(res.data)).catch(() => setDoctors([]));
     }, []);
 
+    const isPhoneValid = (phone: string) => {
+        const digits = phone.replace(/\D/g, '');
+        if (digits.startsWith('62')) {
+            return digits.length >= 11 && digits.length <= 14;
+        }
+        return digits.length >= 10 && digits.length <= 13;
+    };
+
     const isTimeValid = (date: string, time: string) => {
         if (!date || !time) return true;
 
@@ -52,15 +60,35 @@ function AppointmentsContent() {
             }
         }
 
+        // Bersihkan status error jika waktu sudah valid
+        setSubmitStatus({ type: '', msg: '' });
         return true;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // VALIDASI JAM SEBELUM SUBMIT
+
+        // 1. Validasi nomor telepon
+        if (!isPhoneValid(formData.patient_phone)) {
+            setSubmitStatus({ 
+                type: 'error', 
+                msg: '❌ Format nomor WhatsApp tidak valid (10-13 digit untuk format 08xx, atau 11-14 digit untuk format 62xx/+62xx).' 
+            });
+            return;
+        }
+
+        // 2. Validasi tanggal di masa lalu
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (formData.visit_date < todayStr) {
+            setSubmitStatus({ type: 'error', msg: '❌ Tanggal kunjungan tidak boleh di masa lalu.' });
+            return;
+        }
+
+        // 3. Validasi jam sebelum submit
         if (!isTimeValid(formData.visit_date, formData.visit_time)) {
             return; // Hentikan proses jika waktu tidak valid
         }
+
         setSubmitStatus({ type: 'loading', msg: 'Mengirim reservasi...' });
 
         const combinedNotes = `Riwayat: ${formData.medical_history || '-'} | Keperluan: ${formData.additional_notes || '-'}`;
@@ -176,25 +204,20 @@ function AppointmentsContent() {
                                     <div className="relative">
                                         <input
                                             type="tel"
-                                            placeholder="08xx / +62xx / 62xx"
+                                            placeholder="Contoh: 0812xxx atau +62812xxx"
                                             required
                                             maxLength={15}
                                             className={inputClass}
                                             value={formData.patient_phone}
                                             onChange={e => {
                                                 const raw = e.target.value.replace(/[^\d+\-]/g, '');
-                                                const digitsOnly = raw.replace(/\D/g, '');
-                                                const maxDigits = digitsOnly.startsWith('62') ? 13 : 12;
-                                                if (digitsOnly.length <= maxDigits) {
-                                                    setFormData({ ...formData, patient_phone: raw });
-                                                }
+                                                setFormData({ ...formData, patient_phone: raw });
                                             }}
                                         />
                                         {formData.patient_phone && (
                                             <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold pointer-events-none
-                                                ${formData.patient_phone.replace(/\D/g, '').length < 10 ? 'text-red-400' : 'text-emerald-500'}`}>
-                                                {formData.patient_phone.replace(/\D/g, '').length}/
-                                                {formData.patient_phone.replace(/\D/g, '').startsWith('62') ? '13' : '12'}
+                                                ${isPhoneValid(formData.patient_phone) ? 'text-emerald-500' : 'text-red-400'}`}>
+                                                {formData.patient_phone.replace(/\D/g, '').length} digit
                                             </span>
                                         )}
                                     </div>
@@ -205,11 +228,7 @@ function AppointmentsContent() {
                                         maxLength={100}
                                         value={formData.patient_address}
                                         onChange={e => {
-                                            const val = e.target.value;
-                                            // Karakter pertama wajib huruf, setelahnya boleh angka
-                                            if (val === '' || /^[a-zA-ZÀ-ÿ]/.test(val)) {
-                                                setFormData({ ...formData, patient_address: val });
-                                            }
+                                            setFormData({ ...formData, patient_address: e.target.value });
                                         }} />
                                 </div>
                             </div>
@@ -240,8 +259,20 @@ function AppointmentsContent() {
                                 </div>
                                 <div>
                                     <label className={labelClass}>Pilih Tanggal</label>
-                                    <input type="date" required className={inputClass}
-                                        value={formData.visit_date} onChange={e => setFormData({ ...formData, visit_date: e.target.value })} />
+                                    <input 
+                                        type="date" 
+                                        required 
+                                        className={inputClass}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        value={formData.visit_date} 
+                                        onChange={e => {
+                                            const dateVal = e.target.value;
+                                            setFormData({ ...formData, visit_date: dateVal });
+                                            if (formData.visit_time) {
+                                                isTimeValid(dateVal, formData.visit_time);
+                                            }
+                                        }} 
+                                    />
                                 </div>
                                 <div>
                                     <label className={labelClass}>Pilih Waktu</label>
@@ -255,7 +286,6 @@ function AppointmentsContent() {
                                         onChange={e => {
                                             const timeVal = e.target.value;
                                             setFormData({ ...formData, visit_time: timeVal });
-                                            // Validasi langsung saat user mengubah jam
                                             isTimeValid(formData.visit_date, timeVal);
                                         }}
                                     />

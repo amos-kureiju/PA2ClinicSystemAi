@@ -31,8 +31,8 @@ api.interceptors.response.use(
             // Token expired — bersihkan dan arahkan ke login
             localStorage.removeItem('token');
             localStorage.removeItem('user_role');
-            Cookies.remove('token');
-            Cookies.remove('role');
+            Cookies.remove('token', { path: '/' });
+            Cookies.remove('role', { path: '/' });
             if (typeof window !== 'undefined') {
                 window.location.href = '/login';
             }

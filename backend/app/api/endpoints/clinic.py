@@ -1,5 +1,5 @@
 from app.models.patient import Patient
-from fastapi import APIRouter, Depends, HTTPException, Body, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Body, File, UploadFile, BackgroundTasks
 from sqlalchemy import func, or_, Date, cast
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -337,9 +337,31 @@ def get_my_appointments(
     )
 
 
+def send_n8n_webhook_background(payload: dict):
+    """Mengirim payload ke n8n secara background agar tidak memblokir performa API."""
+    import urllib.request
+    import json
+    
+    # URL default mengarah ke host/computer lokal, sesuaikan jika n8n di luar
+    n8n_url = os.getenv("N8N_WEBHOOK_URL", "http://localhost:5678/webhook-test/appointment-created")
+    try:
+        req = urllib.request.Request(
+            n8n_url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=3) as response:
+            response.read()
+    except Exception as e:
+        # Log error tapi tidak menggagalkan proses pendaftaran pasien
+        print(f"[n8n Webhook Error] Gagal mengirim data ke n8n: {e}")
+
+
 @router.post("/appointments", response_model=schemas.AppointmentResponse)
 def create_appointment(
     data: schemas.AppointmentCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -375,6 +397,22 @@ def create_appointment(
 
         db.commit()
         db.refresh(new_appo)
+
+        # Integrasi n8n Webhook
+        try:
+            webhook_payload = {
+                "id": new_appo.id,
+                "patient_name": new_appo.patient_name,
+                "patient_phone": new_appo.patient_phone,
+                "doctor_name": new_appo.doctor_name,
+                "appointment_date": str(new_appo.appointment_date),
+                "notes": new_appo.notes,
+                "status": new_appo.status
+            }
+            background_tasks.add_task(send_n8n_webhook_background, webhook_payload)
+        except Exception as webhook_err:
+            print(f"[n8n Payload Error] Gagal menyiapkan webhook task: {webhook_err}")
+
         return new_appo
 
     except Exception as e:
@@ -400,11 +438,12 @@ def get_my_patients(
         raise HTTPException(status_code=403, detail="Akses ditolak. Endpoint ini hanya untuk dokter.")
 
     user = _get_user_by_token(current_user, db)
+    my_name = user.full_name.strip().lower()
 
     return (
         db.query(Appointment)
         .filter(
-            Appointment.doctor_name == user.full_name,
+            func.lower(Appointment.doctor_name) == my_name,
             Appointment.status.in_(["confirmed", "completed"]),
         )
         .order_by(Appointment.appointment_date.desc())
@@ -449,9 +488,10 @@ def get_doctor_schedule(
 ):
     """Semua appointment milik dokter yang login (tanpa filter tanggal)."""
     user = _get_user_by_token(current_user, db)
+    my_name = user.full_name.strip().lower()
     return (
         db.query(Appointment)
-        .filter(Appointment.doctor_name == user.full_name)
+        .filter(func.lower(Appointment.doctor_name) == my_name)
         .order_by(Appointment.appointment_date.desc())
         .all()
     )
