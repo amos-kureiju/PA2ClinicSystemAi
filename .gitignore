@@ -1,20 +1,30 @@
 # Python Virtual Environments
 .venv/
+venv/
 backend/venv/
 __pycache__/
 *.pyc
 
-# Database & Rahasia
+# Database & Local State
+*.db
+*.db-shm
+*.db-wal
 backend/.env
-backend/clinic.db
+backend/clinic.db*
+clinic.db
 
 # Frontend (Next.js)
+node_modules/
 frontend/node_modules/
 frontend/.next/
 frontend/.env
 frontend/.env.local
 
+# N8N & Scratch
+n8n-docker/n8n_data/
+scratch/
+scratch_insert_test_data.py
+
 # OS Files
 .DS_Store
 Thumbs.db
-.dockerignore

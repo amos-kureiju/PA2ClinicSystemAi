@@ -26,7 +26,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
     const router = useRouter();
     const pathname = usePathname();
     const [user, setUser] = useState({ name: '', email: '' });
-    const [isAuthorized, setIsAuthorized] = useState(false);
+    const [isAuthorized, setIsAuthorized] = useState(true);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
